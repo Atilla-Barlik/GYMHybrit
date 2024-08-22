@@ -1,0 +1,77 @@
+﻿@page "/NutritionSearch"
+@inject NavigationManager Navigation
+@using global::Services.NutrientServices
+@using Entities.NutrientEntities
+@inject INutrientService NutrientService
+
+<h3>NutritionSearch</h3>
+
+<div class="search-container">
+    <input  @oninput="OnSearchChanged" placeholder="Search..." />
+</div>
+
+@if (!string.IsNullOrWhiteSpace(searchTerm))
+{
+    <ul class="product-list">
+        @foreach (var nutrient in _nutrientList)
+        {
+            <li @onclick="() => NavigateToDetails(nutrient.Id)">
+                <img src="@nutrient.image" alt="@nutrient.Name" />
+                <h3>@nutrient.Name</h3>
+                <p>Calories: @nutrient.kcal kcal</p>
+                <p>Carbs: @nutrient.carbonhydrate g</p>
+                <p>Protein: @nutrient.protein g</p>
+                <p>Fat: @nutrient.fat g</p>
+            </li>
+        }
+    </ul>
+}
+else if (!string.IsNullOrWhiteSpace(searchTerm))
+{
+    <p>No results found for "@searchTerm".</p>
+}
+
+@code {
+    private string searchTerm = "";
+
+
+    private List<NutrientResponseModel>? _nutrientList;
+
+
+
+    private void NavigateToDetails(int id)
+    {
+        Navigation.NavigateTo($"/productdetails/{id}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await base.OnInitializedAsync();
+
+        //_nutrientList = await NutrientService.GetAllNutrientList();
+        _nutrientList = await NutrientService.GetNutrientDetailByName(searchTerm);
+
+        if(searchTerm == null)
+        {
+            _nutrientList.Clear();
+        }
+
+    }
+
+    private async Task OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value.ToString();
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            // Eğer arama terimi boşsa tüm ürünleri getir
+            _nutrientList.Clear();
+        }
+        else
+        {
+            // Arama terimi varsa API'den sadece ilgili sonuçları getir
+            _nutrientList = await NutrientService.GetNutrientDetailByName(searchTerm);
+        }
+    }
+}
+

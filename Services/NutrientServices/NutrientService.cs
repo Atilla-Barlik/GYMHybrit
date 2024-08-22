@@ -171,5 +171,35 @@ namespace Services.NutrientServices
 
 			return returnResponse;
 		}
-	}
+        public async Task<List<NutrientResponseModel>> GetNutrientDetailByName(string name)
+        {
+
+            var returnResponse = new List<NutrientResponseModel>();
+
+			try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/nutrients?SearchTerm={name}&PageNumber=1&PageSize=5";
+                    var apiResponse = await client.GetAsync(url);
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+
+						var response = await apiResponse.Content.ReadAsStringAsync();
+
+						returnResponse = JsonConvert.DeserializeObject
+							<List<NutrientResponseModel>>(response);
+
+					}
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return returnResponse;
+        }
+    }
 }

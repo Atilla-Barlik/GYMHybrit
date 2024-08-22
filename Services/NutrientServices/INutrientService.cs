@@ -14,5 +14,6 @@ namespace Services.NutrientServices
 		Task<bool> AddNutrient(AddUpdateNutrientRequest nutrientRequest);
 		Task<bool> UpdateNutrient(NutrientResponseModel nutrientRequest, int id);
 		Task<bool> DeleteNutrient(NutrientResponseModel nutrientRequest);
+		Task<List<NutrientResponseModel>> GetNutrientDetailByName(string name);
 	}
 }
