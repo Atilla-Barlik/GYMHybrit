@@ -1,0 +1,111 @@
+﻿@page "/weather"
+
+<PageTitle>Hesaplayıcı</PageTitle>
+
+
+
+<div class="calculator-container">
+    
+    <p>
+        The Calorie Calculator can be used to estimate the calories you need to consume each day.
+        This calculator can also provide some simple guidelines if you want to gain or lose weight.
+        This calculator uses the Revised Harris-Benedict equation to calculate your calorie needs.
+    </p>
+
+    <div class="calculator">
+        <div class="settings">
+            <div class="input-group">
+                <label>Units:</label>
+                <input type="radio" id="metric" name="units" value="metric" checked>
+                <label for="metric">Metric</label>
+                <input type="radio" id="imperial" name="units" value="imperial">
+                <label for="imperial">Imperial</label>
+            </div>
+            <div class="input-group">
+                <label>Sex:</label>
+                <input type="radio" id="male" name="sex" value="male" checked>
+                <label for="male">Male</label>
+                <input type="radio" id="female" name="sex" value="female">
+                <label for="female">Female</label>
+            </div>
+        </div>
+
+        <div class="inputs">
+            <div class="circular-input" id="age-circle">
+                <label>Age</label>
+                <input type="range" min="1" max="100" id="age" @bind="Age" oninput="updateCircle('age-circle', this.value)">
+                <div class="circular-input-content">
+                    <span id="age-value">25</span>
+                    <p>Years</p>
+                </div>
+            </div>
+            <div class="circular-input" id="weight-circle">
+                <label>Weight</label>
+                <input type="range" min="30" max="200" tabindex="" @bind="Weight" oninput="updateCircle('weight-circle', this.value)">
+                <div class="circular-input-content">
+                    <span id="weight-value">70</span>
+                    <p>KG</p>
+                </div>
+            </div>
+            <div class="circular-input" id="height-circle">
+                <label>Height</label>
+                <input type="range" min="100" max="220" @bind="Height" id="height" oninput="updateCircle('height-circle', this.value)">
+                <div class="circular-input-content">
+                    <span id="height-value">170</span>
+                    <p>CM</p>
+                </div>
+            </div>
+        </div>
+        <br /><br />
+        <div class="dropdowns">
+            <select>
+                <option value="little">Little to no exercise</option>
+                <!-- Diğer seçenekler buraya eklenecek -->
+            </select>
+            <select>
+                <option value="maintain">Stay the Same Weight</option>
+                <!-- Diğer seçenekler buraya eklenecek -->
+            </select>
+        </div>
+
+        <div class="result">
+            <p>You would have to consume: <span>@CalculateCalories()</span></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateCircle(circleId, value) {
+        document.getElementById(circleId).querySelector('span').textContent = value;
+        temp = value;
+    }
+</script>
+
+
+
+@code {
+    private string Units { get; set; } = "metric";
+    private string Sex { get; set; } = "male";
+    private int Age { get; set; } = 25;
+    private int Weight { get; set; } = 70;
+    private int Height { get; set; } = 170;
+    private string ExerciseLevel { get; set; } = "little";
+    private string WeightGoal { get; set; } = "maintain";
+
+    private int CalculateCalories()
+    {
+        // Kalori hesaplama algoritması buraya gelecek.
+        // Örnek olarak basit bir hesaplama yapılacak.
+        int baseCalories = (Weight * 10) + (Height * 6) - (Age * 5);
+        int exerciseModifier = ExerciseLevel switch
+        {
+            "little" => 200,
+            "light" => 400,
+            "moderate" => 600,
+            "intense" => 800,
+            _ => 0
+        };
+
+        return baseCalories + exerciseModifier;
+    }
+}

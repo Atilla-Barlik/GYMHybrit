@@ -1,0 +1,62 @@
+﻿@page "/"
+@using GYMandNutrition.Shared.Services
+@inject IFormFactor FormFactor
+@using global::Services.NutrientServices
+@using Entities.NutrientEntities
+@inject INutrientService NutrientService
+
+
+<PageTitle>Home</PageTitle>
+
+@if (_nutrientList == null)
+{
+	<p>Loading...</p>
+}
+else
+{
+
+	<div class="table-responsive">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Besin Adı</th>
+					<th>Kalori</th>
+					<th>Protein</th>
+					<th>Karbonhidrat</th>
+					<th>Yağ</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var nutrient in _nutrientList)
+				{
+					<tr>
+						<td>@nutrient.Name</td>
+						<td>@nutrient.kcal</td>
+						<td>@nutrient.protein</td>
+						<td>@nutrient.carbonhydrate</td>
+						<td>@nutrient.fat</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+Welcome to your new app running on <em>@factor</em> using <em>@platform</em>.
+
+@code {
+    private string factor => FormFactor.GetFormFactor();
+    private string platform => FormFactor.GetPlatform();
+
+	private List<NutrientResponseModel>? _nutrientList;
+
+	protected override async Task OnInitializedAsync()
+	{
+
+		await base.OnInitializedAsync();
+
+		_nutrientList = await NutrientService.GetAllNutrientList();
+
+
+	}
+}
