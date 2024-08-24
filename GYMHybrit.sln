@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GYMandNutrition", "GYMandNutrition\GYMandNutrition\GYMandNutrition.csproj", "{045FB66D-2292-406E-9B81-5DE0AE354CAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GYMandNutrition", "GYMandNutrition\GYMandNutrition\GYMandNutrition.csproj", "{045FB66D-2292-406E-9B81-5DE0AE354CAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GYMandNutrition.Shared", "GYMandNutrition\GYMandNutrition.Shared\GYMandNutrition.Shared.csproj", "{6D28F6B4-4844-4A34-8FE6-F442E2E8F238}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GYMandNutrition.Shared", "GYMandNutrition\GYMandNutrition.Shared\GYMandNutrition.Shared.csproj", "{6D28F6B4-4844-4A34-8FE6-F442E2E8F238}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GYMandNutrition.Web", "GYMandNutrition\GYMandNutrition.Web\GYMandNutrition.Web.csproj", "{BB82B0FF-8E56-4F7C-A154-F827A5E048F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GYMandNutrition.Web", "GYMandNutrition\GYMandNutrition.Web\GYMandNutrition.Web.csproj", "{BB82B0FF-8E56-4F7C-A154-F827A5E048F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{C9D6FD40-C964-4CF2-8CAF-9D91EB19C576}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{C9D6FD40-C964-4CF2-8CAF-9D91EB19C576}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Entities\Entities.csproj", "{829D7A23-34E7-465D-83F1-90ACF12C019D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entities", "Entities\Entities.csproj", "{829D7A23-34E7-465D-83F1-90ACF12C019D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

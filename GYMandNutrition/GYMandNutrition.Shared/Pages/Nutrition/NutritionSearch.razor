@@ -16,8 +16,8 @@
         @foreach (var nutrient in _nutrientList)
         {
             <div class="col">
-                <div class="border border-4 card h100">
-                    <img src="@nutrient.image" class="border-bottom card-img-top" alt="@nutrient.Name" width="80" height="320" />
+                <div class="border border-4 card h100" >
+                    <img @onclick="() => NavigateToDetails(nutrient.Id)" src="@nutrient.image" class="border-bottom card-img-top" alt="@nutrient.Name" width="80" height="320" />
                     <div class="card-body">
                         <h5 class="card-title text-danger">@nutrient.Name</h5>
                         <p class="card-text">Calories: @nutrient.kcal kcal</p>
@@ -54,7 +54,7 @@ else if (!string.IsNullOrWhiteSpace(searchTerm))
 
     private void NavigateToDetails(int id)
     {
-        Navigation.NavigateTo($"/productdetails/{id}");
+        Navigation.NavigateTo($"/NutritionDetail/{id}");
     }
 
     protected override async Task OnInitializedAsync()

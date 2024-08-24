@@ -15,7 +15,7 @@ namespace Services.NutrientServices
 		public JsonSerializerOptions JsonSerializerOptions;
 		private List<NutrientResponseModel>? returnResponse;
 		private readonly HttpClient httpClient;
-
+		public NutrientResponseModel? returnResponseModel;
 
 
 		public async Task<List<NutrientResponseModel>> GetAllNutrientList()
@@ -51,7 +51,7 @@ namespace Services.NutrientServices
 		public async Task<NutrientResponseModel> GetNutrientDetailById(int Id)
 		{
 
-			var returnResponse = new NutrientResponseModel();
+			returnResponseModel = new NutrientResponseModel();
 
 			try
 			{
@@ -65,7 +65,7 @@ namespace Services.NutrientServices
 
 						var response = await apiResponse.Content.ReadAsStringAsync();
 
-						returnResponse = JsonConvert.DeserializeObject<NutrientResponseModel>(response);
+                        returnResponseModel = JsonConvert.DeserializeObject<NutrientResponseModel>(response);
 
 					}
 				}
@@ -75,7 +75,7 @@ namespace Services.NutrientServices
 				string msg = ex.Message;
 			}
 
-			return returnResponse;
+			return returnResponseModel;
 		}
 
 		public async Task<bool> AddNutrient(AddUpdateNutrientRequest nutrientRequest)

@@ -1,0 +1,190 @@
+﻿@page "/NutritionDetail/{id:int}"
+@inject NavigationManager Navigation
+@using global::Services.NutrientServices
+@using Entities.NutrientEntities
+
+
+<h3>NutritionDetail</h3>
+@if(nutrient == null)
+{
+    <p>Veri yükleniyor...</p>
+}
+else
+{
+    <div class="container mt-4">
+        @if (nutrient != null)
+        {
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <img src="@nutrient.image" alt="@nutrient.Name" class="img-fluid rounded">
+                </div>
+                <div class="col-md-8">
+                    <h2>@nutrient.Name Kaç Kalori?</h2>
+                    <div class="form-group mt-3">
+                        <label for="weightInput">Gramaj:</label>
+                        <input type="number" id="weightInput" class="form-control" @bind="userInputWeight" @oninput="CalculateValues">
+                    </div>
+                    <div class="row text-center mt-4">
+                        <div class="col-sm-3">
+                            <div class="p-3 bg-light rounded-circle border">
+                                <h3 style="color:black">@calculatedKcal.ToString("0.##") kcal</h3>
+                                <small>Kalori</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="p-3 bg-light rounded-circle border">
+                                <h3 style="color:lightslategray">@calculatedCarbs.ToString("0.##") gr</h3>
+                                <small>Karbonhidrat</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="p-3 bg-light rounded-circle border">
+                                <h3 style="color:orangered">@calculatedProtein.ToString("0.##") gr</h3>
+                                <small>Protein</small>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="p-3 bg-light rounded-circle border">
+                                <h3 style="color:darkgoldenrod">@calculatedFat.ToString("0.##") gr</h3>
+                                <small>Yağ</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4>Besin Değerleri</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Besin</th>
+                                <th>100 gr</th>
+                                <th>@userInputWeight gr</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Karbonhidrat (g)</td>
+                                <td>@nutrient.carbonhydrate</td>
+                                <td>@calculatedCarbs.ToString("0.##")</td>
+                            </tr>
+                            <tr>
+                                <td>Protein (g)</td>
+                                <td>@nutrient.protein</td>
+                                <td>@calculatedProtein.ToString("0.##")</td>
+                            </tr>
+                            <tr>
+                                <td>Yağ (g)</td>
+                                <td>@nutrient.fat</td>
+                                <td>@calculatedFat.ToString("0.##")</td>
+                            </tr>
+                            <tr>
+                                <td>Lif (g)</td>
+                                <td>@nutrient.fiber</td>
+                                <td>@calculatedFiber.ToString("0.##")</td>
+                            </tr>
+                            <tr>
+                                <td>Kalsiyum (mg)</td>
+                                <td>@nutrient.calcium</td>
+                                <td>@calculatedCalcium.ToString("0.##")</td>
+                            </tr>
+                            <!-- Add other nutrients here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Besin</th>
+                                <th>100 gr</th>
+                                <th>@userInputWeight gr</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Sodyum (mg)</td>
+                                <td>@nutrient.sodium</td>
+                                <td>@calculatedSodium.ToString("0.##")</td>
+                            </tr>
+                            <tr>
+                                <td>Potasyum (mg)</td>
+                                <td>@nutrient.potassium</td>
+                                <td>@calculatedPotasium.ToString("0.##")</td>
+                            </tr>
+                            <tr>
+                                <td>Vitamin A (iu)</td>
+                                <td>@nutrient.vitamin_A</td>
+                                <td>@calculatedVit_A.ToString("0.##")</td>
+                            </tr>
+                            <tr>
+                                <td>Vitamin C (mg)</td>
+                                <td>@nutrient.vitamin_C</td>
+                                <td>@calculatedVit_C.ToString("0.##")</td>
+                            </tr>
+                            <tr>
+                                <td>Demir (mg)</td>
+                                <td>@nutrient.iron</td>
+                                <td>@calculatedIron.ToString("0.##")</td>
+                            </tr>
+                            <!-- Add other nutrients here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Loading...</p>
+        }
+    </div>
+
+}
+
+
+
+@code {
+    [Inject] INutrientService NutrientService { get; set; }
+    [Parameter] public int Id { get; set; }
+    public NutrientResponseModel? nutrient;
+    public NutrientResponseModel? nutrient2;
+    private int userInputWeight = 100; // Varsayılan olarak 100 gram
+    private double calculatedKcal;
+    private double calculatedCarbs;
+    private double calculatedProtein;
+    private double calculatedFat;
+    private double calculatedFiber;
+    private double calculatedCalcium;
+    private double calculatedSodium;
+    private double calculatedPotasium;
+    private double calculatedVit_A;
+    private double calculatedVit_C;
+    private double calculatedIron;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        nutrient = await NutrientService.GetNutrientDetailById(Id);
+
+        CalculateValues(); // İlk yüklemede hesaplama
+    }
+
+    private void CalculateValues()
+    {
+        calculatedKcal = nutrient.kcal * userInputWeight / 100;
+        calculatedCarbs = nutrient.carbonhydrate * userInputWeight / 100;
+        calculatedProtein = nutrient.protein * userInputWeight / 100;
+        calculatedFat = nutrient.fat * userInputWeight / 100;
+        calculatedFiber = nutrient.fiber / 100 * userInputWeight;
+        calculatedCalcium = nutrient.calcium / 100 * userInputWeight;
+        calculatedSodium = nutrient.sodium / 100 * userInputWeight;
+        calculatedPotasium = nutrient.potassium / 100 * userInputWeight;
+        calculatedVit_A = nutrient.vitamin_A / 100 * userInputWeight;
+        calculatedVit_C = nutrient.vitamin_C / 100 * userInputWeight;
+        calculatedIron = nutrient.iron / 100 * userInputWeight;
+    }
+}
