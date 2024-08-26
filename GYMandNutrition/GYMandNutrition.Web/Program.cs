@@ -1,6 +1,7 @@
 using GYMandNutrition.Shared.Services;
 using GYMandNutrition.Web.Components;
 using GYMandNutrition.Web.Services;
+using Services.DailyNutritionServices;
 using Services.NutrientServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ builder.Services.AddRazorComponents()
 // Add device-specific services used by the GYMandNutrition.Shared project
 builder.Services.AddSingleton<IFormFactor, FormFactor>();
 builder.Services.AddSingleton<INutrientService, NutrientService>();
+builder.Services.AddSingleton<IDailyNutritionService, DailyNutritionService>();
 
 var app = builder.Build();
 

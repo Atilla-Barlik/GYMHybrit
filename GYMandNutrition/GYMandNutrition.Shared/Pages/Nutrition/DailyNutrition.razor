@@ -1,0 +1,70 @@
+﻿@page "/DailyNutritionList"
+@using Entities.DailyNutritionEntities
+@using Entities.NutrientEntities
+@using global::Services.DailyNutritionServices
+<h3>DailyNutrition</h3>
+
+<button @onclick="CheckDailyNutritionStatus" class="btn btn-primary">
+    Check Daily Nutrition
+</button>
+@if(daily== null)
+{
+    <p>Veri yükleniyor...</p>
+}
+else
+{
+    <p>@name</p>
+}
+@code {
+
+    [Inject] NavigationManager Navigation { get; set; }
+    [Inject] IDailyNutritionService dailyNutritionService { get; set; }
+    public int AppUserId { get; set; } = 1; // Assuming user ID is set or fetched from authentication.
+    string name { get; set; }
+    public DailyNutritionResponseModel? daily;
+    bool deneme;
+
+    private async Task CheckDailyNutritionStatus()
+    {
+        DateTime dateTime = new DateTime(1, 1, 1);
+
+        deneme= await dailyNutritionService.GetDailyNutritionCheck(1, dateTime);
+
+        if (deneme == false)
+        {
+            AddUpdateDailyNutritionRequest a1 = new AddUpdateDailyNutritionRequest
+                {
+                    AppUserId = 1,
+                    DailyNutritionStatus = true,
+                    DailyNutritionTotalCarbohydrate = 0,
+                    DailyNutritionTotalFat =0,
+                    DailyNutritionTotalKcal=0,
+                    DailyNutritionTotalProtein=0,
+                    Date = dateTime.Date
+                };
+
+            var existingEntry = await dailyNutritionService.AddDailyNutrition(a1);
+
+            if (existingEntry != null)
+            {
+                // Redirect to the page listing their daily nutrition
+                Navigation.NavigateTo("/daily-nutrition-list");
+                return;
+            }
+        }
+
+        // If no entry exists, create a new one
+        else
+        {
+            name = "bulundu";
+            return;
+        }
+
+            
+    }
+
+    
+}
+
+    
+
