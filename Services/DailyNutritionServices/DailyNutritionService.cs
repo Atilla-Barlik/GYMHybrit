@@ -95,14 +95,14 @@ namespace Services.DailyNutritionServices
             throw new NotImplementedException();
         }
 
-        public async Task<bool> GetDailyNutritionCheck(int id, DateTime date)
+        public async Task<bool> GetDailyNutritionCheck(int id, DateOnly date)
         {
             var returnResponse = false;
             try
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/DailyNutritionCheck/2/2024-08-26T02:33:33.068";
+                    string url = $"{_baseURL}/api/DailyNutritionCheck/1/2024-08-28";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)

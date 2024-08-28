@@ -4,16 +4,17 @@
 @using global::Services.DailyNutritionServices
 <h3>DailyNutrition</h3>
 
-<button @onclick="CheckDailyNutritionStatus" class="btn btn-primary">
-    Check Daily Nutrition
-</button>
-@if(daily== null)
+
+@if(deneme== false)
 {
+    <button @onclick="CheckDailyNutritionStatus" class="btn btn-primary">
+        Check Daily Nutrition
+    </button>
     <p>Veri yükleniyor...</p>
 }
 else
 {
-    <p>@name</p>
+    <p>Liste</p>
 }
 @code {
 
@@ -26,9 +27,13 @@ else
 
     private async Task CheckDailyNutritionStatus()
     {
-        DateTime dateTime = new DateTime(1, 1, 1);
+        DateTime dateTime = DateTime.Now;
 
-        deneme= await dailyNutritionService.GetDailyNutritionCheck(1, dateTime);
+        DateOnly date = DateOnly.FromDateTime(dateTime);
+        Console.WriteLine(date);
+
+
+        deneme = await dailyNutritionService.GetDailyNutritionCheck(1, date);
 
         if (deneme == false)
         {
@@ -40,7 +45,7 @@ else
                     DailyNutritionTotalFat =0,
                     DailyNutritionTotalKcal=0,
                     DailyNutritionTotalProtein=0,
-                    Date = dateTime.Date
+                    Date = date
                 };
 
             var existingEntry = await dailyNutritionService.AddDailyNutrition(a1);
@@ -52,18 +57,12 @@ else
                 return;
             }
         }
-
-        // If no entry exists, create a new one
         else
         {
             name = "bulundu";
             return;
-        }
-
-            
+        }       
     }
-
-    
 }
 
     

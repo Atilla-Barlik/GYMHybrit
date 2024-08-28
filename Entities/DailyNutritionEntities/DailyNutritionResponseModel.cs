@@ -14,7 +14,7 @@ namespace Entities.DailyNutritionEntities
         public decimal DailyNutritionTotalCarbohydrate { get; set; }
         public decimal DailyNutritionTotalProtein { get; set; }
         public decimal DailyNutritionTotalFat { get; set; }
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         public int AppUserId { get; set; }
        
     }
