@@ -3,6 +3,7 @@ using Entities.NutrientEntities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -16,6 +17,9 @@ namespace Services.DailyNutritionServices
         public JsonSerializerOptions JsonSerializerOptions;
         private List<DailyNutritionResponseModel>? returnResponse;
         public DailyNutritionResponseModel? returnResponseModel;
+        public DailyNutritionResponseModel? dailyNutritionId;
+
+        
 
         public Task<List<DailyNutritionResponseModel>> GetAllDailyNutritiontList()
         {
@@ -80,10 +84,36 @@ namespace Services.DailyNutritionServices
             return returnResponse;
         }
 
-        public Task<bool> UpdateDailyNutrition(DailyNutritionResponseModel nutrientRequest, int id)
+        public async Task<bool> UpdateDailyNutrition(DailyNutritionResponseModel nutrientRequest, int id)
         {
-            throw new NotImplementedException();
+            var returnResponse = false;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/DailyNutrition";
+
+
+                    var serializeContent = JsonConvert.SerializeObject(nutrientRequest);
+
+                    var apiResponse = await client.PutAsync(url, new StringContent(serializeContent, Encoding.UTF8, "application/json"));
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+
+                        return true;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return returnResponse;
         }
+    
 
         public Task<bool> DeleteDailyNutrition(DailyNutritionResponseModel nutrientRequest)
         {
@@ -95,9 +125,15 @@ namespace Services.DailyNutritionServices
             throw new NotImplementedException();
         }
 
-        public async Task<bool> GetDailyNutritionCheck(int id, DateOnly date)
+        /*
+         Gönderilen tarih ve kullanıcı id'sine göre databe üzerinde bu verilere göre bir kayıt olup olmadığını kontrol ediyor eğer var ise ilgili objeyi burada
+        modelleyerek 1 değerini gönderiyor. Eğer yoksa 0 gönderip ilgili code bölgesinde yeni bir veri girdisi oluşturuyor.
+         */
+
+        public async Task<int> GetDailyNutritionCheck(int id, DateOnly date)
         {
             var returnResponse = false;
+            var response = "0";
             try
             {
                 using (var client = new HttpClient())
@@ -107,12 +143,22 @@ namespace Services.DailyNutritionServices
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
                     {
-
-                        var response = await apiResponse.Content.ReadAsStringAsync();
-
-                        //returnResponseModel = JsonConvert.DeserializeObject<DailyNutritionResponseModel>(response);
-                        if(response.Contains("true"))
-                            return true;
+                        
+                        response = await apiResponse.Content.ReadAsStringAsync();
+                        returnResponseModel = JsonConvert.DeserializeObject<DailyNutritionResponseModel>(response);
+                        dailyNutritionId = new DailyNutritionResponseModel
+                        {
+                            DailyNutritionID = returnResponseModel.DailyNutritionID,
+                            AppUserId = returnResponseModel.AppUserId,
+                            DailyNutritionStatus = returnResponseModel.DailyNutritionStatus,
+                            DailyNutritionTotalCarbohydrate = 0,
+                            DailyNutritionTotalFat = 0,
+                            DailyNutritionTotalKcal = 0,
+                            DailyNutritionTotalProtein = 0,
+                            Date = date
+                        };
+                        return 1;
+                        
                     }
                 }
             }
@@ -121,7 +167,13 @@ namespace Services.DailyNutritionServices
                 string msg = ex.Message;
             }
 
-            return returnResponse;
+            return 0;
+        }
+
+        public DailyNutritionResponseModel dailyNutrition
+        {
+            set { dailyNutritionId = value; }
+            get => dailyNutritionId;
         }
     }
 }

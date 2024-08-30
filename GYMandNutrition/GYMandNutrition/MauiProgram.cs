@@ -1,6 +1,7 @@
 ﻿using GYMandNutrition.Services;
 using GYMandNutrition.Shared.Services;
 using Microsoft.Extensions.Logging;
+using Services.DailyNutritionDetailsService;
 using Services.DailyNutritionServices;
 using Services.NutrientServices;
 
@@ -22,7 +23,8 @@ namespace GYMandNutrition
 			builder.Services.AddSingleton<IFormFactor, FormFactor>();
 			builder.Services.AddSingleton<INutrientService, NutrientService>();
 			builder.Services.AddSingleton<IDailyNutritionService, DailyNutritionService>();
-			builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddSingleton<IDailyNutritionDetailsService, DailyNutritionDetailsService>();
+            builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
 	        builder.Services.AddBlazorWebViewDeveloperTools();

@@ -1,11 +1,13 @@
 ﻿@page "/DailyNutritionList"
+@using Entities.DailyNutritionDetails
 @using Entities.DailyNutritionEntities
 @using Entities.NutrientEntities
 @using global::Services.DailyNutritionServices
+@using global::Services.DailyNutritionDetailsService
 <h3>DailyNutrition</h3>
 
 
-@if(deneme== false)
+@if (dailyNutritionId == 0)
 {
     <button @onclick="CheckDailyNutritionStatus" class="btn btn-primary">
         Check Daily Nutrition
@@ -15,27 +17,87 @@
 else
 {
     <p>Liste</p>
+
+   
+        @* <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var nutrient in dailyNutritionDetailsList)
+            {
+                <div class="col">
+                    <div class="border border-4 card h100">
+                        <img src="@nutrient.NutrientImage" class="border-bottom card-img-top" alt="@nutrient.NutrientName" width="80" height="320" />
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">@nutrient.NutrientName</h5>
+                            <p class="card-text">Calories: @nutrient.NutrientKcal kcal</p>
+                            <p class="card-text">Carbs: @nutrient.NutrientCarbohydrate g</p>
+                            <p class="card-text">Protein: @nutrient.NutrientProtein g</p>
+                            <p class="card-text">Fat: @nutrient.NutrientFat g</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div> *@
+
+    <div class="container mt-5">
+        <table class="table table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Resim</th>
+                    <th scope="col">İsim</th>
+                    <th scope="col">Kalori (kcal)</th>
+                    <th scope="col">Karbonhidrat (gr)</th>
+                    <th scope="col">Protein (gr)</th>
+                    <th scope="col">Yağ (gr)</th>
+                    <th scope="col">Detaylar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var nutrient in dailyNutritionDetailsList)
+                {
+                    <tr>
+                        <td>
+                            <img src="@nutrient.NutrientImage" alt="@nutrient.NutrientName" class="img-thumbnail" style="width: 75px; height: 75px; object-fit: cover;" />
+                        </td>
+                        <td>@nutrient.NutrientName</td>
+                        <td>@nutrient.NutrientKcal</td>
+                        <td>@nutrient.NutrientCarbohydrate</td>
+                        <td>@nutrient.NutrientProtein</td>
+                        <td>@nutrient.NutrientFat</td>
+                        <td>
+                            <a href="@($"/nutrition-detail/{nutrient.DailyNutritionDetailsId}")" class="btn btn-info btn-sm">
+                                Detaylar
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <button class="btn btn-primary mt-3" @onclick="CalculateAndSaveTotals">Toplamı Kaydet</button>
 }
 @code {
 
     [Inject] NavigationManager Navigation { get; set; }
     [Inject] IDailyNutritionService dailyNutritionService { get; set; }
+    [Inject] IDailyNutritionDetailsService dailyNutritionDetailsService { get; set; }
     public int AppUserId { get; set; } = 1; // Assuming user ID is set or fetched from authentication.
     string name { get; set; }
     public DailyNutritionResponseModel? daily;
+    public List<DailyNutritionDetailsResponseModel>? dailyNutritionDetailsList;
     bool deneme;
-
+    int dailyNutritionId = 0;
+    [Inject] IDailyNutritionService DailyNutritionService { get; set; }
     private async Task CheckDailyNutritionStatus()
     {
         DateTime dateTime = DateTime.Now;
 
         DateOnly date = DateOnly.FromDateTime(dateTime);
-        Console.WriteLine(date);
+        
+        //Console.WriteLine(date);
 
 
-        deneme = await dailyNutritionService.GetDailyNutritionCheck(1, date);
+        dailyNutritionId = await dailyNutritionService.GetDailyNutritionCheck(1, date);
 
-        if (deneme == false)
+        if (dailyNutritionId == 0)
         {
             AddUpdateDailyNutritionRequest a1 = new AddUpdateDailyNutritionRequest
                 {
@@ -53,15 +115,46 @@ else
             if (existingEntry != null)
             {
                 // Redirect to the page listing their daily nutrition
-                Navigation.NavigateTo("/daily-nutrition-list");
+                Navigation.NavigateTo("/NutritionSearch");
                 return;
             }
         }
         else
         {
-            name = "bulundu";
+            dailyNutritionDetailsList = await dailyNutritionDetailsService.GetAllDailyNutritiontList();
+
             return;
-        }       
+        }      
+    }
+    private async Task CalculateAndSaveTotals()
+    {
+        // `DailyNutritionDetails` tablosundaki verileri topluyoruz
+        var totalKcal = dailyNutritionDetailsList.Sum(d => d.NutrientKcal);
+        var totalCarbs = dailyNutritionDetailsList.Sum(d => d.NutrientCarbohydrate);
+        var totalProtein = dailyNutritionDetailsList.Sum(d => d.NutrientProtein);
+        var totalFat = dailyNutritionDetailsList.Sum(d => d.NutrientFat);
+        DateTime dateTime = DateTime.Now;
+
+        DateOnly date = DateOnly.FromDateTime(dateTime);
+        // Yeni bir `DailyNutrition` nesnesi oluşturuyoruz ve topladığımız verileri atıyoruz
+        var daily = new DailyNutritionResponseModel
+            {
+
+                DailyNutritionID = DailyNutritionService.dailyNutrition.DailyNutritionID,
+                DailyNutritionTotalKcal = totalKcal,
+                DailyNutritionTotalCarbohydrate = totalCarbs,
+                DailyNutritionTotalProtein = totalProtein,
+                DailyNutritionTotalFat = totalFat,
+                Date = date,
+                DailyNutritionStatus = true,
+                AppUserId = 1 // currentUserId'yi kullanıcıya göre ayarlayın
+            };
+
+        // API'ye kayıt işlemi yapıyoruz
+        await dailyNutritionService.UpdateDailyNutrition(daily, DailyNutritionService.dailyNutrition.DailyNutritionID);
+
+        // Başarılı bir şekilde kayıt yaptıktan sonra, kullanıcıyı listeleme sayfasına yönlendirebiliriz
+        //NavigationManager.NavigateTo("/daily-nutrition-list");
     }
 }
 

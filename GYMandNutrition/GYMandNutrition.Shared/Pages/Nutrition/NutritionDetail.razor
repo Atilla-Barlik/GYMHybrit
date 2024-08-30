@@ -1,6 +1,10 @@
 ﻿@page "/NutritionDetail/{id:int}"
 @inject NavigationManager Navigation
+@using Entities.DailyNutritionDetails
+@using Entities.DailyNutritionEntities
 @using global::Services.NutrientServices
+@using global::Services.DailyNutritionDetailsService
+@using global::Services.DailyNutritionServices
 @using Entities.NutrientEntities
 
 
@@ -11,6 +15,9 @@
 }
 else
 {
+    <EditForm Model="@nutrient" OnValidSubmit="SubmitNutrient">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
     <div class="container mt-4">
         @if (nutrient != null)
         {
@@ -134,22 +141,28 @@ else
                     </table>
                 </div>
             </div>
+                <button type="submit" class="btn btn-primary">Kayıt Yap</button>
         }
         else
         {
             <p>Loading...</p>
         }
     </div>
-
+    
+    </EditForm>
 }
 
 
 
 @code {
     [Inject] INutrientService NutrientService { get; set; }
+    [Inject] IDailyNutritionService DailyNutritionService { get; set; }
+    [Inject] IDailyNutritionDetailsService DailyNutritionDetailsService { get; set; }
     [Parameter] public int Id { get; set; }
     public NutrientResponseModel? nutrient;
     public NutrientResponseModel? nutrient2;
+    public AddUpdateDailyNutritionDetailsRequest? AddDailyNutritionDetails;
+    public DailyNutritionResponseModel dailyNutritionId; 
     private int userInputWeight = 100; // Varsayılan olarak 100 gram
     private double calculatedKcal;
     private double calculatedCarbs;
@@ -186,5 +199,25 @@ else
         calculatedVit_A = nutrient.vitamin_A / 100 * userInputWeight;
         calculatedVit_C = nutrient.vitamin_C / 100 * userInputWeight;
         calculatedIron = nutrient.iron / 100 * userInputWeight;
+    }
+
+    private async Task SubmitNutrient()
+    {
+        AddDailyNutritionDetails = new AddUpdateDailyNutritionDetailsRequest
+        {
+           DailyNutritionId = DailyNutritionService.dailyNutrition.DailyNutritionID,
+           NutrientCarbohydrate = (decimal)calculatedCarbs,
+           NutrientFat = (decimal)calculatedFat,
+           NutrientImage = nutrient.image,
+           NutrientKcal = (int)calculatedKcal,
+           NutrientProtein = (decimal)calculatedProtein,
+           NutrientName = nutrient.Name
+        };
+        if(AddDailyNutritionDetails != null)
+            await DailyNutritionDetailsService.AddDailyNutrition(AddDailyNutritionDetails);
+        else
+        {
+            Console.WriteLine("Kayıt sırasında bir hata oluştu.");
+        }
     }
 }
