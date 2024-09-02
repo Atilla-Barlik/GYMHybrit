@@ -1,0 +1,55 @@
+﻿<style>
+
+.bmi-container {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+.bmi-range {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    text-align: center;
+    font-size: 12px;
+    color: white;
+}
+
+.underweight {
+    background-color: #77c1e5;
+    left: 0;
+    width: 15%;
+}
+
+.normal {
+    background-color: #5cb85c;
+    left: 15%;
+    width: 25%;
+}
+
+.overweight {
+    background-color: #f0ad4e;
+    left: 40%;
+    width: 15%;
+}
+
+.obesity {
+    background-color: #d9534f;
+    left: 55%;
+    width: 45%;
+}
+
+.bmi-indicator {
+    position: absolute;
+    top: -10px;
+    width: 2px;
+    height: 60px;
+    background-color: black;
+    z-index: 10;
+}
+
+</style >

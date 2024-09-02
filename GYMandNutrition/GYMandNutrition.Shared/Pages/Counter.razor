@@ -1,18 +1,258 @@
 ﻿@page "/counter"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.ComponentModel.DataAnnotations
 
-<PageTitle>Counter</PageTitle>
+<h3 class="text-center my-4">Vücut Kitle İndeksi Hesaplama</h3>
 
-<h1>Counter</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <EditForm Model="bmiModel" OnValidSubmit="CalculateBMI">
+                <DataAnnotationsValidator />
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="age">Age</label>
+                            <InputNumber id="age" class="form-control" TValue="int?" Value="bmiModel.Age" ValueExpression="() => bmiModel.Age" ValueChanged="(value) => AgeChanged(value)" />
+                            <ValidationMessage For="@(() => bmiModel.Age)" />
+                        </div>
+                        <div class="form-group mt-3">
+                            <label>Gender</label>
+                            <InputRadioGroup @bind-Value="gender.selectedGender"><br />
+                                @foreach (var option in rdOptions)
+                                {
+                                    <InputRadio Value="option" /> @option 
+                                }
+                            </InputRadioGroup>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="height">Height (cm)</label>
+                            <InputNumber id="height" class="form-control" TValue="double?" Value="bmiModel.Height" ValueExpression="() => bmiModel.Height" ValueChanged="(value) => HeightChanged(value)" />
+                            <ValidationMessage For="@(() => bmiModel.Height)" />
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="weight">Weight (kg)</label>
+                            <InputNumber id="weight" class="form-control" TValue="double?" Value="bmiModel.Weight" ValueExpression="() => bmiModel.Weight" ValueChanged="(value) => WeightChanged(value)" />
+                            <ValidationMessage For="@(() => bmiModel.Weight)" />
+                        </div>
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary w-100">Hesapla</button>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
 
-<p role="status">Current count: @currentCount</p>
+    @if (bmiResult != null)
+    {
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h4>Sonuç</h4>
+                        <div class="bmi-container">
+                            <div class="bmi-indicator" style="left:@GetBMIPointerPosition()%;"></div>
+                            <div class="bmi-range underweight">Zayıf</div>
+                            <div class="bmi-range normal">Normal</div>
+                            <div class="bmi-range overweight">Kilolu</div>
+                            <div class="bmi-range obesity">Obez</div>
+                        </div><br />
+                        <div class="alert @bmiResult.UyariSinifi">
+                            <strong>BMI = @bmiResult.BMI</strong> (@bmiResult.Kategori)
+                        </div>
+                        <ul>
+                            <li>Sağlıklı BMI aralığı: 18.5 kg/m² - 25 kg/m²</li>
+                            <li>Boy için sağlıklı kilo aralığı: @bmiResult.MinKilo kg - @bmiResult.MaxKilo kg</li>
+                            <li>BMI 25 kg/m²'ye düşmek için verilmesi gereken kilo: @bmiResult.VermekIstenenKilo kg</li>
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    }
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+</div>
 
 @code {
-    private int currentCount = 0;
-
-    private void IncrementCount()
+    private BMICalculatorModel bmiModel = new BMICalculatorModel();
+    private BMIResult bmiResult;
+    [Parameter]
+    public double BMI { get; set; }
+    private double GetBMIPointerPosition()
     {
-        currentCount++;
+        if (BMI < 18.5) return BMI * 0.81;
+        if (BMI < 25) return 15 + ((BMI - 18.5) * 2.5);
+        if (BMI < 30) return 40 + ((BMI - 25) * 3);
+        return 55 + ((BMI - 30) * 4.5);
     }
+    private void AgeChanged(int? value)
+    {
+        bmiModel.Age =(int) value;
+    }
+    private void HeightChanged(double? value)
+    {
+        bmiModel.Height = (double) value;
+    }
+    private void WeightChanged(double? value)
+    {
+        bmiModel.Weight =(double) value;
+    }
+    private void CalculateBMI()
+    {
+        var boyMetre = bmiModel.Height / 100.0; // cm'yi metreye çeviriyoruz
+        var bmi = (double) bmiModel.Weight / (double) (boyMetre * boyMetre); // BMI hesaplama formülü
+
+        BMI = bmi;
+        bmiResult = new BMIResult
+            {
+                BMI = Math.Round(bmi, 1),
+                Kategori = BMICategorisi(bmi),
+                MinKilo = (double)Math.Round((double)(18.5 * boyMetre * boyMetre), 1),
+                MaxKilo = Math.Round((double)(25 * boyMetre * boyMetre), 1),
+                VermekIstenenKilo = Math.Round((double)(bmiModel.Weight - (25 * boyMetre * boyMetre)), 1),
+                UyariSinifi = BMIUyariSinifi(bmi)
+            };
+    }
+
+    private string GetBMICategory(double bmi)
+    {
+        if (bmi < 18.5)
+            return "Underweight";
+        if (bmi >= 18.5 && bmi < 24.9)
+            return "Normal weight";
+        if (bmi >= 25 && bmi < 29.9)
+            return "Overweight";
+        return "Obese";
+    }
+
+    public class BMICalculatorModel
+    {
+        [Required(ErrorMessage = "Yaş Girmek Zorunludur.")]
+        [Range(18, 70, ErrorMessage = "Yaş, 18 ve 70 arasında olmalıdır.")]
+        public int? Age { get; set; }
+        public string Gender { get; set; }
+        [Required(ErrorMessage = "Boy Girmek Zorunludur.")]
+        [Range(140, 220, ErrorMessage = "Boy, 40 and 220 arasında olmalıdır.")]
+        public double? Height { get; set; }
+        [Required(ErrorMessage = "Kilo Girmek Zorunludur.")]
+        [Range(40, 250, ErrorMessage = "Kilo, 40 ve 250 arasında olmalıdır.")]
+        public double? Weight { get; set; }
+    }
+
+    public class BMIResult
+    {
+        public double BMI { get; set; }
+        public string Kategori { get; set; }
+        public double MinKilo { get; set; }
+        public double MaxKilo { get; set; }
+        public double VermekIstenenKilo { get; set; }
+        public string UyariSinifi { get; set; } // Renkli uyarı
+    }
+    Gender gender = new Gender()
+        {
+            selectedGender = "Erkek" // default value
+        };
+    List<string> rdOptions = new List<string> { "Erkek", "Kadın" };
+
+    // BMI Sonuç Modeli
+    public class Gender
+    {
+        public string selectedGender { get; set; }
+    }
+    private string BMICategorisi(double bmi)
+    {
+        if (bmi <= 18.5)
+            return "zayıf";
+        if (bmi <= 25)
+            return "Normal";
+        if (bmi <= 30)
+            return "Fazla Kilolu";
+        else
+            return "Obez";
+    }
+
+    // BMI'ye Göre Uyarı Renk Sınıfı
+    private string BMIUyariSinifi(double bmi)
+    {
+        if (bmi <= 18.5)
+            return "alert-warning";
+        if (bmi <= 25)
+            return "alert-success";
+        if (bmi <= 30)
+            return "alert-warning";
+        else
+            return "alert-danger";
+    }
+
+   
 }
+
+<style>
+    .bmi-container {
+        position: relative;
+        width: 100%;
+        height: 40px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        margin: 20px 0;
+    }
+
+    .bmi-range {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        text-align: center;
+        font-size: 12px;
+        color: white;
+    }
+
+    .underweight {
+        background-color: #77c1e5;
+        left: 0;
+        width: 15%;
+    }
+
+    .normal {
+        background-color: #5cb85c;
+        left: 15%;
+        width: 25%;
+    }
+
+    .overweight {
+        background-color: #f0ad4e;
+        left: 40%;
+        width: 15%;
+    }
+
+    .obesity {
+        background-color: #d9534f;
+        left: 55%;
+        width: 45%;
+    }
+
+    .bmi-indicator {
+        position: absolute;
+        top: -10px;
+        width: 2px;
+        height: 60px;
+        background-color: black;
+        z-index: 10;
+    }
+</style>
+<style>
+    .valid.modified:not([type=checkbox]) {
+        outline: 1px solid #26b050;
+    }
+
+    .invalid {
+        outline: 1px solid red;
+    }
+
+    .validation-message {
+        color: red;
+    }
+</style>
