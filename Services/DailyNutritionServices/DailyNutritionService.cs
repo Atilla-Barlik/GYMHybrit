@@ -138,7 +138,7 @@ namespace Services.DailyNutritionServices
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/DailyNutritionCheck/1/2024-08-30";
+                    string url = $"{_baseURL}/api/DailyNutritionCheck/1/2024-09-05";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)

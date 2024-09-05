@@ -175,7 +175,7 @@ else
     private double calculatedVit_A;
     private double calculatedVit_C;
     private double calculatedIron;
-
+    [Inject] MealTimeService mealTimeService { get; set; }
 
 
     protected override async Task OnInitializedAsync()
@@ -211,11 +211,15 @@ else
            NutrientImage = nutrient.image,
            NutrientKcal = (int)calculatedKcal,
            NutrientProtein = (decimal)calculatedProtein,
-           NutrientName = nutrient.Name
+           NutrientName = nutrient.Name,
+           DailyMealTime = mealTimeService.GetMealId()
         };
         if(AddDailyNutritionDetails != null)
+        {
             await DailyNutritionDetailsService.AddDailyNutrition(AddDailyNutritionDetails);
-        else
+            Navigation.NavigateTo("/DailyNutritionList");
+        }
+    else
         {
             Console.WriteLine("Kayıt sırasında bir hata oluştu.");
         }

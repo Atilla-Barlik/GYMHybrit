@@ -7,13 +7,13 @@
 <h3>DailyNutrition</h3>
 
 
-@if (dailyNutritionId == 0)
+@* @if (dailyNutritionId == 0)
 {
     <button @onclick="CheckDailyNutritionStatus" class="btn btn-primary">
         Check Daily Nutrition
     </button>
     <p>Veri yükleniyor...</p>
-}
+} *@
 @if(dailyNutritionDetailsList?.Count == 0)
 {
     <p>Liste Boş</p>
@@ -42,7 +42,7 @@ else
         </div> *@
         @if(dailyNutritionDetailsList != null)
     {
-        <div class="container mt-5">
+        @* <div class="container mt-5">
             <table class="table table-hover">
                 <thead class="thead-dark">
                     <tr>
@@ -68,7 +68,7 @@ else
                             <td>@nutrient.NutrientProtein</td>
                             <td>@nutrient.NutrientFat</td>
                             <td>
-                                <a @onclick="()=>DeleteNutrient(nutrient)" class="btn btn-danger btn-sm">
+                                <a @onclick="()=>DeleteNutrient(nutrient)" class="btn btn-danger btn-sm" style="width: 75px; height: 75px; object-fit: fill; text-align:revert-layer;">
                                     Sil
                                 </a>
                             </td>
@@ -76,8 +76,44 @@ else
                     }
                 </tbody>
             </table>
+            <div class="text-center"><button class="btn btn-primary mt-3"  @onclick="CalculateAndSaveTotals">Toplamı Kaydet</button></div>
+            
+        </div> *@
+
+        <div class="container mt-4">
+            @foreach (var meal in fixedMealTimes)
+            {
+                <div class="card mb-4">
+                      <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>@GetMealName(meal.MealId)</h5>
+                        <button class="btn btn-success btn-sm" @onclick="() => SelectMealTime(meal.MealId)">+</button>
+                    </div>
+                    <div class="card-body">
+                        @if (mealTimes.ContainsKey(meal.MealId) && mealTimes[meal.MealId].Any())
+                        {
+                            <ul class="list-group">
+                                @foreach (var nutrient in mealTimes[meal.MealId])
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <img src="@nutrient.NutrientImage" alt="@nutrient.NutrientName" class="rounded" width="50" height="50" />
+                                            <strong>@nutrient.NutrientName</strong>
+                                            <p>Kalori: @nutrient.NutrientKcal | Karbonhidrat: @nutrient.NutrientCarbohydrate g | Protein: @nutrient.NutrientProtein g | Yağ: @nutrient.NutrientFat g</p>
+                                        </div>
+                                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteNutrient(nutrient)">Sil</button>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>Bu öğünde henüz besin eklenmemiş.</p>
+                        }
+                    </div>
+                </div>
+            }
         </div>
-        <button class="btn btn-primary mt-3" @onclick="CalculateAndSaveTotals">Toplamı Kaydet</button>
+        
     }
 }
 @code {
@@ -85,6 +121,7 @@ else
     [Inject] NavigationManager Navigation { get; set; }
     [Inject] IDailyNutritionService dailyNutritionService { get; set; }
     [Inject] IDailyNutritionDetailsService dailyNutritionDetailsService { get; set; }
+    [Inject] MealTimeService mealTimeService { get; set; }
     public int AppUserId { get; set; } = 1; // Assuming user ID is set or fetched from authentication.
     string name { get; set; }
     public DailyNutritionResponseModel? daily;
@@ -96,6 +133,67 @@ else
     {
 
         //OnInitializedAsync içerisine aktarılacak
+        // DateTime dateTime = DateTime.Now;
+
+        // DateOnly date = DateOnly.FromDateTime(dateTime);
+
+        // //Console.WriteLine(date);
+
+
+        // dailyNutritionId = await dailyNutritionService.GetDailyNutritionCheck(1, date);
+
+        // if (dailyNutritionId == 0)
+        // {
+        //     AddUpdateDailyNutritionRequest a1 = new AddUpdateDailyNutritionRequest
+        //         {
+        //             AppUserId = 1,
+        //             DailyNutritionStatus = true,
+        //             DailyNutritionTotalCarbohydrate = 0,
+        //             DailyNutritionTotalFat =0,
+        //             DailyNutritionTotalKcal=0,
+        //             DailyNutritionTotalProtein=0,
+        //             Date = date
+        //         };
+
+        //     var existingEntry = await dailyNutritionService.AddDailyNutrition(a1);
+
+        //     if (existingEntry != null)
+        //     {
+        //         // Redirect to the page listing their daily nutrition
+        //         Navigation.NavigateTo("/NutritionSearch");
+        //         return;
+        //     }
+        // }
+        // else
+        // {
+        //     dailyNutritionDetailsList = await dailyNutritionDetailsService.GetAllDailyNutritiontList();
+
+        //     return;
+        // }      
+    }
+    private Dictionary<int, List<DailyNutritionDetailsResponseModel>> mealTimes = new Dictionary<int, List<DailyNutritionDetailsResponseModel>>();
+    private async Task DeleteNutrient(DailyNutritionDetailsResponseModel id)
+    {
+        if (id != null)
+        {
+            //dailyNutritionDetailsList.Remove(id);
+            foreach (var meal in mealTimes)
+            {
+                meal.Value.RemoveAll(n => n.DailyNutritionDetailsId == id.DailyNutritionDetailsId);
+            }
+            await dailyNutritionDetailsService.DeleteDailyNutrition(id);
+        }
+        else
+            return;
+    }
+    private void SelectMealTime(int mealId)
+    {
+        // mealId'yi global olarak kaydediyoruz.
+        mealTimeService.SetMealId(mealId);
+        Navigation.NavigateTo("/NutritionSearch"); // /NutritionSearch sayfasına yönlendiriyoruz.
+    }
+    protected override async Task OnInitializedAsync()
+    {
         DateTime dateTime = DateTime.Now;
 
         DateOnly date = DateOnly.FromDateTime(dateTime);
@@ -112,9 +210,9 @@ else
                     AppUserId = 1,
                     DailyNutritionStatus = true,
                     DailyNutritionTotalCarbohydrate = 0,
-                    DailyNutritionTotalFat =0,
-                    DailyNutritionTotalKcal=0,
-                    DailyNutritionTotalProtein=0,
+                    DailyNutritionTotalFat = 0,
+                    DailyNutritionTotalKcal = 0,
+                    DailyNutritionTotalProtein = 0,
                     Date = date
                 };
 
@@ -130,23 +228,13 @@ else
         else
         {
             dailyNutritionDetailsList = await dailyNutritionDetailsService.GetAllDailyNutritiontList();
+            mealTimes = dailyNutritionDetailsList
+            .GroupBy(n => n.DailyMealTime)
+            .ToDictionary(g => g.Key, g => g.ToList());
 
             return;
-        }      
-    }
-    private async Task DeleteNutrient(DailyNutritionDetailsResponseModel id)
-    {
-        if (id != null)
-        {
-            dailyNutritionDetailsList.Remove(id);
-            await dailyNutritionDetailsService.DeleteDailyNutrition(id);
         }
-        else
-            return;
-    }
-    protected override async Task OnInitializedAsync()
-    {
-       dailyNutritionDetailsList = await dailyNutritionDetailsService.GetAllDailyNutritiontList();
+       //dailyNutritionDetailsList = await dailyNutritionDetailsService.GetAllDailyNutritiontList();
     }
 
     private async Task CalculateAndSaveTotals()
@@ -179,6 +267,34 @@ else
         // Başarılı bir şekilde kayıt yaptıktan sonra, kullanıcıyı listeleme sayfasına yönlendirebiliriz
         //NavigationManager.NavigateTo("/daily-nutrition-list");
     }
+
+    private string GetMealName(int mealId)
+    {
+        return mealId switch
+        {
+            0 => "Sabah Öğünü",
+            1 => "Öğle Öğünü",
+            2 => "Akşam Öğünü",
+            3 => "Ara Öğün 1",
+            4 => "Ara Öğün 2",
+            _ => "Bilinmeyen Öğün"
+        };
+    }
+
+    public class MealModel
+    {
+        public int MealId { get; set; }
+        public string MealName { get; set; }
+    }
+
+    private List<MealModel> fixedMealTimes = new List<MealModel>
+    {
+        new MealModel { MealId = 0, MealName = "Sabah Öğünü" },
+        new MealModel { MealId = 1, MealName = "Öğle Öğünü" },
+        new MealModel { MealId = 2, MealName = "Akşam Öğünü" },
+        new MealModel { MealId = 3, MealName = "Ara Öğün 1" },
+        new MealModel { MealId = 4, MealName = "Ara Öğün 2" }
+    };
 }
 
     

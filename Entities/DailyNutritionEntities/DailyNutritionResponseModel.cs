@@ -16,6 +16,5 @@ namespace Entities.DailyNutritionEntities
         public decimal DailyNutritionTotalFat { get; set; }
         public DateOnly Date { get; set; }
         public int AppUserId { get; set; }
-       
     }
 }

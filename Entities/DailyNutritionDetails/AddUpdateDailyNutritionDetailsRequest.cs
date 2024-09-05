@@ -15,5 +15,6 @@ namespace Entities.DailyNutritionDetails
         public decimal NutrientProtein { get; set; }
         public decimal NutrientFat { get; set; }
         public int DailyNutritionId { get; set; }
+        public int DailyMealTime { get; set; }
     }
 }

@@ -16,6 +16,7 @@ builder.Services.AddSingleton<IFormFactor, FormFactor>();
 builder.Services.AddSingleton<INutrientService, NutrientService>();
 builder.Services.AddSingleton<IDailyNutritionService, DailyNutritionService>();
 builder.Services.AddSingleton<IDailyNutritionDetailsService, DailyNutritionDetailsService>();
+builder.Services.AddSingleton<MealTimeService>();
 
 var app = builder.Build();
 
