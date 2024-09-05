@@ -44,9 +44,39 @@ namespace Services.DailyNutritionDetailsService
             return returnResponse;
         }
 
-        public Task<bool> DeleteDailyNutrition(DailyNutritionDetailsResponseModel nutrientRequest)
+        public async Task<bool> DeleteDailyNutrition(DailyNutritionDetailsResponseModel nutrientRequest)
         {
-            throw new NotImplementedException();
+            var returnResponse = false;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/DailyNutritionDetails?id={nutrientRequest.DailyNutritionDetailsId}";
+
+                    var serializeContent = JsonConvert.SerializeObject(nutrientRequest);
+                    var request = new HttpRequestMessage();
+                    request.Method = HttpMethod.Delete;
+                    request.RequestUri = new Uri(url);
+                    request.Content = new StringContent(serializeContent, Encoding.UTF8, "application/json");
+
+
+
+                    var apiResponse = await client.SendAsync(request);
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+
+                        return true;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return returnResponse;
         }
 
         public async Task<List<DailyNutritionDetailsResponseModel>> GetAllDailyNutritiontList()

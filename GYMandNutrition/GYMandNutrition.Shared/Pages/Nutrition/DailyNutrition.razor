@@ -14,6 +14,10 @@
     </button>
     <p>Veri yükleniyor...</p>
 }
+@if(dailyNutritionDetailsList?.Count == 0)
+{
+    <p>Liste Boş</p>
+}
 else
 {
     <p>Liste</p>
@@ -36,43 +40,45 @@ else
                 </div>
             }
         </div> *@
-
-    <div class="container mt-5">
-        <table class="table table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Resim</th>
-                    <th scope="col">İsim</th>
-                    <th scope="col">Kalori (kcal)</th>
-                    <th scope="col">Karbonhidrat (gr)</th>
-                    <th scope="col">Protein (gr)</th>
-                    <th scope="col">Yağ (gr)</th>
-                    <th scope="col">Detaylar</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var nutrient in dailyNutritionDetailsList)
-                {
+        @if(dailyNutritionDetailsList != null)
+    {
+        <div class="container mt-5">
+            <table class="table table-hover">
+                <thead class="thead-dark">
                     <tr>
-                        <td>
-                            <img src="@nutrient.NutrientImage" alt="@nutrient.NutrientName" class="img-thumbnail" style="width: 75px; height: 75px; object-fit: cover;" />
-                        </td>
-                        <td>@nutrient.NutrientName</td>
-                        <td>@nutrient.NutrientKcal</td>
-                        <td>@nutrient.NutrientCarbohydrate</td>
-                        <td>@nutrient.NutrientProtein</td>
-                        <td>@nutrient.NutrientFat</td>
-                        <td>
-                            <a href="@($"/nutrition-detail/{nutrient.DailyNutritionDetailsId}")" class="btn btn-info btn-sm">
-                                Detaylar
-                            </a>
-                        </td>
+                        <th scope="col">Resim</th>
+                        <th scope="col">İsim</th>
+                        <th scope="col">Kalori (kcal)</th>
+                        <th scope="col">Karbonhidrat (gr)</th>
+                        <th scope="col">Protein (gr)</th>
+                        <th scope="col">Yağ (gr)</th>
+                        <th scope="col">Detaylar</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    <button class="btn btn-primary mt-3" @onclick="CalculateAndSaveTotals">Toplamı Kaydet</button>
+                </thead>
+                <tbody>
+                    @foreach (var nutrient in dailyNutritionDetailsList)
+                    {
+                        <tr>
+                            <td>
+                                <img src="@nutrient.NutrientImage" alt="@nutrient.NutrientName" class="img-thumbnail" style="width: 75px; height: 75px; object-fit: cover;" />
+                            </td>
+                            <td>@nutrient.NutrientName</td>
+                            <td>@nutrient.NutrientKcal</td>
+                            <td>@nutrient.NutrientCarbohydrate</td>
+                            <td>@nutrient.NutrientProtein</td>
+                            <td>@nutrient.NutrientFat</td>
+                            <td>
+                                <a @onclick="()=>DeleteNutrient(nutrient)" class="btn btn-danger btn-sm">
+                                    Sil
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <button class="btn btn-primary mt-3" @onclick="CalculateAndSaveTotals">Toplamı Kaydet</button>
+    }
 }
 @code {
 
@@ -88,10 +94,12 @@ else
     [Inject] IDailyNutritionService DailyNutritionService { get; set; }
     private async Task CheckDailyNutritionStatus()
     {
+
+        //OnInitializedAsync içerisine aktarılacak
         DateTime dateTime = DateTime.Now;
 
         DateOnly date = DateOnly.FromDateTime(dateTime);
-        
+
         //Console.WriteLine(date);
 
 
@@ -126,6 +134,21 @@ else
             return;
         }      
     }
+    private async Task DeleteNutrient(DailyNutritionDetailsResponseModel id)
+    {
+        if (id != null)
+        {
+            dailyNutritionDetailsList.Remove(id);
+            await dailyNutritionDetailsService.DeleteDailyNutrition(id);
+        }
+        else
+            return;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+       dailyNutritionDetailsList = await dailyNutritionDetailsService.GetAllDailyNutritiontList();
+    }
+
     private async Task CalculateAndSaveTotals()
     {
         // `DailyNutritionDetails` tablosundaki verileri topluyoruz
