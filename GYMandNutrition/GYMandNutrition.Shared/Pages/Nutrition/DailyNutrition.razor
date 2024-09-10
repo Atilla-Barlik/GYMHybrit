@@ -95,12 +95,14 @@ else
                                 @foreach (var nutrient in mealTimes[meal.MealId])
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <img src="@nutrient.NutrientImage" alt="@nutrient.NutrientName" class="rounded" width="50" height="50" />
-                                            <strong>@nutrient.NutrientName</strong>
-                                            <p>Kalori: @nutrient.NutrientKcal | Karbonhidrat: @nutrient.NutrientCarbohydrate g | Protein: @nutrient.NutrientProtein g | Yağ: @nutrient.NutrientFat g</p>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@nutrient.NutrientImage" alt="@nutrient.NutrientName" class="rounded" width="75" height="75" />
+                                            <div class="ms-3">
+                                                <strong>@nutrient.NutrientName</strong>
+                                                <p class="mb-0">Kalori: @nutrient.NutrientKcal | Karbonhidrat: @nutrient.NutrientCarbohydrate g | Protein: @nutrient.NutrientProtein g | Yağ: @nutrient.NutrientFat g</p>
+                                            </div>
                                         </div>
-                                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteNutrient(nutrient)">Sil</button>
+                                        <button class="btn btn-danger btn-lg" @onclick="() => DeleteNutrient(nutrient)">Sil</button>
                                     </li>
                                 }
                             </ul>

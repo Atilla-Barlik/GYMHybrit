@@ -18,7 +18,7 @@ else
     <EditForm Model="@nutrient" OnValidSubmit="SubmitNutrient">
     <DataAnnotationsValidator />
     <ValidationSummary />
-    <div class="container mt-4">
+    <div class="container mt-4" >
         @if (nutrient != null)
         {
             <div class="row mb-4">
@@ -33,26 +33,26 @@ else
                     </div>
                     <div class="row text-center mt-4">
                         <div class="col-sm-3">
-                            <div class="p-3 bg-light rounded-circle border">
-                                <h3 style="color:black">@calculatedKcal.ToString("0.##") kcal</h3>
+                            <div class="p-3 rounded-3 border" style="background-color:whitesmoke">
+                                    <h4 style="color:#F44D59">@calculatedKcal.ToString("0.##") kcal</h4>
                                 <small>Kalori</small>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <div class="p-3 bg-light rounded-circle border">
-                                <h3 style="color:lightslategray">@calculatedCarbs.ToString("0.##") gr</h3>
+                                <div class="p-3  rounded-3 border" style="background-color:whitesmoke">
+                                <h4 style="color:darkorange" >@calculatedCarbs.ToString("0.##") gr</h4>
                                 <small>Karbonhidrat</small>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <div class="p-3 bg-light rounded-circle border">
-                                <h3 style="color:orangered">@calculatedProtein.ToString("0.##") gr</h3>
+                                <div class="p-3 rounded-3 border" style="background-color:whitesmoke">
+                                <h4 style="color:brow">@calculatedProtein.ToString("0.##") gr</h4>
                                 <small>Protein</small>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <div class="p-3 bg-light rounded-circle border">
-                                <h3 style="color:darkgoldenrod">@calculatedFat.ToString("0.##") gr</h3>
+                                <div class="p-3 rounded-3 border" style="background-color:whitesmoke">
+                                <h4 style="color:darkgoldenrod">@calculatedFat.ToString("0.##") gr</h4>
                                 <small>Yağ</small>
                             </div>
                         </div>

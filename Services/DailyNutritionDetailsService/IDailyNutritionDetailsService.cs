@@ -1,4 +1,5 @@
 ﻿using Entities.DailyNutritionDetails;
+using Entities.DailyNutritionDetailsDto;
 using Entities.DailyNutritionEntities;
 using System;
 using System.Collections.Generic;
@@ -15,5 +16,6 @@ namespace Services.DailyNutritionDetailsService
         Task<bool> AddDailyNutrition(AddUpdateDailyNutritionDetailsRequest nutrientRequest);
         Task<bool> UpdateDailyNutrition(DailyNutritionDetailsResponseModel nutrientRequest, int id);
         Task<bool> DeleteDailyNutrition(DailyNutritionDetailsResponseModel nutrientRequest);
+        Task<List<NutritionSummaryDto>> GetTotalMeal(int DailyNutritionId);
     }
 }

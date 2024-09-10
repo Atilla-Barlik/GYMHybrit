@@ -1,0 +1,163 @@
+﻿@page "/userProfile"
+@using Entities.DailyNutritionDetailsDto;
+
+<h3>Makro Takibi</h3>
+
+@if(get == false )
+{
+    <h1>Yükleniyor</h1>
+}
+else
+{
+    <div class="container mt-4">
+        @foreach (var meal in MealSummaries)
+        {
+            var targetMeal = mealTargets[meal.DailyMealTime];
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>@GetMealName(meal.DailyMealTime)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <p><strong>Hedef Kalori:</strong> @targetMeal.TotalKcal Kcal</p>
+                            <p><strong>Tüketilen Kalori:</strong> <span class="@GetDifferenceClass(targetMeal.TotalKcal, meal.TotalKcal)">@meal.TotalKcal Kcal</span></p>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success text-dark" role="progressbar" style="width:@GetProgressPercentage(targetMeal.TotalKcal, meal.TotalKcal)%" aria-valuenow="@GetProgressPercentage(targetMeal.TotalKcal, meal.TotalKcal)" aria-valuemin="0" aria-valuemax="100">
+                                    @if(GetProgressPercentage(targetMeal.TotalKcal,meal.TotalKcal) > 20)
+                                    {
+                                        @GetProgressLabel(targetMeal.TotalKcal, meal.TotalKcal)
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Hedef Karbonhidrat:</strong> @targetMeal.TotalCarbohydrate g</p>
+                            <p><strong>Tüketilen Karbonhidrat:</strong> <span class="@GetDifferenceClass(targetMeal.TotalCarbohydrate, meal.TotalCarbohydrate)">@meal.TotalCarbohydrate g</span></p>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-primary text-dark" role="progressbar" style="width:@GetProgressPercentage(targetMeal.TotalCarbohydrate, meal.TotalCarbohydrate)%" aria-valuenow="@GetProgressPercentage(targetMeal.TotalCarbohydrate, meal.TotalCarbohydrate)" aria-valuemin="0" aria-valuemax="100">
+                                    @if(GetProgressPercentage(targetMeal.TotalCarbohydrate, meal.TotalCarbohydrate) > 20)
+                                    {
+                                        @GetProgressLabel(targetMeal.TotalCarbohydrate, meal.TotalCarbohydrate)
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Hedef Protein:</strong> @targetMeal.TotalProtein g</p>
+                            <p><strong>Tüketilen Protein:</strong> <span class="@GetDifferenceClass(targetMeal.TotalProtein, meal.TotalProtein)">@meal.TotalProtein g</span></p>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-warning text-dark" role="progressbar" style="width:@GetProgressPercentage(targetMeal.TotalProtein, meal.TotalProtein)%" aria-valuenow="@GetProgressPercentage(targetMeal.TotalProtein, meal.TotalProtein)" aria-valuemin="0" aria-valuemax="100">
+                                    @if(GetProgressPercentage(targetMeal.TotalProtein, meal.TotalProtein) > 20)
+                                    {
+                                        @GetProgressLabel(targetMeal.TotalProtein, meal.TotalProtein)
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Hedef Yağ:</strong> @targetMeal.TotalFat g</p>
+                            <p><strong>Tüketilen Yağ:</strong> <span class="@GetDifferenceClass(targetMeal.TotalFat, meal.TotalFat)">@meal.TotalFat g</span></p>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-danger text-dark" role="progressbar" style="width:@GetProgressPercentage(targetMeal.TotalFat, meal.TotalFat)%" aria-valuenow="@GetProgressPercentage(targetMeal.TotalFat, meal.TotalFat)" aria-valuemin="0" aria-valuemax="100">
+                                    @if (GetProgressPercentage(targetMeal.TotalFat, meal.TotalFat) > 20)
+                                    {
+                                        @GetProgressLabel(targetMeal.TotalFat, meal.TotalFat)
+                                    }
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private bool get = false;
+    [Inject] IDailyNutritionDetailsService dailyNutritionDetailsService { get; set; }
+    List<NutritionSummaryDto> MealSummaries = new List<NutritionSummaryDto>();
+    protected override async Task OnInitializedAsync()
+    {
+
+        await base.OnInitializedAsync();
+
+        MealSummaries = await dailyNutritionDetailsService.GetTotalMeal(1);
+        
+        for (int i = 0; i <= 4; i++)
+        {
+            if (!MealSummaries.Any(m => m.DailyMealTime == i))
+            {
+                MealSummaries.Add(new NutritionSummaryDto { DailyMealTime = i, TotalKcal = 0, TotalCarbohydrate = 0, TotalProtein = 0, TotalFat = 0 });
+            }
+        }
+
+        MealSummaries = MealSummaries.OrderBy(m => m.DailyMealTime).ToList();
+
+        get = true;
+
+    }
+
+
+    private Dictionary<int, NutritionSummaryDto> mealTargets = new Dictionary<int, NutritionSummaryDto>
+    {
+        { 0, new NutritionSummaryDto { DailyMealTime = 0, TotalKcal = 500, TotalCarbohydrate = 50, TotalProtein = 20, TotalFat = 10 } },
+        { 1, new NutritionSummaryDto { DailyMealTime = 1, TotalKcal = 600, TotalCarbohydrate = 60, TotalProtein = 25, TotalFat = 15 } },
+        { 2, new NutritionSummaryDto { DailyMealTime = 2, TotalKcal = 700, TotalCarbohydrate = 70, TotalProtein = 30, TotalFat = 20 } },
+        { 3, new NutritionSummaryDto { DailyMealTime = 3, TotalKcal = 200, TotalCarbohydrate = 20, TotalProtein = 10, TotalFat = 5 } },
+        { 4, new NutritionSummaryDto { DailyMealTime = 4, TotalKcal = 200, TotalCarbohydrate = 20, TotalProtein = 10, TotalFat = 5 } }
+    };
+
+    private string GetDifferenceClass(decimal target, decimal actual)
+    {
+        if (actual < target)
+        {
+            return "text-danger"; // Eksikse kırmızı
+        }
+        else if (actual > target)
+        {
+            return "text-warning"; // Fazlaysa sarı
+        }
+        return "text-success"; // Hedefe uygunsa yeşil
+    }
+
+    private string GetMealName(int mealTime)
+    {
+        return mealTime switch
+        {
+            0 => "Sabah Öğünü",
+            1 => "Öğle Öğünü",
+            2 => "Akşam Öğünü",
+            3 => "Ara Öğün 1",
+            4 => "Ara Öğün 2",
+            _ => "Bilinmeyen Öğün"
+        };
+    }
+
+    private decimal GetProgressPercentage(decimal target, decimal actual)
+    {
+        if (target == 0) return 0;
+        var percentage = (actual / target) * 100;
+        return percentage > 100 ? 100 : percentage; // Progress bar'ı %100'den fazla göstermemek için
+    }
+
+    private string GetProgressLabel(decimal target, decimal actual)
+    {
+        
+        if (actual < target)
+        {
+            return "Eksik"; // Eğer hedefin altındaysa "Eksik" yazacak
+        }
+        else if (actual > target)
+        {
+            return "Fazla"; // Eğer hedefin üstündeyse "Fazla" yazacak
+        }
+        return "İdeal"; // Hedef ile eşitse "İdeal" yazacak
+    }
+
+
+}
+
