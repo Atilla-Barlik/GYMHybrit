@@ -9,7 +9,82 @@
 }
 else
 {
-    <div class="container mt-4">
+    <div class="card mb-4">
+        <div class="container mt-3">
+            <h4 class="text-center font-weight-bold fs-3">Hedef Besin Değerleri</h4>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card bg-warning text-center">
+                        <div class="card-body">
+                            <h6 class="font-weight-bold fs-4">Toplam Kalori</h6>
+                            <p class="font-weight-bold fs-4">@goalkcal Kcal</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-center">
+                        <div class="card-body">
+                            <h6 class="font-weight-bold fs-4">Toplam Karbonhidrat</h6>
+                            <p class="font-weight-bold fs-4">@goalCarbs g</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-center">
+                        <div class="card-body">
+                            <h6 class="font-weight-bold fs-4">Toplam Protein</h6>
+                            <p class="font-weight-bold fs-4">@goalProtein g</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-center">
+                        <div class="card-body">
+                            <h6 class="font-weight-bold fs-4">Toplam Yağ</h6>
+                            <p class="font-weight-bold fs-4">@goalFat g</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        <br />
+            <h4 class="text-center font-weight-bold fs-3">Alınan Besin Değerleri</h4>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card bg-warning text-center">
+                        <div class="card-body">
+                            <h6 class="font-weight-bold fs-4">Toplam Kalori</h6>
+                            <p class="font-weight-bold fs-4">@totalKcal Kcal</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-center">
+                        <div class="card-body">
+                            <h6 class ="font-weight-bold fs-4">Toplam Karbonhidrat</h6>
+                            <p class="font-weight-bold fs-4">@totalCarbs g</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-center">
+                        <div class="card-body">
+                            <h6 class="font-weight-bold fs-4">Toplam Protein</h6>
+                            <p class="font-weight-bold fs-4">@totalProtein g</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-center">
+                        <div class="card-body">
+                            <h6 class="font-weight-bold fs-4">Toplam Yağ</h6>
+                            <p class="font-weight-bold fs-4">@totalFat g</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br /><br />
         @foreach (var meal in MealSummaries)
         {
             var targetMeal = mealTargets[meal.DailyMealTime];
@@ -80,13 +155,14 @@ else
     private bool get = false;
     [Inject] IDailyNutritionDetailsService dailyNutritionDetailsService { get; set; }
     List<NutritionSummaryDto> MealSummaries = new List<NutritionSummaryDto>();
+    private decimal totalKcal,totalCarbs, totalProtein, totalFat,goalkcal,goalCarbs,goalProtein,goalFat;
     protected override async Task OnInitializedAsync()
     {
 
         await base.OnInitializedAsync();
 
         MealSummaries = await dailyNutritionDetailsService.GetTotalMeal(1);
-        
+
         for (int i = 0; i <= 4; i++)
         {
             if (!MealSummaries.Any(m => m.DailyMealTime == i))
@@ -96,6 +172,15 @@ else
         }
 
         MealSummaries = MealSummaries.OrderBy(m => m.DailyMealTime).ToList();
+
+        totalKcal = MealSummaries.Sum(d => d.TotalKcal);
+        totalCarbs = MealSummaries.Sum(d => d.TotalCarbohydrate);
+        totalProtein = MealSummaries.Sum(d => d.TotalProtein);
+        totalFat = MealSummaries.Sum(d => d.TotalFat);
+        goalkcal = 2000;
+        goalCarbs = 300;
+        goalProtein = 120;
+        goalFat = 40;
 
         get = true;
 

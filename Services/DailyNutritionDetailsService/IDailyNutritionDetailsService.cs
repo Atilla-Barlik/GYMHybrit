@@ -17,5 +17,6 @@ namespace Services.DailyNutritionDetailsService
         Task<bool> UpdateDailyNutrition(DailyNutritionDetailsResponseModel nutrientRequest, int id);
         Task<bool> DeleteDailyNutrition(DailyNutritionDetailsResponseModel nutrientRequest);
         Task<List<NutritionSummaryDto>> GetTotalMeal(int DailyNutritionId);
+        Task<List<TotalUsageNutritionDto>> GetTotalUsageNutrition();
     }
 }

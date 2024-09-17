@@ -2,6 +2,7 @@
 @inject NavigationManager Navigation
 @using global::Services.NutrientServices
 @using Entities.NutrientEntities
+@using Entities.DailyNutritionDetailsDto
 @inject INutrientService NutrientService
 
 <h3>NutritionSearch</h3>
@@ -12,44 +13,74 @@
 
 @if (!string.IsNullOrWhiteSpace(searchTerm))
 {
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="container mt-4">
+    <div class="row">
         @foreach (var nutrient in _nutrientList)
         {
-            <div class="col">
-                <div class="border border-4 card h100" >
-                    <img @onclick="() => NavigateToDetails(nutrient.Id)" src="@nutrient.image" class="border-bottom card-img-top" alt="@nutrient.Name" width="80" height="320" />
+
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm" >
+                    <img @onclick="() => NavigateToDetails(nutrient.Id)" src="@nutrient.image" class="card-img-top" alt="@nutrient.Name" style="height: 150px; object-fit: cover;"  />
                     <div class="card-body">
-                        <h5 class="card-title text-danger">@nutrient.Name</h5>
-                        <p class="card-text">Calories: @nutrient.kcal kcal</p>
-                        <p class="card-text">Carbs: @nutrient.carbonhydrate g</p>
-                        <p class="card-text">Protein: @nutrient.protein g</p>
-                        <p class="card-text">Fat: @nutrient.fat g</p>
+                        <h5 class="card-title text-center">@nutrient.Name</h5>
+                        <p class="card-text">
+                            <strong>Kalori:</strong> @nutrient.kcal Kcal <br />
+                            <strong>Karbonhidrat:</strong> @nutrient.carbonhydrate g<br />
+                            <strong>Protein:</strong> @nutrient.protein g<br />
+                            <strong>Yağ:</strong> @nutrient.fat g
+                        </p>
                     </div>
                 </div>
             </div>
-            @* <li @onclick="() => NavigateToDetails(nutrient.Id)">
-                <img src="@nutrient.image" alt="@nutrient.Name" />
-                <h3>@nutrient.Name</h3>
-                <p>Calories: @nutrient.kcal kcal</p>
-                <p>Carbs: @nutrient.carbonhydrate g</p>
-                <p>Protein: @nutrient.protein g</p>
-                <p>Fat: @nutrient.fat g</p>
-            </li> *@
-        
         }
     </div>
+    </div>
 }
-else if (!string.IsNullOrWhiteSpace(searchTerm))
+else if (string.IsNullOrWhiteSpace(searchTerm))
 {
-    <p>No results found for "@searchTerm".</p>
+    <div class="container mt-4">
+        <h3>En Çok Kullanılan Besinler</h3>
+
+        @if (_totalUsageNurition != null && _totalUsageNurition.Any())
+        {
+            <div class="row">
+                @foreach (var nutrient in _totalUsageNurition)
+                {
+                    <div class="col-md-4">
+                        <div class="card mb-4 shadow-sm">
+                            <img src="@nutrient.NutrientImage" class="card-img-top" alt="@nutrient.NutrientName" style="height: 150px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title text-center">@nutrient.NutrientName</h5>
+                                <p class="card-text">
+                                    <strong>Kalori:</strong> @nutrient.NutrientKcal Kcal <br />
+                                    <strong>Karbonhidrat:</strong> @nutrient.NutrientCarbohydrate g <br />
+                                    <strong>Protein:</strong> @nutrient.NutrientProtein g <br />
+                                    <strong>Yağ:</strong> @nutrient.NutrientFat g
+                                </p>
+                                <p class="text-muted text-center">
+                                    <small>Kullanım Sayısı: @nutrient.TotalUsageCount</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                En çok kullanılan besinler henüz bulunmamaktadır.
+            </div>
+        }
+    </div>
 }
 
 @code {
     private string searchTerm = "";
 
-
+    [Inject] IDailyNutritionDetailsService dailyNutritionDetailsService { get; set; }
     private List<NutrientResponseModel>? _nutrientList;
-
+    private List<TotalUsageNutritionDto> _totalUsageNurition;
 
 
     private void NavigateToDetails(int id)
@@ -62,6 +93,7 @@ else if (!string.IsNullOrWhiteSpace(searchTerm))
 
         await base.OnInitializedAsync();
 
+        _totalUsageNurition = await dailyNutritionDetailsService.GetTotalUsageNutrition();
         //_nutrientList = await NutrientService.GetAllNutrientList();
         _nutrientList = await NutrientService.GetNutrientDetailByName(searchTerm);
 
