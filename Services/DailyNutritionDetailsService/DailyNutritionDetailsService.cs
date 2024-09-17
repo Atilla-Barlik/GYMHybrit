@@ -19,6 +19,7 @@ namespace Services.DailyNutritionDetailsService
         private List<DailyNutritionDetailsResponseModel>? returnResponse;
         private List<NutritionSummaryDto>? _summary;
         private List<TotalUsageNutritionDto>? _total;
+        private List<DailyNutritionDetailsResponseModel> _userMostUsageNutrientList;
         public async Task<bool> AddDailyNutrition(AddUpdateDailyNutritionDetailsRequest nutrientRequest)
         {
             var returnResponse = false;
@@ -172,6 +173,37 @@ namespace Services.DailyNutritionDetailsService
             }
 
             return _total;
+        }
+
+        public async Task<List<DailyNutritionDetailsResponseModel>> GetUserMostUsageNutrients(int UserId)
+        {
+            _userMostUsageNutrientList = new List<DailyNutritionDetailsResponseModel>();
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/TotalUsageNutrition/userTop10/1";
+                    var apiResponse = await client.GetAsync(url);
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+
+                        var response = await apiResponse.Content.ReadAsStringAsync();
+
+                        _userMostUsageNutrientList = JsonConvert.DeserializeObject
+                            <List<DailyNutritionDetailsResponseModel>>(response);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return _userMostUsageNutrientList;
+
         }
 
         public async Task<bool> UpdateDailyNutrition(DailyNutritionDetailsResponseModel nutrientRequest, int id)

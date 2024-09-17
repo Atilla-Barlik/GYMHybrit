@@ -1,8 +1,5 @@
 ﻿@page "/NutritionSearch"
 @inject NavigationManager Navigation
-@using global::Services.NutrientServices
-@using Entities.NutrientEntities
-@using Entities.DailyNutritionDetailsDto
 @inject INutrientService NutrientService
 
 <h3>NutritionSearch</h3>
@@ -73,6 +70,39 @@ else if (string.IsNullOrWhiteSpace(searchTerm))
             </div>
         }
     </div>
+
+    <div class="container mt-4">
+        <h3>Sizin En Çok Kullandıklarınız</h3>
+
+        @if (_userMostUsageNutrientList != null && _userMostUsageNutrientList.Any())
+        {
+            <div class="row">
+                @foreach (var nutrient in _userMostUsageNutrientList)
+                {
+                    <div class="col-md-4">
+                        <div class="card mb-4 shadow-sm">
+                            <img src="@nutrient.NutrientImage" class="card-img-top" alt="@nutrient.NutrientName" style="height: 150px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title text-center">@nutrient.NutrientName</h5>
+                                <p class="card-text">
+                                    <strong>Kalori:</strong> @nutrient.NutrientKcal Kcal <br />
+                                    <strong>Karbonhidrat:</strong> @nutrient.NutrientCarbohydrate g <br />
+                                    <strong>Protein:</strong> @nutrient.NutrientProtein g <br />
+                                    <strong>Yağ:</strong> @nutrient.NutrientFat g
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning">
+                En çok kullanılan besinler henüz bulunmamaktadır.
+            </div>
+        }
+    </div>
 }
 
 @code {
@@ -81,7 +111,7 @@ else if (string.IsNullOrWhiteSpace(searchTerm))
     [Inject] IDailyNutritionDetailsService dailyNutritionDetailsService { get; set; }
     private List<NutrientResponseModel>? _nutrientList;
     private List<TotalUsageNutritionDto> _totalUsageNurition;
-
+    private List<DailyNutritionDetailsResponseModel> _userMostUsageNutrientList;
 
     private void NavigateToDetails(int id)
     {
@@ -94,6 +124,7 @@ else if (string.IsNullOrWhiteSpace(searchTerm))
         await base.OnInitializedAsync();
 
         _totalUsageNurition = await dailyNutritionDetailsService.GetTotalUsageNutrition();
+        _userMostUsageNutrientList = await dailyNutritionDetailsService.GetUserMostUsageNutrients(1);
         //_nutrientList = await NutrientService.GetAllNutrientList();
         _nutrientList = await NutrientService.GetNutrientDetailByName(searchTerm);
 
