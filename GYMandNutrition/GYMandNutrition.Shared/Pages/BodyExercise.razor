@@ -1,0 +1,56 @@
+﻿@page "/body-exercise"
+@using Entities.ExerciseEntities
+@using global::Services.ExerciseServices
+@inject NavigationManager NavigationManager
+
+@if(@Exercises == null)
+{
+    <p>Yükleniyor</p>
+}
+else
+{
+    <div class="container">
+        <h1 style="text-align:center">Vücut Bölümleri</h1> <br>
+        <div class="row">
+            @foreach (var exercise in Exercises)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card" style="width: auto;">
+                        <a @onclick="() => NavigateToDetail(exercise.ExerciseId)" style="text-decoration:none;">
+                            <img src="@exercise.ExerciseImage" class="card-img-top exercise-img" alt="@exercise.ExerciseName">
+                            <div class="card-body">
+                                <h5 class="card-title">@exercise.ExerciseName</h5>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+
+@code {
+    [Inject] IExerciseService exerciseService { get; set; }
+    public List<ExerciseResponseModel> Exercises { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Exercises = await exerciseService.GetAllExercises();
+    }
+
+    private void NavigateToDetail(int id)
+    {
+        // Redirect to the detailed exercise page, passing the id
+        NavigationManager.NavigateTo($"/exercise-detail/{id}");
+    }
+}
+
+<style>
+    .exercise-img {
+        height: 200px; /* Set a fixed height for all images */
+        object-fit: cover; /* Ensures images fit within the height and width without distortion */
+        width: 100%; /* Ensures the image takes up the full width of the card */
+    }
+</style>
+

@@ -3,6 +3,7 @@ using GYMandNutrition.Web.Components;
 using GYMandNutrition.Web.Services;
 using Services.DailyNutritionDetailsService;
 using Services.DailyNutritionServices;
+using Services.ExerciseServices;
 using Services.NutrientServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder.Services.AddSingleton<IFormFactor, FormFactor>();
 builder.Services.AddSingleton<INutrientService, NutrientService>();
 builder.Services.AddSingleton<IDailyNutritionService, DailyNutritionService>();
 builder.Services.AddSingleton<IDailyNutritionDetailsService, DailyNutritionDetailsService>();
+builder.Services.AddSingleton<IExerciseService, ExerciseService>();
 builder.Services.AddSingleton<MealTimeService>();
 
 var app = builder.Build();
@@ -27,7 +29,7 @@ if (!app.Environment.IsDevelopment())
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
-
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
