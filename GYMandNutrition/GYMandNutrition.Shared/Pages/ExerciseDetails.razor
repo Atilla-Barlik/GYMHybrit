@@ -1,0 +1,111 @@
+﻿@page "/exercise-list/{id:int}"
+@using Entities.ExerciseDetailEntities
+@using global::Services.ExerciseDetailServise
+
+<div class="container mt-5">
+    <div class="row">
+        @if (exerciseDetails != null)
+        {
+            @foreach (var exercise in exerciseDetails)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <video class="card-img-top" controls>
+                            <source src="@exercise.Gif1" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="card-body">
+                            <h5 class="card-title">@exercise.Name</h5>
+                            <p class="card-text"><strong>Difficulty:</strong> @exercise.Difficulty</p>
+                            <p class="card-text"><strong>Calories Burned:</strong> @exercise.AverageKcal</p>
+                            <p class="card-text"><strong>Equipment:</strong> @exercise.Equipment</p>
+                            <p class="card-text">@exercise.Description1</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0">
+                            <button class="btn btn-primary btn-block" @onclick="() => OpenModal(exercise)" data-bs-toggle="modal" data-bs-target="#exerciseModal">View More</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Modal Structure -->
+<div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exerciseModalLabel">@SelectedExercise?.Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <video class="img-fluid" controls>
+                            <source src="@v1" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <video class="img-fluid mt-3" controls>
+                            <source src="@v2" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Difficulty:</strong> @SelectedExercise?.Difficulty</p>
+                        <p><strong>Calories Burned:</strong> @SelectedExercise?.AverageKcal</p>
+                        <p><strong>Equipment:</strong> @SelectedExercise?.Equipment</p>
+                        <ul>
+                            <li>@SelectedExercise?.Description1</li>
+                            <li>@SelectedExercise?.Description2</li>
+                            <li>@SelectedExercise?.Description3</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+    public List<ExerciseDetailsResponseModel> exerciseDetails { get; set; }
+    [Inject] IExerciseDetailService exerciseDetailService { get; set; }
+    public ExerciseDetailsResponseModel SelectedExercise { get; set; }
+    string v1, v2;
+    protected override async Task OnInitializedAsync()
+    {
+        // API'den gelen Id'ye göre filtrelenmiş veriyi çek
+        exerciseDetails = await exerciseDetailService.GetExerciseDetailList(Id);
+    }
+
+    private void OpenModal(ExerciseDetailsResponseModel exercise)
+    {
+        SelectedExercise = exercise;
+        v1 = exercise.Gif1;
+        v2 = exercise.Gif2;
+    }
+}
+
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+    .card-footer {
+        text-align: center;
+    }
+
+    .btn-block {
+        width: 100%;
+    }
+
+</style>

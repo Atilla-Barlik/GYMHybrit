@@ -3,6 +3,7 @@ using GYMandNutrition.Web.Components;
 using GYMandNutrition.Web.Services;
 using Services.DailyNutritionDetailsService;
 using Services.DailyNutritionServices;
+using Services.ExerciseDetailServise;
 using Services.ExerciseServices;
 using Services.NutrientServices;
 
@@ -18,6 +19,7 @@ builder.Services.AddSingleton<INutrientService, NutrientService>();
 builder.Services.AddSingleton<IDailyNutritionService, DailyNutritionService>();
 builder.Services.AddSingleton<IDailyNutritionDetailsService, DailyNutritionDetailsService>();
 builder.Services.AddSingleton<IExerciseService, ExerciseService>();
+builder.Services.AddSingleton<IExerciseDetailService, ExerciseDetailService>();
 builder.Services.AddSingleton<MealTimeService>();
 
 var app = builder.Build();
