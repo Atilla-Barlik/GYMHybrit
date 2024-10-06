@@ -11,8 +11,37 @@ namespace Services.ExerciseDetailServise
 {
     public class ExerciseDetailService : IExerciseDetailService
     {
+
         private string _baseURL = "https://localhost:7149";
         private List<ExerciseDetailsResponseModel> exerciseDetailsResponseModels;
+        private ExerciseDetailsResponseModel exerciseDetailResponseModel;
+        public async Task<ExerciseDetailsResponseModel> GetExerciseDetailById(int id)
+        {
+            exerciseDetailResponseModel = new ExerciseDetailsResponseModel();
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/ExerciseDetail/{id}";
+                    var apiResponse = await client.GetAsync(url);
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+
+                        var response = await apiResponse.Content.ReadAsStringAsync();
+
+                        exerciseDetailResponseModel = JsonConvert.DeserializeObject<ExerciseDetailsResponseModel>(response);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+            return exerciseDetailResponseModel;
+        }
 
         public async Task<List<ExerciseDetailsResponseModel>> GetExerciseDetailList(int id)
         {

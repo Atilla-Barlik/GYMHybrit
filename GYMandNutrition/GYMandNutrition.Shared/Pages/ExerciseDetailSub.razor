@@ -1,0 +1,186 @@
+﻿@page "/exercise-details-sub/{id:int}"
+@using Entities.AppUserExerciseProgramEntities
+@using Entities.ExerciseDetailEntities
+@using global::Services.AppUserExerciseProgramServise
+@using global::Services.ExerciseDetailServise
+@inject IJSRuntime js
+@inject NavigationManager nm
+@if(exercise != null)
+{
+    <!-- Gray background container -->
+   @*  <div class="custom-container container mt-5 p-4" style="background-color: #f8f9fa !important; border-radius: 8px;">
+
+        <!-- Exercise Title with light blue background -->
+        <div class="text-center p-3" style="background-color: #d1ecf1; border-radius: 5px;">
+            <h2>@exercise.Name</h2>
+        </div>
+
+        <!-- Videos section -->
+        <div class="row mt-4">
+            <div class="col-md-6 mb-3">
+                <video width="100%" height="auto" controls>
+                    <source src="@exercise.Gif1" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="col-md-6 mb-3">
+                <video width="100%" height="auto" controls>
+                    <source src="@exercise.Gif2" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+
+        <!-- Numbered descriptions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <ol class="list-group list-group-numbered">
+                    <li class="list-group-item">@exercise.Description1</li>
+                    <li class="list-group-item">@exercise.Description2</li>
+                    <li class="list-group-item">@exercise.Description3</li>
+                </ol>
+            </div>
+        </div>
+    </div> *@
+
+    <div class="custom-container container mt-5 p-4" style="background-color: #f8f9fa; border-radius: 8px;">
+        <!-- Başlık -->
+        <div class="p-3 mb-4" style="background-color: #e7f3ff; border-radius: 8px;">
+            <h2 class="text-center">@exercise.Name</h2>
+        </div>
+
+        <!-- Videolar -->
+        <div class="row">
+            <div class="col-md-6">
+                <video class="w-100" controls>
+                    <source src="@exercise.Gif1" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="col-md-6">
+                <video class="w-100" controls>
+                    <source src="@exercise.Gif2" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+
+        <!-- Açıklamalar -->
+        <div class="mt-4">
+            <h4>Uygulama</h4>
+            <ol>
+                <li>@exercise.Description1</li>
+                <li>@exercise.Description2</li>
+                <li>@exercise.Description3</li>
+            </ol>
+        </div>
+        <div class="container mt-5 p-4" style="background-color: #f8f9fa; border-radius: 8px;">
+            <!-- Diğer İçerikler: Başlık, Videolar vs. -->
+            <!-- Girdi Alanları -->
+            <div class="mt-4">
+                <h4>Exercise Input:</h4>
+                <div class="form-group">
+                    <label for="exerciseRepeat">Repeat Count:</label>
+                    <input type="number" class="form-control" id="exerciseRepeat" @bind="ExerciseRepeat" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="exerciseSet">Set Count:</label>
+                    <input type="number" class="form-control" id="exerciseSet" @bind="ExerciseSet" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="dayNo">Day Number:</label>
+                    <input type="number" class="form-control" id="dayNo" @bind="DayNo" required />
+                </div>
+
+                <button id="toastbtn" class="btn btn-primary mt-3" @onclick="SubmitExerciseProgram">Submit</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast @toastClass" role="alert" aria-live="assertive" aria-atomic="true" style="display: @(showToast ? "block" : "none")">
+            <div class="toast-header">
+                <strong class="me-auto">Mesaj</strong>
+                <button type="button" class="btn-close" @onclick="CloseToast"></button>
+            </div>
+            <div class="toast-body">
+                @toastMessage
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+    [Inject] IExerciseDetailService exerciseDetailService { get; set; }
+    [Inject] IAppUserExerciseProgramService appUserExerciseService { get; set; }
+    private ExerciseDetailsResponseModel exercise;
+    private AddUpdateAppUserExerciseProgramRequest addUpdateAppUserExerciseProgramRequest;
+    private int ExerciseRepeat { get; set; }
+    private int ExerciseSet { get; set; }
+    private int DayNo { get; set; }
+    private string toastMessage;
+    private string toastClass;
+    private bool showToast;
+    DateTime dateTime;
+    DateOnly date;
+    
+    bool t = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        dateTime = DateTime.Now;
+        date = DateOnly.FromDateTime(dateTime);
+        exercise = await exerciseDetailService.GetExerciseDetailById(Id);
+    }
+    private async Task SubmitExerciseProgram()
+    {
+        addUpdateAppUserExerciseProgramRequest = new AddUpdateAppUserExerciseProgramRequest
+        {
+                ExerciseRepeat = ExerciseRepeat,
+                ExerciseSet = ExerciseSet,
+                ExerciseTotalBurnedKcal = 0, // Bu alan hesaplanabilir ya da başka bir değere sahip olabilir
+                ExerciseDetailId = exercise.ExerciseDetailId, // Bunu dinamik olarak set edebilirsiniz, örneğin yönlendirme ile gelen ID
+                AppUserId = 1, // Kullanıcı ID'si
+                DayNo = DayNo,
+                Date = date
+        };
+
+        var response = appUserExerciseService.AddAppUserExercise(addUpdateAppUserExerciseProgramRequest);
+
+        if (t)
+        {
+            // Başarılı mesajı
+            toastMessage = "Veri başarıyla kaydedildi!";
+            toastClass = "text-bg-success"; // Bootstrap başarı sınıfı
+            showToast = true; // Toast mesajını göster
+            StateHasChanged(); // UI güncellemesi
+            await Task.Delay(2000); // Mesajın bir süre görünmesi için bekle
+            nm.NavigateTo("/body-exercise"); // Yönlendirme
+        }
+        else
+        {
+            // Hata mesajı
+            toastMessage = "Veri kaydedilirken bir hata oluştu!";
+            toastClass = "text-bg-danger"; // Bootstrap hata sınıfı
+            showToast = true; // Toast mesajını göster
+            StateHasChanged(); // UI güncellemesi
+        }
+       
+    }
+    private void CloseToast()
+    {
+        showToast = false; // Toast mesajını gizle
+        StateHasChanged(); // UI güncellemesi
+    }
+    
+}
+
+<style>
+    .custom-container {
+        background-color: #f8f9fa;
+    }
+</style>
+

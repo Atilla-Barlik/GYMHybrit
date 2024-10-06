@@ -22,7 +22,7 @@
                             <p class="card-text">@exercise.Description1</p>
                         </div>
                         <div class="card-footer bg-transparent border-top-0">
-                            <button class="btn btn-primary btn-block" @onclick="() => OpenModal(exercise)" data-bs-toggle="modal" data-bs-target="#exerciseModal">View More</button>
+                            <button class="btn btn-primary btn-block" @onclick="() => NavigateToDetails(exercise.ExerciseDetailId)" data-bs-toggle="modal" data-bs-target="#exerciseModal">View More</button>
                         </div>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
 </div>
 
 <!-- Modal Structure -->
-<div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
+@* <div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -68,14 +68,16 @@
             </div>
         </div>
     </div>
-</div>
+</div> *@
 
 
 @code {
     [Parameter] public int Id { get; set; }
     public List<ExerciseDetailsResponseModel> exerciseDetails { get; set; }
     [Inject] IExerciseDetailService exerciseDetailService { get; set; }
+    [Inject] NavigationManager navigationManager { get; set; }
     public ExerciseDetailsResponseModel SelectedExercise { get; set; }
+
     string v1, v2;
     protected override async Task OnInitializedAsync()
     {
@@ -88,6 +90,10 @@
         SelectedExercise = exercise;
         v1 = exercise.Gif1;
         v2 = exercise.Gif2;
+    }
+    private void NavigateToDetails(int id)
+    {
+        navigationManager.NavigateTo($"/exercise-details-sub/{id}");
     }
 }
 

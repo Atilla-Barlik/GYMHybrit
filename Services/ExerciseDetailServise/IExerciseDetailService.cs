@@ -10,5 +10,7 @@ namespace Services.ExerciseDetailServise
     public interface IExerciseDetailService
     {
         Task<List<ExerciseDetailsResponseModel>> GetExerciseDetailList(int id);
+
+        Task<ExerciseDetailsResponseModel> GetExerciseDetailById(int id);
     }
 }
