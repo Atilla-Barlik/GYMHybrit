@@ -1,4 +1,5 @@
 ﻿using Entities.AppUserExerciseProgramEntities;
+using Entities.UserExerciseProgramEntities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,6 @@ namespace Services.AppUserExerciseProgramServise
     public interface IAppUserExerciseProgramService
     {
         Task<bool> AddAppUserExercise(AddUpdateAppUserExerciseProgramRequest request);
+        Task<List<CombinedExerciseDataResponseModel>> GetAppUserExerciseProgramDetails(int AppUserId);
     }
 }

@@ -1,9 +1,14 @@
 ﻿using Entities.AppUserExerciseProgramEntities;
+using Entities.DailyNutritionDetails;
+using Entities.UserExerciseProgramEntities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Services.AppUserExerciseProgramServise
@@ -11,6 +16,9 @@ namespace Services.AppUserExerciseProgramServise
     public class AppUserExerciseProgramService : IAppUserExerciseProgramService
     {
         private string _baseURL = "https://localhost:7149";
+        private readonly HttpClient _httpClient;
+        private List<CombinedExerciseDataResponseModel> _combinedData;
+
         //private AddUpdateAppUserExerciseProgramRequest _addRequest;
         public async Task<bool> AddAppUserExercise(AddUpdateAppUserExerciseProgramRequest request)
         {
@@ -39,6 +47,38 @@ namespace Services.AppUserExerciseProgramServise
             }
 
             return returnResponse;
+        }
+
+        public async Task<List<CombinedExerciseDataResponseModel>> GetAppUserExerciseProgramDetails(int AppUserId)
+        {
+            _combinedData = new List<CombinedExerciseDataResponseModel>();
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/AppUserExerciseProgram/user-exercises/{AppUserId}";
+                    var apiResponse = await client.GetAsync(url);
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var response = await apiResponse.Content.ReadAsStringAsync();
+
+                        var options = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true // JSON'daki anahtar isimleri için büyük/küçük harf duyarlılığını kapat
+                        };
+
+                        _combinedData = System.Text.Json.JsonSerializer.Deserialize<List<CombinedExerciseDataResponseModel>>(response, options);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Hata mesajını loglama
+                Console.WriteLine($"Hata: {ex.Message}");
+            }
+
+            return _combinedData;
         }
     }
 }

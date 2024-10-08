@@ -1,0 +1,159 @@
+﻿@page "/UserExerciseList"
+@using Entities.UserExerciseProgramEntities
+@using global::Services.AppUserExerciseProgramServise
+@inject NavigationManager navigationManager;
+<h3>Egzersiz Programları</h3>
+
+@if (combinedExerciseDataResponseModels != null)
+{
+    <div class="container mt-4">
+        @if (combinedExerciseDataResponseModels != null && combinedExerciseDataResponseModels.Any())
+        {
+            foreach (var group in GroupedExercises)
+            {
+                // Get a representative exercise from the group
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Program No: @group.Key - Toplam Egzersiz: @group.Count()
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Egzersizler</h5>
+                        <div class="row">
+                            @foreach (var exercise in group)
+                            {
+                                <div class="col-md-4 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#exerciseModal"
+                                           @onclick="() => OpenModal(exercise)" class="me-2">
+                                            @exercise.ExerciseDetailDto.Name
+                                        </a>
+                                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteExercise(exercise)">
+                                            X
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <a href="@group.First().ExerciseDetailDto.Gif1" class="btn btn-primary" target="_blank">View First Exercise GIF</a>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No exercises found.</p>
+        }
+    </div>
+}
+else
+{
+    <p>Loading exercise data...</p>
+}
+<!-- Modal -->
+@if (selectedExercise != null && selectedExercise.ExerciseDetailDto != null)
+{
+    <div class="modal fade show" tabindex="-1" role="dialog" style="display: block; background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@selectedExercise.ExerciseDetailDto.Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => selectedExercise = null"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Display exercise details -->
+                    <div class="text-center mb-3">
+                        <video width="100%" controls>
+                            <source src="@selectedExercise.ExerciseDetailDto.Gif1" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <video width="100%" controls class="mt-2">
+                            <source src="@selectedExercise.ExerciseDetailDto.Gif2" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Egzersiz İsmi: </strong> @selectedExercise.ExerciseDetailDto.Name
+                    </div>
+                    <div class="mb-3">
+                        <strong>Yakılan Kalori (Avg): </strong> @selectedExercise.ExerciseDetailDto.AverageKcal
+                    </div>
+                    <div class="mb-3">
+                        <strong>Zorluk Seviyesi: </strong> @selectedExercise.ExerciseDetailDto.Difficulty
+                    </div>
+                    <div class="mb-3">
+                        <strong>Ekipman: </strong> @selectedExercise.ExerciseDetailDto.Equipment
+                    </div>
+                    <div class="mb-3">
+                        <strong>Nasıl Uygulanır?</strong>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Adım 1: </strong> @selectedExercise.ExerciseDetailDto.Description1
+                    </div>
+                    <div class="mb-3">
+                        <strong>Adım 2: </strong> @selectedExercise.ExerciseDetailDto.Description2
+                    </div>
+                    <div class="mb-3">
+                        @if (selectedExercise.ExerciseDetailDto.Description3 != null)
+                        {
+                            <strong>Adım 3: </strong> @selectedExercise.ExerciseDetailDto.Description3
+                        }
+                    </div>
+
+                    <!-- Editable fields for sets and repeats -->
+                    <div class="form-group">
+                        <label for="exerciseRepeat">Tekrar Sayısı</label>
+                        <input type="number" id="exerciseRepeat" class="form-control" @bind="selectedExercise.ExerciseRepeat" />
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="exerciseSet">Set Sayısı</label>
+                        <input type="number" id="exerciseSet" class="form-control" @bind="selectedExercise.ExerciseSet" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => selectedExercise = null">Close</button>
+                   @*  <button type="button" class="btn btn-primary" @onclick="SaveChanges">Save changes</button> *@
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Inject] IAppUserExerciseProgramService appUserExerciseProgramService { get; set; }
+    private List<CombinedExerciseDataResponseModel> combinedExerciseDataResponseModels;
+    private List<int> distinctDays;
+    private ExerciseDetailResponseModel selectedExerciseDetail;
+    CombinedExerciseDataResponseModel selectedExercise = null;
+    protected override async Task OnInitializedAsync()
+    {
+        combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails(1);
+        distinctDays = combinedExerciseDataResponseModels.Select(e => e.DayNo).Distinct().ToList();
+    }
+    private IEnumerable<IGrouping<int, CombinedExerciseDataResponseModel>> GroupedExercises =>
+        combinedExerciseDataResponseModels.GroupBy(e => e.DayNo);
+
+    void OpenModal(CombinedExerciseDataResponseModel exercise)
+    {
+        selectedExercise = exercise;
+    }
+    void SaveChanges()
+    {
+        // set ve tekrar sayılarını güncelleme veya yeni kayıt alma işlemi gerçekleştirilecek
+        //Console.WriteLine($"Saved: {selectedExercise.ExerciseRepeat} repeats, {selectedExercise.ExerciseSet} sets");
+    }
+    void DeleteExercise(CombinedExerciseDataResponseModel exercise)
+    {
+        //exercises.Remove(exercise);
+        // You can also make an API call here to delete the exercise from the database
+        //StateHasChanged();
+    }
+}
+<style>
+    .exercise-item {
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        text-align: center;
+}
+</style>

@@ -23,6 +23,8 @@ builder.Services.AddSingleton<IExerciseService, ExerciseService>();
 builder.Services.AddSingleton<IExerciseDetailService, ExerciseDetailService>();
 builder.Services.AddSingleton<IAppUserExerciseProgramService, AppUserExerciseProgramService>();
 builder.Services.AddSingleton<MealTimeService>();
+builder.Services.AddRazorPages();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
