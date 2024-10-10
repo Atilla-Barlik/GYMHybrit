@@ -1,4 +1,5 @@
 ﻿using Entities.AppUserExerciseProgramEntities;
+using Entities.DailyNutritionDetails;
 using Entities.UserExerciseProgramEntities;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,8 @@ namespace Services.AppUserExerciseProgramServise
 {
     public interface IAppUserExerciseProgramService
     {
-        Task<bool> AddAppUserExercise(AddUpdateAppUserExerciseProgramRequest request);
+        Task<bool> AddAppUserExercise(AppUserExerciseProgramResponseModel request);
         Task<List<CombinedExerciseDataResponseModel>> GetAppUserExerciseProgramDetails(int AppUserId);
+        Task<bool> DeleteAppUserExerciseProgram(AddUpdateAppUserExerciseProgramRequest appUserExerciseProgramRequest);
     }
 }

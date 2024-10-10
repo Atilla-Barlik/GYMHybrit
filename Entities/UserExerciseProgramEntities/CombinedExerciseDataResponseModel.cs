@@ -11,6 +11,7 @@ namespace Entities.UserExerciseProgramEntities
         public int AppUserExerciseProgramId { get; set; }
         public int ExerciseRepeat { get; set; }
         public int ExerciseSet { get; set; }
+        public decimal ExerciseWeight { get; set; }
         public int ExerciseTotalBurnedKcal { get; set; }
         public int AppUserId { get; set; }
         public int DayNo { get; set; }

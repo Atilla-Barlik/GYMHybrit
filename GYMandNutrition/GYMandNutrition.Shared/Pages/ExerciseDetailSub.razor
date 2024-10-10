@@ -93,7 +93,10 @@
                     <label for="dayNo">Day Number:</label>
                     <input type="number" class="form-control" id="dayNo" @bind="DayNo" required />
                 </div>
-
+                <div class="form-group">
+                    <label for="dayNo">Ağırlık:</label>
+                    <input type="number" class="form-control" id="exerciseWeight" @bind="ExerciseWeight" required />
+                </div>
                 <button id="toastbtn" class="btn btn-primary mt-3" @onclick="SubmitExerciseProgram">Submit</button>
             </div>
         </div>
@@ -117,10 +120,11 @@
     [Inject] IExerciseDetailService exerciseDetailService { get; set; }
     [Inject] IAppUserExerciseProgramService appUserExerciseService { get; set; }
     private ExerciseDetailsResponseModel exercise;
-    private AddUpdateAppUserExerciseProgramRequest addUpdateAppUserExerciseProgramRequest;
+    private AppUserExerciseProgramResponseModel addUpdateAppUserExerciseProgramRequest;
     private int ExerciseRepeat { get; set; }
     private int ExerciseSet { get; set; }
     private int DayNo { get; set; }
+    private decimal ExerciseWeight { get; set; }
     private string toastMessage;
     private string toastClass;
     private bool showToast;
@@ -137,12 +141,13 @@
     }
     private async Task SubmitExerciseProgram()
     {
-        addUpdateAppUserExerciseProgramRequest = new AddUpdateAppUserExerciseProgramRequest
+        addUpdateAppUserExerciseProgramRequest = new AppUserExerciseProgramResponseModel
         {
                 ExerciseRepeat = ExerciseRepeat,
                 ExerciseSet = ExerciseSet,
                 ExerciseTotalBurnedKcal = 0, // Bu alan hesaplanabilir ya da başka bir değere sahip olabilir
                 ExerciseDetailId = exercise.ExerciseDetailId, // Bunu dinamik olarak set edebilirsiniz, örneğin yönlendirme ile gelen ID
+                ExerciseWeight = ExerciseWeight,
                 AppUserId = 1, // Kullanıcı ID'si
                 DayNo = DayNo,
                 Date = date

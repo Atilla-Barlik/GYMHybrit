@@ -1,4 +1,5 @@
 ﻿@page "/UserExerciseList"
+@using Entities.AppUserExerciseProgramEntities
 @using Entities.UserExerciseProgramEntities
 @using global::Services.AppUserExerciseProgramServise
 @inject NavigationManager navigationManager;
@@ -108,6 +109,10 @@ else
                         <label for="exerciseSet">Set Sayısı</label>
                         <input type="number" id="exerciseSet" class="form-control" @bind="selectedExercise.ExerciseSet" />
                     </div>
+                    <div class="form-group mt-3">
+                        <label for="exerciseSet">Ağırlık</label>
+                        <input type="number" id="exerciseSet" class="form-control" @bind="selectedExercise.ExerciseWeight" />
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="() => selectedExercise = null">Close</button>
@@ -122,16 +127,20 @@ else
 @code {
     [Inject] IAppUserExerciseProgramService appUserExerciseProgramService { get; set; }
     private List<CombinedExerciseDataResponseModel> combinedExerciseDataResponseModels;
+    private List<CombinedExerciseDataResponseModel> localCombinedExerciseProgramData;
     private List<int> distinctDays;
     private ExerciseDetailResponseModel selectedExerciseDetail;
     CombinedExerciseDataResponseModel selectedExercise = null;
+    AddUpdateAppUserExerciseProgramRequest addUpdateAppUserExerciseProgramRequest;
     protected override async Task OnInitializedAsync()
     {
         combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails(1);
-        distinctDays = combinedExerciseDataResponseModels.Select(e => e.DayNo).Distinct().ToList();
+        localCombinedExerciseProgramData = combinedExerciseDataResponseModels;
+        distinctDays = localCombinedExerciseProgramData.Select(e => e.DayNo).Distinct().ToList();
+
     }
     private IEnumerable<IGrouping<int, CombinedExerciseDataResponseModel>> GroupedExercises =>
-        combinedExerciseDataResponseModels.GroupBy(e => e.DayNo);
+        localCombinedExerciseProgramData.GroupBy(e => e.DayNo);
 
     void OpenModal(CombinedExerciseDataResponseModel exercise)
     {
@@ -144,6 +153,21 @@ else
     }
     void DeleteExercise(CombinedExerciseDataResponseModel exercise)
     {
+        localCombinedExerciseProgramData.Remove(exercise);
+        addUpdateAppUserExerciseProgramRequest = new AddUpdateAppUserExerciseProgramRequest
+            {
+                AppUserExerciseProgramId = exercise.AppUserExerciseProgramId,
+                ExerciseRepeat = exercise.ExerciseRepeat,
+                ExerciseSet = exercise.ExerciseSet,
+                ExerciseWeight = exercise.ExerciseWeight,
+                ExerciseTotalBurnedKcal = exercise.ExerciseTotalBurnedKcal,
+                ExerciseDetailId = exercise.ExerciseDetailDto.ExerciseDetailId,
+                AppUserId = exercise.AppUserId,
+                DayNo = exercise.DayNo,
+                Date = exercise.Date
+            };
+        appUserExerciseProgramService.DeleteAppUserExerciseProgram(addUpdateAppUserExerciseProgramRequest);
+        
         //exercises.Remove(exercise);
         // You can also make an API call here to delete the exercise from the database
         //StateHasChanged();

@@ -20,7 +20,7 @@ namespace Services.AppUserExerciseProgramServise
         private List<CombinedExerciseDataResponseModel> _combinedData;
 
         //private AddUpdateAppUserExerciseProgramRequest _addRequest;
-        public async Task<bool> AddAppUserExercise(AddUpdateAppUserExerciseProgramRequest request)
+        public async Task<bool> AddAppUserExercise(AppUserExerciseProgramResponseModel request)
         {
             var returnResponse = false;
             try
@@ -79,6 +79,39 @@ namespace Services.AppUserExerciseProgramServise
             }
 
             return _combinedData;
+        }
+
+        public async Task<bool> DeleteAppUserExerciseProgram(AddUpdateAppUserExerciseProgramRequest appUserExerciseProgramRequest)
+        {
+            var returnResponse = false;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/AppUserExerciseProgram?id={appUserExerciseProgramRequest.AppUserExerciseProgramId}";
+
+                    var serializeContent = JsonConvert.SerializeObject(appUserExerciseProgramRequest);
+                    var request = new HttpRequestMessage();
+                    request.Method = HttpMethod.Delete;
+                    request.RequestUri = new Uri(url);
+                    request.Content = new StringContent(serializeContent, Encoding.UTF8, "application/json");
+
+                    var apiResponse = await client.SendAsync(request);
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+
+                        return true;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return returnResponse;
         }
     }
 }
