@@ -14,5 +14,6 @@ namespace Services.AppUserExerciseProgramServise
         Task<bool> AddAppUserExercise(AppUserExerciseProgramResponseModel request);
         Task<List<CombinedExerciseDataResponseModel>> GetAppUserExerciseProgramDetails(int AppUserId);
         Task<bool> DeleteAppUserExerciseProgram(AddUpdateAppUserExerciseProgramRequest appUserExerciseProgramRequest);
+        Task<bool> UpdateAppUserExerciseProgram(AddUpdateAppUserExerciseProgramRequest addUpdateAppUserExerciseProgramRequest);
     }
 }

@@ -113,5 +113,35 @@ namespace Services.AppUserExerciseProgramServise
 
             return returnResponse;
         }
+
+        public async Task<bool> UpdateAppUserExerciseProgram(AddUpdateAppUserExerciseProgramRequest addUpdateAppUserExerciseProgramRequest)
+        {
+            var returnResponse = false;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/AppUserExerciseProgram";
+
+
+                    var serializeContent = JsonConvert.SerializeObject(addUpdateAppUserExerciseProgramRequest);
+
+                    var apiResponse = await client.PutAsync(url, new StringContent(serializeContent, Encoding.UTF8, "application/json"));
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.NoContent)
+                    {
+
+                        return true;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return returnResponse;
+        }
     }
 }

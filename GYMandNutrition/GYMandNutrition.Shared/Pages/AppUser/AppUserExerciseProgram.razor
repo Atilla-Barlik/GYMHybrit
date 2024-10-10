@@ -115,8 +115,8 @@ else
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="() => selectedExercise = null">Close</button>
-                   @*  <button type="button" class="btn btn-primary" @onclick="SaveChanges">Save changes</button> *@
+                    <button type="button" class="btn btn-secondary" @onclick="() => selectedExercise = null">Kapat</button>
+                    <button type="button" class="btn btn-primary" @onclick=" () =>SaveChanges(selectedExercise)">Değişiklikleri Kaydet</button>
                 </div>
             </div>
         </div>
@@ -146,8 +146,22 @@ else
     {
         selectedExercise = exercise;
     }
-    void SaveChanges()
+    void SaveChanges(CombinedExerciseDataResponseModel combinedData)
     {
+        addUpdateAppUserExerciseProgramRequest = new AddUpdateAppUserExerciseProgramRequest
+        {
+            AppUserExerciseProgramId = combinedData.AppUserExerciseProgramId,
+            ExerciseRepeat = combinedData.ExerciseRepeat,
+            ExerciseSet = combinedData.ExerciseSet,
+            ExerciseWeight = combinedData.ExerciseWeight,
+            ExerciseTotalBurnedKcal = combinedData.ExerciseTotalBurnedKcal,
+            ExerciseDetailId = combinedData.ExerciseDetailDto.ExerciseDetailId,
+            AppUserId = combinedData.AppUserId,
+            DayNo = combinedData.DayNo,
+            Date = combinedData.Date
+        };
+
+        appUserExerciseProgramService.UpdateAppUserExerciseProgram(addUpdateAppUserExerciseProgramRequest);
         // set ve tekrar sayılarını güncelleme veya yeni kayıt alma işlemi gerçekleştirilecek
         //Console.WriteLine($"Saved: {selectedExercise.ExerciseRepeat} repeats, {selectedExercise.ExerciseSet} sets");
     }
