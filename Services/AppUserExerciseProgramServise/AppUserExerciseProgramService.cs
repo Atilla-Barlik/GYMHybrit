@@ -143,5 +143,32 @@ namespace Services.AppUserExerciseProgramServise
 
             return returnResponse;
         }
+
+        public async Task<bool> DeleteAppUserExerciseProgramByDyNo(int DayNo)
+        {
+            var returnResponse = false;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/AppUserExerciseProgram/delete-by-dayno/{DayNo}";
+
+                    var apiResponse = await client.DeleteAsync(url);
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.NoContent)
+                    {
+
+                        return true;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return returnResponse;
+        }
     }
 }

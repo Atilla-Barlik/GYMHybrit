@@ -14,8 +14,11 @@
             {
                 // Get a representative exercise from the group
                 <div class="card mb-3">
-                    <div class="card-header">
-                        Program No: @group.Key - Toplam Egzersiz: @group.Count()
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Program No: @group.Key - Toplam Egzersiz: @group.Count()</span>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteByDayNo(group.Key)">
+                            X
+                        </button>
                     </div>
                     <div class="card-body">
                         <h5 class="card-title">Egzersizler</h5>
@@ -181,10 +184,18 @@ else
                 Date = exercise.Date
             };
         appUserExerciseProgramService.DeleteAppUserExerciseProgram(addUpdateAppUserExerciseProgramRequest);
-        
+
         //exercises.Remove(exercise);
         // You can also make an API call here to delete the exercise from the database
         //StateHasChanged();
+    }
+
+    void DeleteByDayNo(int dayNo)
+    {
+        
+        localCombinedExerciseProgramData.RemoveAll(q=>q.DayNo == dayNo);
+        
+        appUserExerciseProgramService.DeleteAppUserExerciseProgramByDyNo(dayNo);
     }
 }
 <style>
