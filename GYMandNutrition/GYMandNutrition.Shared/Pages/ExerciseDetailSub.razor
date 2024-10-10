@@ -43,7 +43,7 @@
         </div>
     </div> *@
 
-    <div class="custom-container container mt-5 p-4" style="background-color: #f8f9fa; border-radius: 8px;">
+    @* <div class="custom-container container mt-5 p-4" style="background-color: #f8f9fa; border-radius: 8px;">
         <!-- Başlık -->
         <div class="p-3 mb-4" style="background-color: #e7f3ff; border-radius: 8px;">
             <h2 class="text-center">@exercise.Name</h2>
@@ -100,7 +100,7 @@
                 <button id="toastbtn" class="btn btn-primary mt-3" @onclick="SubmitExerciseProgram">Submit</button>
             </div>
         </div>
-    </div>
+    </div>*@
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <div class="toast @toastClass" role="alert" aria-live="assertive" aria-atomic="true" style="display: @(showToast ? "block" : "none")">
             <div class="toast-header">
@@ -112,6 +112,172 @@
             </div>
         </div>
     </div>
+
+    <div class="container mt-4">
+        <!-- Başlık -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="bg-light p-3 rounded">@exercise.Name</h2>
+            </div>
+        </div>
+
+        <!-- Video ve Detaylar -->
+        <div class="row mt-4">
+            <div class="col-md-6 d-flex justify-content-center">
+                <video class="img-fluid rounded" controls>
+                    <source src="@exercise.Gif1" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <div class="col-md-6 d-flex justify-content-center">
+                <video class="img-fluid rounded" controls>
+                    <source src="@exercise.Gif1" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+
+        <!-- Uygulama ve Girişler -->
+        <div class="row mt-4">
+            <!-- Sol Tarafta Uygulama -->
+            <div class="col-md-6">
+                <div class="bg-light p-4 rounded">
+                    <h5>Uygulama</h5>
+                    <ol>
+                        <li>@exercise.Description1</li>
+                        <li>@exercise.Description2</li>
+                        <li>@exercise.Description3</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Sağ Tarafta Input Girişleri -->
+           @*  <div class="col-md-6">
+                <div class="bg-light p-4 rounded">
+                    <h5>Exercise Input</h5>
+                    <div class="form-group">
+                        <label for="DayNo">Program Numarası</label>
+                        <div class="input-group">
+                            <!-- Decrease Button -->
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => DecreaseValue(nameof(DayNo))">-</button>
+
+                            <!-- Input Field -->
+                            <input type="number" id="DayNo" class="form-control text-center" @bind="DayNo" min="0" />
+
+                            <!-- Increase Button -->
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => IncreaseValue(nameof(DayNo))">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="exerciseRepeat">Tekrar Sayısı</label>
+                        <div class="input-group">
+                            <!-- Decrease Button -->
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => DecreaseValue(nameof(ExerciseRepeat))">-</button>
+
+                            <!-- Input Field -->
+                            <input type="number" id="exerciseRepeat" class="form-control text-center" @bind="ExerciseRepeat" min="0" />
+
+                            <!-- Increase Button -->
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => IncreaseValue(nameof(ExerciseRepeat))">+</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="exerciseSet">Set Sayısı</label>
+                        <div class="input-group">
+                            <!-- Decrease Button -->
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => DecreaseValue(nameof(ExerciseSet))">-</button>
+
+                            <!-- Input Field -->
+                            <input type="number" id="exerciseSet" class="form-control text-center" @bind="ExerciseSet" min="0" />
+
+                            <!-- Increase Button -->
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => IncreaseValue(nameof(ExerciseSet))">+</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label for="exerciseWeight">Ağırlık</label>
+                        <div class="input-group">
+                            <!-- Decrease Button -->
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => DecreaseValue(nameof(ExerciseWeight))">-</button>
+
+                            <!-- Input Field -->
+                            <input type="number" id="exerciseWeight" class="form-control text-center" @bind="ExerciseWeight" min="0" />
+
+                            <!-- Increase Button -->
+                            <button type="button" class="btn btn-outline-secondary" @onclick="() => IncreaseValue(nameof(ExerciseWeight))">+</button>
+                        </div>
+                    </div>
+                    <button id="toastbtn" class="btn btn-primary mt-3" @onclick="SubmitExerciseProgram">Submit</button>
+                </div>
+            </div> *@
+            <div class="col-md-6">
+                <div class="bg-light p-4 rounded">
+                    <h5>Egzersiz Girdileri</h5>
+                    <form>
+                        <div class="mb-3">
+                            <label for="dayNumber" class="form-label">Program Numarası</label>
+                            <div class="input-group">
+                                <!-- Decrease Button -->
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => DecreaseValue(nameof(DayNo))">-</button>
+
+                                <!-- Input Field -->
+                                <input type="number" class="form-control text-center" id="dayNumber" @bind="DayNo" min="0" />
+
+                                <!-- Increase Button -->
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => IncreaseValue(nameof(DayNo))">+</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="repeatCount" class="form-label">Tekrar SAyısı</label>
+                            <div class="input-group">
+                                <!-- Decrease Button -->
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => DecreaseValue(nameof(ExerciseRepeat))">-</button>
+
+                                <!-- Input Field -->
+                                <input type="number" class="form-control text-center" id="repeatCount" @bind="ExerciseRepeat" min="0" />
+
+                                <!-- Increase Button -->
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => IncreaseValue(nameof(ExerciseRepeat))">+</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="setCount" class="form-label">Set Sayısı</label>
+                            <div class="input-group">
+                                <!-- Decrease Button -->
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => DecreaseValue(nameof(ExerciseSet))">-</button>
+
+                                <!-- Input Field -->
+                                <input type="number" class="form-control text-center" id="setCount" @bind="ExerciseSet" min="0" />
+
+                                <!-- Increase Button -->
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => IncreaseValue(nameof(ExerciseSet))">+</button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="weight" class="form-label">Ağırlık</label>
+                            <div class="input-group">
+                                <!-- Decrease Button -->
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => DecreaseValue(nameof(ExerciseWeight))">-</button>
+
+                                <!-- Input Field -->
+                                <input type="number" class="form-control text-center" id="weight" @bind="ExerciseWeight" min="0" />
+
+                                <!-- Increase Button -->
+                                <button type="button" class="btn btn-outline-secondary" @onclick="() => IncreaseValue(nameof(ExerciseWeight))">+</button>
+                            </div>
+                        </div>
+                        
+                    </form>
+                    <button id="toastbtn" class="btn btn-primary w-100" @onclick="SubmitExerciseProgram">Kaydet</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 }
 
 
@@ -180,7 +346,46 @@
         showToast = false; // Toast mesajını gizle
         StateHasChanged(); // UI güncellemesi
     }
-    
+    void IncreaseValue(string inputId)
+    {
+        switch (inputId)
+        {
+            case nameof(DayNo):
+                DayNo++;
+                break;
+            case nameof(ExerciseRepeat):
+                ExerciseRepeat++;
+                break;
+            case nameof(ExerciseSet):
+                ExerciseSet++;
+                break;
+            case nameof(ExerciseWeight):
+                ExerciseWeight++;
+                break;
+        }
+    }
+    void DecreaseValue(string inputId)
+    {
+        switch (inputId)
+        {
+            case nameof(DayNo):
+                if (DayNo > 0)
+                    DayNo--;
+                break;
+            case nameof(ExerciseRepeat):
+                if (ExerciseRepeat > 0)
+                    ExerciseRepeat--;
+                break;
+            case nameof(ExerciseSet):
+                if (ExerciseSet > 0)
+                    ExerciseSet--;
+                break;
+            case nameof(ExerciseWeight):
+                if (ExerciseWeight > 0)
+                    ExerciseWeight--;
+                break;
+        }
+    }
 }
 
 <style>
