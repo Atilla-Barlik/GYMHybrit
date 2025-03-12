@@ -57,7 +57,7 @@ namespace Services.NutrientServices
 			{
 				using (var client = new HttpClient())
 				{
-					string url = $"{_baseURL}/api/nutrients/{Id}";
+					string url = $"https://localhost:7149/api/Nutrient/{Id}";
 					var apiResponse = await client.GetAsync(url);
 
 					if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
@@ -180,7 +180,7 @@ namespace Services.NutrientServices
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/nutrients?SearchTerm={name}&PageNumber=1&PageSize=5";
+                    string url = $"https://localhost:7149/api/Nutrient/GetNutrientDetailByName/{name}";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)

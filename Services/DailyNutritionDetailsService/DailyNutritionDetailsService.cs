@@ -29,11 +29,11 @@ namespace Services.DailyNutritionDetailsService
                 {
                     string url = $"{_baseURL}/api/DailyNutritionDetails";
 
-                    var serializeContent = JsonConvert.SerializeObject(nutrientRequest);
+                    var serializeContent = JsonConvert.SerializeObject(nutrientRequest, Formatting.Indented);
 
                     var apiResponse = await client.PostAsync(url, new StringContent(serializeContent, Encoding.UTF8, "application/json"));
 
-                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.Created)
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
                     {
 
                         return true;

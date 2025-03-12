@@ -203,11 +203,11 @@ else
            DailyNutritionId = DailyNutritionService.dailyNutrition.DailyNutritionID,
            NutrientCarbohydrate = (decimal)calculatedCarbs,
            NutrientFat = (decimal)calculatedFat,
-           NutrientImage = nutrient.image,
            NutrientKcal = (int)calculatedKcal,
            NutrientProtein = (decimal)calculatedProtein,
            NutrientName = nutrient.Name,
-           DailyMealTime = mealTimeService.GetMealId()
+           DailyMealTime = mealTimeService.GetMealId(),
+           NutrientImage = nutrient.image
         };
         if(AddDailyNutritionDetails != null)
         {

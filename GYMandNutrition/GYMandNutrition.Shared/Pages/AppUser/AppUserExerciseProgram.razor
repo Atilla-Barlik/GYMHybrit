@@ -1,4 +1,4 @@
-﻿@page "/UserExerciseList"
+﻿@* @page "/UserExerciseList"
 @using Entities.AppUserExerciseProgramEntities
 @using Entities.UserExerciseProgramEntities
 @using global::Services.AppUserExerciseProgramServise
@@ -205,4 +205,344 @@ else
         border-radius: 5px;
         text-align: center;
 }
+</style> *@
+
+
+@* @page "/UserExerciseList"
+@using Entities.AppUserExerciseProgramEntities
+@using Entities.UserExerciseProgramEntities
+@using global::Services.AppUserExerciseProgramServise
+@inject NavigationManager navigationManager;
+
+<h3 class="text-center my-4">🏋️ Egzersiz Programları</h3>
+
+@if (combinedExerciseDataResponseModels != null)
+{
+    <div class="container mt-4">
+        @if (combinedExerciseDataResponseModels.Any())
+        {
+            foreach (var group in GroupedExercises)
+            {
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                        <h5 class="mb-0">📅 Program No: @group.Key - 🏋️ Toplam Egzersiz: @group.Count()</h5>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteByDayNo(group.Key)">❌</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach (var exercise in group)
+                            {
+                                <div class="col-md-4">
+                                    <div class="card exercise-card">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-center">🏋️ @exercise.ExerciseDetailDto.Name</h6>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item">🔄 Set: <strong>@exercise.ExerciseSet</strong></li>
+                                                <li class="list-group-item">🔁 Tekrar: <strong>@exercise.ExerciseRepeat</strong></li>
+                                                <li class="list-group-item">🏋️ Ağırlık: <strong>@exercise.ExerciseWeight kg</strong></li>
+                                                <li class="list-group-item">🔥 Yakılan Kalori: <strong>@exercise.ExerciseTotalBurnedKcal kcal</strong></li>
+                                            </ul>
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <a href="@exercise.ExerciseDetailDto.Gif1" class="btn btn-sm btn-primary" target="_blank">🎥 GIF İzle</a>
+                                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteExercise(exercise)">🗑️ Sil</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-center text-muted">🚫 Henüz egzersiz eklenmedi.</p>
+        }
+    </div>
+}
+else
+{
+    <p class="text-center">⏳ Egzersiz verileri yükleniyor...</p>
+}
+
+<style>
+    .exercise-card {
+        border-radius: 10px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .exercise-card:hover {
+            transform: scale(1.05);
+        }
 </style>
+
+@code {
+    [Inject] IAppUserExerciseProgramService appUserExerciseProgramService { get; set; }
+    private List<CombinedExerciseDataResponseModel> combinedExerciseDataResponseModels;
+    private List<CombinedExerciseDataResponseModel> localCombinedExerciseProgramData;
+    private List<int> distinctDays;
+    protected override async Task OnInitializedAsync()
+    {
+        combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails(1);
+        localCombinedExerciseProgramData = combinedExerciseDataResponseModels;
+        distinctDays = localCombinedExerciseProgramData.Select(e => e.DayNo).Distinct().ToList();
+    }
+
+    private IEnumerable<IGrouping<int, CombinedExerciseDataResponseModel>> GroupedExercises =>
+        localCombinedExerciseProgramData.GroupBy(e => e.DayNo);
+
+    void DeleteExercise(CombinedExerciseDataResponseModel exercise)
+    {
+        localCombinedExerciseProgramData.Remove(exercise);
+        appUserExerciseProgramService.DeleteAppUserExerciseProgram(new AddUpdateAppUserExerciseProgramRequest
+            {
+                AppUserExerciseProgramId = exercise.AppUserExerciseProgramId,
+                ExerciseRepeat = exercise.ExerciseRepeat,
+                ExerciseSet = exercise.ExerciseSet,
+                ExerciseWeight = exercise.ExerciseWeight,
+                ExerciseTotalBurnedKcal = exercise.ExerciseTotalBurnedKcal,
+                ExerciseDetailId = exercise.ExerciseDetailDto.ExerciseDetailId,
+                AppUserId = exercise.AppUserId,
+                DayNo = exercise.DayNo,
+                Date = exercise.Date
+            });
+    }
+
+    void DeleteByDayNo(int dayNo)
+    {
+        localCombinedExerciseProgramData.RemoveAll(q => q.DayNo == dayNo);
+        appUserExerciseProgramService.DeleteAppUserExerciseProgramByDyNo(dayNo);
+    }
+} *@
+
+@page "/UserExerciseList"
+@using Entities.AppUserExerciseProgramEntities
+@using Entities.UserExerciseProgramEntities
+@using global::Services.AppUserExerciseProgramServise
+@inject NavigationManager navigationManager;
+
+<h3 class="text-center my-4">🏋️ Egzersiz Programları</h3>
+
+@if (combinedExerciseDataResponseModels != null)
+{
+    <div class="container mt-4">
+        @if (combinedExerciseDataResponseModels.Any())
+        {
+            foreach (var group in GroupedExercises)
+            {
+                var totalCalories = group.Sum(ex => ex.ExerciseTotalBurnedKcal);
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                        <h5 class="mb-0">📅 Program No: @group.Key - 🏋️ Toplam Egzersiz: @group.Count() - 🔥 Toplam Kalori: @totalCalories kcal</h5>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteByDayNo(group.Key)">❌</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach (var exercise in group)
+                            {
+                                <div class="col-md-4">
+                                    <div class="card exercise-card">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-center">🏋️ @exercise.ExerciseDetailDto.Name</h6>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item">🔄 Set: <strong>@exercise.ExerciseSet</strong></li>
+                                                <li class="list-group-item">🔁 Tekrar: <strong>@exercise.ExerciseRepeat</strong></li>
+                                                <li class="list-group-item">🏋️ Ağırlık: <strong>@exercise.ExerciseWeight kg</strong></li>
+                                                <li class="list-group-item">🔥 Yakılan Kalori: <strong>@exercise.ExerciseTotalBurnedKcal kcal</strong></li>
+                                            </ul>
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <button class="btn btn-sm btn-info" @onclick="() => OpenModal(exercise)">ℹ️ Ayrıntıları Göster</button>
+                                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteExercise(exercise)">🗑️ Sil</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-center text-muted">🚫 Henüz egzersiz eklenmedi.</p>
+        }
+    </div>
+}
+else
+{
+    <p class="text-center">⏳ Egzersiz verileri yükleniyor...</p>
+}
+
+@if (selectedExercise != null && selectedExercise.ExerciseDetailDto != null)
+{
+    <div class="modal fade show" tabindex="-1" role="dialog" style="display: block; background-color: rgba(0, 0, 0, 0.7);">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content border-0 rounded-lg shadow-lg">
+                <div class="modal-header bg-gradient text-white" style="background: linear-gradient(135deg, #36d1dc, #5b86e5);">
+                    <h5 class="modal-title font-weight-bold">@selectedExercise.ExerciseDetailDto.Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="() => CloseModal()"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <video width="100%" controls class="rounded shadow">
+                        <source src="@selectedExercise.ExerciseDetailDto.Gif1" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <video width="100%" controls class="mt-2 rounded shadow">
+                        <source src="@selectedExercise.ExerciseDetailDto.Gif2" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="mt-4 p-3 bg-light rounded shadow-sm">
+                        <h6 class="mb-3">📌@selectedExercise.ExerciseDetailDto.Name Egzersiz Bilgileri</h6>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold">🔁 Set Sayısı:</span>
+                            <div class="input-group w-50">
+                                <button class="btn btn-outline-secondary" type="button" @onclick="() => selectedExercise.ExerciseSet--">-</button>
+                                <input type="number" class="form-control text-center" @bind="selectedExercise.ExerciseSet" />
+                                <button class="btn btn-outline-secondary" type="button" @onclick="() => selectedExercise.ExerciseSet++">+</button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold">🔄 Tekrar Sayısı:</span>
+                            <div class="input-group w-50">
+                                <button class="btn btn-outline-secondary" type="button" @onclick="() => selectedExercise.ExerciseRepeat--">-</button>
+                                <input type="number" class="form-control text-center" @bind="selectedExercise.ExerciseRepeat" />
+                                <button class="btn btn-outline-secondary" type="button" @onclick="() => selectedExercise.ExerciseRepeat++">+</button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold">🏋️ Ağırlık (kg):</span>
+                            <div class="input-group w-50">
+                                <button class="btn btn-outline-secondary" type="button" @onclick="() => selectedExercise.ExerciseWeight--">-</button>
+                                <input type="number" class="form-control text-center" @bind="selectedExercise.ExerciseWeight" />
+                                <button class="btn btn-outline-secondary" type="button" @onclick="() => selectedExercise.ExerciseWeight++">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary shadow-sm" @onclick="() => CloseModal()">Kapat</button>
+                    <button type="button" class="btn btn-primary shadow-sm" @onclick="() => SaveChanges(selectedExercise)">💾 Değişiklikleri Kaydet</button>
+                    @if (showSuccessPopup)
+                    {
+                        <div class="alert alert-success text-center position-fixed bottom-0 start-0 m-3" role="alert">
+                            ✅ Değişiklikler başarıyla kaydedildi!
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .exercise-card {
+        border-radius: 10px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .exercise-card:hover {
+            transform: scale(1.05);
+            transition: all 0.3s ease-in-out;
+        }
+
+</style>
+
+@code {
+    private CombinedExerciseDataResponseModel selectedExercise;
+    private bool showSuccessPopup = false;
+    void OpenModal(CombinedExerciseDataResponseModel exercise)
+    {
+        selectedExercise = exercise;
+    }
+
+    [Inject] IAppUserExerciseProgramService appUserExerciseProgramService { get; set; }
+    private List<CombinedExerciseDataResponseModel> combinedExerciseDataResponseModels;
+    private List<CombinedExerciseDataResponseModel> localCombinedExerciseProgramData;
+    AddUpdateAppUserExerciseProgramRequest addUpdateAppUserExerciseProgramRequest;
+    private List<int> distinctDays;
+    protected override async Task OnInitializedAsync()
+    {
+        combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails(1);
+        localCombinedExerciseProgramData = combinedExerciseDataResponseModels;
+        distinctDays = localCombinedExerciseProgramData.Select(e => e.DayNo).Distinct().ToList();
+    }
+
+    private IEnumerable<IGrouping<int, CombinedExerciseDataResponseModel>> GroupedExercises =>
+        localCombinedExerciseProgramData.GroupBy(e => e.DayNo);
+
+    void DeleteExercise(CombinedExerciseDataResponseModel exercise)
+    {
+        localCombinedExerciseProgramData.Remove(exercise);
+        appUserExerciseProgramService.DeleteAppUserExerciseProgram(new AddUpdateAppUserExerciseProgramRequest
+            {
+                AppUserExerciseProgramId = exercise.AppUserExerciseProgramId,
+                ExerciseRepeat = exercise.ExerciseRepeat,
+                ExerciseSet = exercise.ExerciseSet,
+                ExerciseWeight = exercise.ExerciseWeight,
+                ExerciseTotalBurnedKcal = exercise.ExerciseTotalBurnedKcal,
+                ExerciseDetailId = exercise.ExerciseDetailDto.ExerciseDetailId,
+                AppUserId = exercise.AppUserId,
+                DayNo = exercise.DayNo,
+                Date = exercise.Date
+            });
+    }
+
+    void DeleteByDayNo(int dayNo)
+    {
+        localCombinedExerciseProgramData.RemoveAll(q => q.DayNo == dayNo);
+        appUserExerciseProgramService.DeleteAppUserExerciseProgramByDyNo(dayNo);
+    }
+    async void SaveChanges(CombinedExerciseDataResponseModel combinedData)
+    {
+        if(combinedData != null)
+        {
+            addUpdateAppUserExerciseProgramRequest = new AddUpdateAppUserExerciseProgramRequest
+                {
+                    AppUserExerciseProgramId = combinedData.AppUserExerciseProgramId,
+                    ExerciseRepeat = combinedData.ExerciseRepeat,
+                    ExerciseSet = combinedData.ExerciseSet,
+                    ExerciseWeight = combinedData.ExerciseWeight,
+                    ExerciseTotalBurnedKcal = combinedData.ExerciseTotalBurnedKcal,
+                    ExerciseDetailId = combinedData.ExerciseDetailDto.ExerciseDetailId,
+                    AppUserId = combinedData.AppUserId,
+                    DayNo = combinedData.DayNo,
+                    Date = combinedData.Date
+                };
+
+            appUserExerciseProgramService.UpdateAppUserExerciseProgram(addUpdateAppUserExerciseProgramRequest);
+            showSuccessPopup = true;
+            StateHasChanged(); // Popup'ı hemen göster
+            await Task.Delay(2000); // 2 saniye beklet
+            showSuccessPopup = false;
+
+            
+            CloseModal(); // Modalı kapat
+
+        }
+        else
+        {
+            return;
+        }
+
+
+    }
+
+    async Task ReloadExerciseData()
+    {
+        combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails(1);
+        localCombinedExerciseProgramData = combinedExerciseDataResponseModels;
+        StateHasChanged();
+    }
+
+    async void CloseModal()
+    {
+        selectedExercise = null;
+        StateHasChanged();
+        await ReloadExerciseData(); // Listeyi güncelle
+    }
+}
