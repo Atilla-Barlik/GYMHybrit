@@ -1,0 +1,89 @@
+﻿@page "/exercise-statistics"
+@using Entities.UserExerciseProgramEntities
+@using System.Globalization
+@using global::Services.StatisticServices
+
+
+
+<h3 class="text-center my-4">📊 Egzersiz İstatistikleri</h3>
+
+@if (exerciseStatistics != null && exerciseStatistics.Any())
+{
+    var groupedData = exerciseStatistics.GroupBy(e => e.ExerciseId);
+
+    @foreach (var exerciseGroup in groupedData)
+    {
+        <MudCard Class="mb-4">
+            <MudCardHeader>
+                <MudText Typo="Typo.h5" Class="text-primary">🏋️ @exerciseGroup.First().ExerciseName - İstatistik Grafiği</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <div>
+                    <MudChart ChartType="ChartType.Line" ChartSeries="@GetChartSeries(exerciseGroup)" XAxisLabels="@exerciseGroup.Select(e => e.DateFormatted).ToArray()" ChartOptions="_options" Width="100%" Height="350px"></MudChart>
+                    <MudSlider @bind-Value="_options.YAxisTicks" Min="5" Max="300" Step="1" Color="Color.Info">Y-Axis Ticks: @_options.YAxisTicks.ToString()</MudSlider>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    }
+}
+else
+{
+    <p class="text-center text-muted">🔄 Egzersiz verileri yükleniyor...</p>
+}
+
+
+@code {
+    [Inject] IStatisticService StatisticService { get; set; }
+    private List<ExerciseStatisticsModel> exerciseStatistics;
+    private readonly ChartOptions _options = new() { YAxisTicks = 5};
+    protected override async Task OnInitializedAsync()
+    {
+        exerciseStatistics = await StatisticService.GetAllExercisesStatistics();
+        if (exerciseStatistics != null)
+        {
+            var random = new Random();
+            DateOnly lastDate = DateOnly.MinValue;
+
+            foreach (var item in exerciseStatistics)
+            {
+                if (item.Date == lastDate)
+                {
+                    // Aynı tarihli veriyi biraz farklılaştırıyoruz
+                    item.Date = item.Date.AddDays(random.Next(1, 5));
+                }
+                lastDate = item.Date;
+                item.DateFormatted = item.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            }
+            
+            foreach (var item in exerciseStatistics)
+            {
+                item.DateFormatted = DateTime.ParseExact(item.Date.ToString("yyyy-MM-dd"), "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
+            }
+        }
+
+        StateHasChanged();        
+    }
+
+    private List<ChartSeries> GetChartSeries(IGrouping<int, ExerciseStatisticsModel> exerciseGroup)
+    {
+        return new List<ChartSeries>
+        {
+            new ChartSeries { Name = "🔄 Tekrar", Data = exerciseGroup.Select(e => (double)e.ExerciseRepeat).ToArray() },
+            new ChartSeries { Name = "🔁 Set", Data = exerciseGroup.Select(e => (double)e.ExerciseSet).ToArray() },
+            new ChartSeries { Name = "🏋️ Ağırlık (kg)", Data = exerciseGroup.Select(e => (double)e.ExerciseWeight).ToArray() },
+        };
+    }
+
+}
+
+<style>
+    .mud-chart-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>

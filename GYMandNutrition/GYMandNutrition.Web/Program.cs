@@ -1,12 +1,14 @@
 using GYMandNutrition.Shared.Services;
 using GYMandNutrition.Web.Components;
 using GYMandNutrition.Web.Services;
+using MudBlazor.Services;
 using Services.AppUserExerciseProgramServise;
 using Services.DailyNutritionDetailsService;
 using Services.DailyNutritionServices;
 using Services.ExerciseDetailServise;
 using Services.ExerciseServices;
 using Services.NutrientServices;
+using Services.StatisticServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,9 +24,11 @@ builder.Services.AddSingleton<IDailyNutritionDetailsService, DailyNutritionDetai
 builder.Services.AddSingleton<IExerciseService, ExerciseService>();
 builder.Services.AddSingleton<IExerciseDetailService, ExerciseDetailService>();
 builder.Services.AddSingleton<IAppUserExerciseProgramService, AppUserExerciseProgramService>();
+builder.Services.AddSingleton<IStatisticService, StatisticService>();
 builder.Services.AddSingleton<MealTimeService>();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 
