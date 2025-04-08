@@ -19,8 +19,8 @@
             </MudCardHeader>
             <MudCardContent>
                 <div>
-                    <MudChart ChartType="ChartType.Line" ChartSeries="@GetChartSeries(exerciseGroup)" XAxisLabels="@exerciseGroup.Select(e => e.DateFormatted).ToArray()" ChartOptions="_options" Width="100%" Height="350px"></MudChart>
-                    <MudSlider @bind-Value="_options.YAxisTicks" Min="5" Max="300" Step="1" Color="Color.Info">Y-Axis Ticks: @_options.YAxisTicks.ToString()</MudSlider>
+                    <MudChart ChartType="ChartType.Line" ChartSeries="@GetChartSeries(exerciseGroup)" XAxisLabels="@exerciseGroup.Select(e => e.DateFormatted).ToArray()" ChartOptions="_options" Width="100%" Height="350px" CanHideSeries></MudChart>
+                    <MudSlider @bind-Value="_options.YAxisTicks" Min="0" Max="300" Step="1" Color="Color.Info">Y-Axis Ticks: @_options.YAxisTicks.ToString()</MudSlider>
                 </div>
             </MudCardContent>
         </MudCard>
@@ -35,7 +35,7 @@ else
 @code {
     [Inject] IStatisticService StatisticService { get; set; }
     private List<ExerciseStatisticsModel> exerciseStatistics;
-    private readonly ChartOptions _options = new() { YAxisTicks = 5};
+    private readonly ChartOptions _options = new() { YAxisTicks = 1};
     protected override async Task OnInitializedAsync()
     {
         exerciseStatistics = await StatisticService.GetAllExercisesStatistics();

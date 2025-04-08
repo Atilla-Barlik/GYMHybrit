@@ -59,6 +59,7 @@
 
   <ItemGroup>
     <None Include="..\GYMandNutrition.Shared\Pages\BMIGraph.razor" Link="BMIGraph.razor" />
+    <None Include="..\GYMandNutrition.Shared\Pages\Nutrition\Component.razor" Link="Component.razor" />
   </ItemGroup>
 
   <ItemGroup>

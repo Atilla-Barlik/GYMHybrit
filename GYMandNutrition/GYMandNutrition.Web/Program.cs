@@ -10,6 +10,7 @@ using Services.ExerciseServices;
 using Services.NutrientServices;
 using Services.StatisticServices;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -29,7 +30,12 @@ builder.Services.AddSingleton<MealTimeService>();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 builder.Services.AddMudServices();
+builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
+{
+    options.DetailedErrors = true;
+});
 
+	
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

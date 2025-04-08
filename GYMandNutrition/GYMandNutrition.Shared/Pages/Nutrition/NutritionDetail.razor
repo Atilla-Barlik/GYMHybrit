@@ -12,7 +12,8 @@ else
 {
     <EditForm Model="@nutrient" OnValidSubmit="SubmitNutrient">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+    <Microsoft.AspDotNetCore.Components.Forms.ValidationSummary />
+    
     <div class="container mt-4" >
         @if (nutrient != null)
         {
