@@ -30,6 +30,7 @@ builder.Services.AddSingleton<MealTimeService>();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 builder.Services.AddMudServices();
+builder.Services.AddBlazorBootstrap();
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
 {
     options.DetailedErrors = true;

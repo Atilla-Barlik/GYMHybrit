@@ -130,15 +130,17 @@ namespace Services.DailyNutritionServices
         modelleyerek 1 değerini gönderiyor. Eğer yoksa 0 gönderip ilgili code bölgesinde yeni bir veri girdisi oluşturuyor.
          */
 
-        public async Task<int> GetDailyNutritionCheck(int id, DateOnly date)
+        public async Task<int> GetDailyNutritionCheck(int id)
         {
+            DateTime dateTime = DateTime.Now;
+            DateOnly date = DateOnly.FromDateTime(dateTime);
             var returnResponse = false;
             var response = "0";
             try
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/DailyNutritionCheck/1/2024-09-05";
+                    string url = $"{_baseURL}/api/DailyNutritionCheck/1";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)

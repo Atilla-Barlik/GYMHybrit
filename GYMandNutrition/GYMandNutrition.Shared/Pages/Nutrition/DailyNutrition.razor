@@ -91,7 +91,7 @@ else
         DateTime dateTime = DateTime.Now;
         DateOnly date = DateOnly.FromDateTime(dateTime);
 
-        dailyNutritionId = await dailyNutritionService.GetDailyNutritionCheck(1, date);
+        dailyNutritionId = await dailyNutritionService.GetDailyNutritionCheck(1);
 
         if (dailyNutritionId == 0)
         {

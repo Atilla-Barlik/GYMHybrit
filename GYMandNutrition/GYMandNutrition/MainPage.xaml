@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:GYMandNutrition"
              xmlns:shared="clr-namespace:GYMandNutrition.Shared;assembly=GYMandNutrition.Shared"
+             xmlns:mud="clr-namespace:MudBlazor;assembly=MudBlazor"
              x:Class="GYMandNutrition.MainPage"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
 
