@@ -172,12 +172,13 @@ else
     private double calculatedVit_C;
     private double calculatedIron;
     [Inject] MealTimeService mealTimeService { get; set; }
-
+    private int CurrentMealTime;
 
     protected override async Task OnInitializedAsync()
     {
 
         nutrient = await NutrientService.GetNutrientDetailById(Id);
+        CurrentMealTime = mealTimeService.GetMealId();
 
         CalculateValues(); // İlk yüklemede hesaplama
     }
@@ -207,7 +208,7 @@ else
            NutrientKcal = (int)calculatedKcal,
            NutrientProtein = (decimal)calculatedProtein,
            NutrientName = nutrient.Name,
-           DailyMealTime = mealTimeService.GetMealId(),
+           DailyMealTime = CurrentMealTime,
            NutrientImage = nutrient.image
         };
         if(AddDailyNutritionDetails != null)
