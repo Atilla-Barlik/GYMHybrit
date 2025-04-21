@@ -91,7 +91,7 @@ namespace Services.DailyNutritionDetailsService
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/DailyNutritionDetails";
+                    string url = $"{_baseURL}/api/DailyNutritionDetails/latest-nutrition-details/1";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
@@ -118,14 +118,14 @@ namespace Services.DailyNutritionDetailsService
             throw new NotImplementedException();
         }
 
-        public async Task<List<NutritionSummaryDto>> GetTotalMeal(int DailyNutritionId)
+        public async Task<List<NutritionSummaryDto>> GetTotalMeal(int UserId)
         {
             _summary = new List<NutritionSummaryDto>();
             try
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/DailyMealSummary/summary/{DailyNutritionId}";
+                    string url = $"{_baseURL}/api/DailyMealSummary/summary/user/{UserId}";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)

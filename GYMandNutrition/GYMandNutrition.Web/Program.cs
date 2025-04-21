@@ -1,8 +1,11 @@
 using GYMandNutrition.Shared.Services;
 using GYMandNutrition.Web.Components;
 using GYMandNutrition.Web.Services;
+using Microsoft.Extensions.DependencyInjection;
+using MudBlazor;
 using MudBlazor.Services;
 using Services.AppUserExerciseProgramServise;
+using Services.DailyMacroServices;
 using Services.DailyNutritionDetailsService;
 using Services.DailyNutritionServices;
 using Services.ExerciseDetailServise;
@@ -26,10 +29,22 @@ builder.Services.AddSingleton<IExerciseService, ExerciseService>();
 builder.Services.AddSingleton<IExerciseDetailService, ExerciseDetailService>();
 builder.Services.AddSingleton<IAppUserExerciseProgramService, AppUserExerciseProgramService>();
 builder.Services.AddSingleton<IStatisticService, StatisticService>();
+builder.Services.AddSingleton<IDailyMacroService, DailyMacroService>();
 builder.Services.AddSingleton<MealTimeService>();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+
+    config.SnackbarConfiguration.PreventDuplicates = false;
+    config.SnackbarConfiguration.NewestOnTop = false;
+    config.SnackbarConfiguration.ShowCloseIcon = true;
+    config.SnackbarConfiguration.VisibleStateDuration = 10000;
+    config.SnackbarConfiguration.HideTransitionDuration = 500;
+    config.SnackbarConfiguration.ShowTransitionDuration = 500;
+    config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+});
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
 {

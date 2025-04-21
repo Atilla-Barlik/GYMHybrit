@@ -1,11 +1,11 @@
 ﻿@page "/weather"
 
-<PageTitle>Hesaplayıcı</PageTitle>
+@* <PageTitle>Hesaplayıcı</PageTitle>
 
 
 
 <div class="calculator-container">
-    
+
     <p>
         The Calorie Calculator can be used to estimate the calories you need to consume each day.
         This calculator can also provide some simple guidelines if you want to gain or lose weight.
@@ -107,5 +107,135 @@
         };
 
         return baseCalories + exerciseModifier;
+    }
+} *@
+
+@inject IDailyMacroService dailyMacroService
+@inject ISnackbar snackbar
+@using Entities.DailyMacroEntities
+@using MudBlazor
+
+<PageTitle>Günlük Kalori ve Makro Hesabı</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-5">
+    <MudPaper Elevation="4" Class="p-6">
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">Nutrition Calculator</MudText>
+        <MudText Typo="Typo.subtitle1" Align="Align.Center">The calculator estimates your daily calories, protein, fat, and carbohydrate needs based on Harris-Benedict equation.</MudText>
+
+        <MudDivider Class="my-4" />
+
+        <MudRadioGroup  @bind-Value="Sex" Label="Sex" Orientation="Orientation.Horizontal" Class="mb-4">
+            <MudRadio  Value="@("male")" Label="Erkek" />
+            <MudRadio Value="@("female")" Label="Kadın" />
+        </MudRadioGroup>
+
+        <MudGrid Class="mb-4">
+            <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="Age" Label="Yaş" Min="10" Max="100" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="Weight" Label="Kilo (kg)" Min="30" Max="200" Variant="Variant.Outlined" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField @bind-Value="Height" Label="Boy (cm)" Min="100" Max="250" Variant="Variant.Outlined" />
+            </MudItem>
+        </MudGrid>
+
+        <MudGrid Class="mb-4">
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="ActivityFactor" Label="Egzersiz Seviyesi" Variant="Variant.Outlined">
+                    <MudSelectItem Value="1.2">Egzersiz Yapmıyorum</MudSelectItem>
+                    <MudSelectItem Value="1.3">Hafif Egzersiz</MudSelectItem>
+                    <MudSelectItem Value="1.4">Orta Egzersiz</MudSelectItem>
+                    <MudSelectItem Value="1.5">Ağır Egzersiz</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudSelect @bind-Value="CarbPercent" Label="Karbonhidrat %" Variant="Variant.Outlined">
+                    <MudSelectItem Value="0.45">45%</MudSelectItem>
+                    <MudSelectItem Value="0.55">55%</MudSelectItem>
+                    <MudSelectItem Value="0.60">60%</MudSelectItem>
+                    <MudSelectItem Value="0.65">65%</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateNutrition" Class="my-4" FullWidth="true">Calculate</MudButton>
+
+        @if (Calculated)
+        {
+            <MudPaper Class="pa-4 mt-4" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-2">Sonuç:</MudText>
+                <MudList T="string" Dense="true">
+                    <MudListItem >Günlük Kalori İhtiyacı: <strong>@Calories kcal</strong></MudListItem>
+                    <MudListItem>Protein İhtiyacı: <strong>@Protein g</strong></MudListItem>
+                    <MudListItem>Yağ İhtiyacı: <strong>@Fat g</strong></MudListItem>
+                    <MudListItem>Karbonhidrat İhtiyacı: <strong>@Carbohydrate g</strong></MudListItem>
+                </MudList>
+                <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="SaveNutrition" Class="mt-4">Sonucu Kaydet</MudButton>
+            </MudPaper>
+
+
+        }
+
+    </MudPaper>
+</MudContainer>
+
+@code {
+
+    private string Sex { get; set; }
+    private int Age { get; set; } = 25;
+    private double Weight { get; set; } = 70;
+    private double Height { get; set; } = 170;
+    private double ActivityFactor { get; set; } = 1.2;
+    private double CarbPercent { get; set; } = 0.55;
+
+    private bool Calculated = false;
+    private decimal Calories;
+    private decimal Protein;
+    private decimal Fat;
+    private decimal Carbohydrate;
+
+    private void CalculateNutrition()
+    {
+        double BEE;
+        if(Sex == "male")
+        {
+            BEE = 66.5 + (13.8 * Weight) + (5.0 * Height) - (6.8 * Age);
+        }
+        else
+        {
+            BEE = 655.1 + (9.6 * Weight) + (1.9 * Height) - (4.7 * Age);
+        }
+
+        Calories = (decimal) Math.Round(BEE * ActivityFactor, 0);
+        Protein = (decimal) Math.Round(Weight * 0.9, 1); // Ortalama protein
+        Fat = (decimal)Math.Round(((decimal)Calories * (decimal)0.30) / 9, 1);
+        Carbohydrate = (decimal)Math.Round(((decimal)Calories * (decimal)CarbPercent) / 4, 1);
+
+        Calculated = true;
+    }
+
+    private async Task SaveNutrition()
+    {
+        var macroRequest = new AddUpdateDailyMacroRequest
+        {
+            Calories = Calories,
+            Proteins = Protein,
+            Fats = Fat,
+            Carbohydrates = Carbohydrate,
+            AppUserId = 1
+        };
+
+        var result = await dailyMacroService.AddDailyMacro(macroRequest);
+
+        if (result)
+        {
+            snackbar.Add("Macro başarıyla kaydedildi!", Severity.Success);
+        }
+        else
+        {
+            snackbar.Add("Kayıt sırasında bir hata oluştu!", Severity.Error);   
+        }
     }
 }
