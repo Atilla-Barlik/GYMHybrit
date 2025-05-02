@@ -195,13 +195,22 @@ else
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject MealTimeService MealTimeService
+@using MudBlazor.Services
+@inject IDialogService DialogService
+
+<h3 class="d-flex justify-content-between align-items-center mt-4">
+    Günlük Besin Listeleri
+    <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="SaveDailyNutrientDialog">
+        <MudIcon Icon="@Icons.Material.Filled.Save" class="me-1" /> Kaydet ve Kapat
+    </MudButton>
+</h3>
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
     @foreach (var group in mealGroupList)
     {
         <MudPaper Class="p-3 mb-4 fade-in">
             <MudStack Direction="Row" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                <MudText Typo="Typo.h6">Liste @group.MealTime</MudText>
+                <MudText Typo="Typo.h6">Liste @(group.MealTime+1)</MudText>
                 <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="() => AddNewItemToMeal(group.MealTime)" />
             </MudStack>
 
@@ -249,6 +258,7 @@ else
 
 @code {
     private Dictionary<int, List<DailyNutritionDetailsResponseModel>> dailyNutritionGroups = new();
+    private DailyNutritionResponseModel dailyNutrition;
     private const int MaxGroups = 10;
     [Inject] IDailyNutritionService dailyNutritionService { get; set; }
     int dailyNutritionId = 0;
@@ -259,6 +269,7 @@ else
         DateOnly today = DateOnly.FromDateTime(DateTime.Now);
         dailyNutritionId = await dailyNutritionService.GetDailyNutritionCheck(1);
 
+        dailyNutrition = await dailyNutritionService.GetDailyNutritionById(dailyNutritionService.dailyNutrition.DailyNutritionID);
         // Günlük kayıt yoksa oluştur
         if (dailyNutritionId == 0)
         {
@@ -299,7 +310,7 @@ else
         ConvertGroupsToList();
         StateHasChanged();
     }
-
+    int nextMealTime;
     private void AddNewItemToMeal(int mealTime)
     {
         if (dailyNutritionGroups.Count >= MaxGroups)
@@ -307,10 +318,15 @@ else
             Snackbar.Add("Maksimum 10 adet öğün listesine ulaşılmıştır!", Severity.Warning);
             return;
         }
+        if (dailyNutritionGroups.Count == 0)
+            nextMealTime = 1;
+        else
+        {
+            nextMealTime = dailyNutritionGroups.Keys.Max() + 1;
+            if (!dailyNutritionGroups.ContainsKey(nextMealTime))
+                dailyNutritionGroups[nextMealTime] = new();
+        }
 
-        int nextMealTime = dailyNutritionGroups.Keys.Max() + 1;
-        if (!dailyNutritionGroups.ContainsKey(nextMealTime))
-            dailyNutritionGroups[nextMealTime] = new();
 
         MealTimeService.SetMealId(mealTime);
         Navigation.NavigateTo("/NutritionSearch");
@@ -349,7 +365,7 @@ else
             StateHasChanged();
         }
     }
-    
+
     private void EnsureEmptyListSlot()
     {
         if (dailyNutritionGroups.Count >= MaxGroups)
@@ -386,6 +402,29 @@ else
                 mealGroupList.Add(new MealGroup { MealTime = next });
             }
         }
+    }
+
+    private async Task SaveDailyNutrientDialog()
+    {
+        if(dailyNutrition.DailyNutritionStatus !=false)
+        {
+            var yes = await DialogService.ShowMessageBox(
+            "Günlük Listeni Kaydet",
+            "Günlük besin listesini kaydetmek ve kapatmak istediğine emin misin?",
+            yesText: "Evet", noText: "Hayır");
+            if (yes == true)
+            {
+                var res = await dailyNutritionService.AggregateAndCloseAsync(dailyNutritionService.dailyNutrition.DailyNutritionID);
+                if (res) Snackbar.Add("Başarıyla kaydedildi.", Severity.Success);
+                else Snackbar.Add("Kayıt hatası.", Severity.Error);
+                Navigation.NavigateTo("/DailyNutritionList");
+            }
+        }
+        else
+        {
+            Snackbar.Add("Günlük Kaydınız Gerçekleştirilmiş.", Severity.Error);
+        }
+
     }
 }
 

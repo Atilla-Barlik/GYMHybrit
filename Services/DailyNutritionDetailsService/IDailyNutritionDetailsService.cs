@@ -19,5 +19,6 @@ namespace Services.DailyNutritionDetailsService
         Task<List<NutritionSummaryDto>> GetTotalMeal(int UserId);
         Task<List<TotalUsageNutritionDto>> GetTotalUsageNutrition();
         Task<List<DailyNutritionDetailsResponseModel>> GetUserMostUsageNutrients(int UserId);
+
     }
 }

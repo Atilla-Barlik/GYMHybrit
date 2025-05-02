@@ -172,6 +172,35 @@ namespace Services.DailyNutritionServices
             return 0;
         }
 
+        public async Task<bool> AggregateAndCloseAsync(int dailyNutritionId)
+        {
+            var returnResponse = false;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/DailyNutrition/close/{dailyNutritionId}";
+
+                    var serializeContent = JsonConvert.SerializeObject(dailyNutritionId);
+
+                    var apiResponse = await client.PostAsync(url, new StringContent(serializeContent, Encoding.UTF8, "application/json"));
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.NoContent)
+                    {
+
+                        return true;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return returnResponse;
+        }
+
         public DailyNutritionResponseModel dailyNutrition
         {
             set { dailyNutritionId = value; }

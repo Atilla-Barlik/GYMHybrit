@@ -19,5 +19,7 @@ namespace Services.DailyNutritionServices
         Task<int> GetDailyNutritionCheck(int id);
 
         public DailyNutritionResponseModel dailyNutrition { get; set; }
+
+        Task<bool> AggregateAndCloseAsync(int dailyNutritionId);
     }
 }
