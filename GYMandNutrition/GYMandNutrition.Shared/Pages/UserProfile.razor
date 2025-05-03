@@ -1,4 +1,4 @@
-﻿@page "/userProfile"
+﻿@* @page "/userProfile"
 @using Entities.DailyMacroEntities
 
 
@@ -247,5 +247,199 @@ else
     }
 
 
+} *@
+
+        @page "/userProfile"
+@using Entities.DailyMacroEntities
+@using Entities.DailyNutritionEntities
+@inject IDailyNutritionDetailsService dailyNutritionDetailsService
+@inject IDailyMacroService dailyMacroService
+
+<h3 class="text-center my-4">Makro Takibi</h3>
+
+@if (!loaded)
+{
+    <div class="text-center">
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+        <p>Yükleniyor…</p>
+    </div>
+}
+else
+{
+    <!-- --- HEDEF VE ALINAN TOPLAM ÖZETİ --- -->
+    <div class="row mb-5 gx-3">
+        <!-- Hedefler -->
+        <div class="col-12 mb-3">
+            <h5 class="text-center">🎯 Hedef Besin Değerleri</h5>
+        </div>
+        @foreach (var kv in overallTargets)
+        {
+            <div class="col-sm-6 col-md-3 mb-2">
+                <MudPaper Elevation="2" Class="@($"p-3 text-center {kv.Value.BgColor}")">
+                    <MudText Typo="Typo.subtitle1" Class="fw-bold">@kv.Key</MudText>
+                    <MudText Typo="Typo.h5">@kv.Value.Amount @kv.Value.Unit</MudText>
+                </MudPaper>
+            </div>
+        }
+
+        <!-- Alınan -->
+        <div class="col-12 mt-4 mb-3">
+            <h5 class="text-center">✅ Alınan Besin Değerleri</h5>
+        </div>
+        @foreach (var kv in overallTaken)
+        {
+            <div class="col-sm-6 col-md-3 mb-2">
+                <MudPaper Elevation="2" Class="@($"p-3 text-center {kv.Value.BgColor}")">
+                    <MudText Typo="Typo.subtitle1" Class="fw-bold">@kv.Key</MudText>
+                    <MudText Typo="Typo.h5">@kv.Value.Amount @kv.Value.Unit</MudText>
+                </MudPaper>
+            </div>
+        }
+    </div>
+
+    <!-- --- HER ÖĞÜN İÇİN DİNAMİK KARTLAR --- -->
+    
+    @foreach (var grp in groups)
+    {
+        var mealTime = grp.Key+1;
+        // toplamı yeniden hesaplıyoruz (zaten tek öğün bazında geliyorsa aynı)
+        var taken = new NutritionSummaryDto {
+            DailyMealTime      = mealTime,
+            TotalKcal          = grp.Sum(x => x.TotalKcal),
+            TotalCarbohydrate  = grp.Sum(x => x.TotalCarbohydrate),
+            TotalProtein       = grp.Sum(x => x.TotalProtein),
+            TotalFat           = grp.Sum(x => x.TotalFat)
+        };
+        // hedefi alıyoruz, yoksa sıfır
+        mealTargets.TryGetValue(mealTime-1, out var target);
+
+        <MudPaper Class="mb-4">
+            <MudCardHeader Class="bg-secondary text-white">
+                <MudText Typo="Typo.h6">Öğün @mealTime </MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <div class="row gx-3">
+                    @* Kalori *@
+                    <div class="col-md-3 mb-3">
+                        <MudText  Typo="Typo.subtitle2" Class="fw-bold">Kalori</MudText>
+                        <div class="d-flex align-items-center">
+                            <MudText Class="me-2">@taken.TotalKcal Kcal</MudText>
+                            <MudText Color="@GetDiffColorEnum(target?.TotalKcal ?? 0, taken.TotalKcal)">
+                                (@GetProgressLabel(target?.TotalKcal ?? 0, taken.TotalKcal))
+                            </MudText>
+                        </div>
+                        <MudProgressLinear Color="Color.Primary"
+                                           Value="GetProgressPercent(target?.TotalKcal ?? 0, taken.TotalKcal)"
+                                           Buffer="false" />
+                    </div>
+                    @* Karbonhidrat *@
+                    <div class="col-md-3 mb-3">
+                        <MudText Typo="Typo.subtitle2" Class="fw-bold">Karbonhidrat</MudText>
+                        <div class="d-flex align-items-center">
+                            <MudText Class="me-2">@taken.TotalCarbohydrate g</MudText>
+                            <MudText Color="@GetDiffColorEnum(target?.TotalCarbohydrate ?? 0, taken.TotalCarbohydrate)">
+                                (@GetProgressLabel(target?.TotalCarbohydrate ?? 0, taken.TotalCarbohydrate))
+                            </MudText>
+                        </div>
+                        <MudProgressLinear Color="Color.Info"
+                                           Value="GetProgressPercent(target?.TotalCarbohydrate ?? 0,taken.TotalCarbohydrate)"
+                                           Buffer="false" />
+                    </div>
+                    @* Protein *@
+                    <div class="col-md-3 mb-3">
+                        <MudText Typo="Typo.subtitle2" Class="fw-bold">Protein</MudText>
+                        <div class="d-flex align-items-center">
+                            <MudText Class="me-2">@taken.TotalProtein g</MudText>
+                            <MudText Color="@GetDiffColorEnum(target?.TotalProtein ?? 0, taken.TotalProtein)">
+                                (@GetProgressLabel(target?.TotalProtein ?? 0, taken.TotalProtein))
+                            </MudText>
+                        </div>
+                        <MudProgressLinear Color="Color.Success"
+                                           Value="GetProgressPercent(target?.TotalProtein ?? 0, taken.TotalProtein)"
+                                           Buffer="false" />
+                    </div>
+                    @* Yağ *@
+                    <div class="col-md-3 mb-3">
+                        <MudText Typo="Typo.subtitle2" Class="fw-bold">Yağ</MudText>
+                        <div class="d-flex align-items-center">
+                            <MudText Class="me-2">@taken.TotalFat g</MudText>
+                            <MudText Color="@GetDiffColorEnum(target?.TotalFat ?? 0, taken.TotalFat)">
+                                (@GetProgressLabel(target?.TotalFat ?? 0, taken.TotalFat))
+                            </MudText>
+                        </div>
+                        <MudProgressLinear Color="Color.Error"
+                                           Value="GetProgressPercent(target?.TotalFat ?? 0, taken.TotalFat)"
+                                           Buffer="false" />
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudPaper>
+    }
 }
 
+@code {
+    private bool loaded;
+    List<NutritionSummaryDto> MealSummaries = new();
+    DailyMacroResponseModel dailyMacro;
+    private IEnumerable<IGrouping<int, NutritionSummaryDto>> groups =>
+        MealSummaries
+            .GroupBy(x => x.DailyMealTime)
+            .OrderBy(g => g.Key);
+
+    // Hedef sözlüğü (isteğe göre servis’den de çekilebilir)
+    private readonly Dictionary<int, NutritionSummaryDto> mealTargets = new Dictionary<int, NutritionSummaryDto>
+    {
+        { 0, new NutritionSummaryDto{ DailyMealTime=0, TotalKcal=500, TotalCarbohydrate=50, TotalProtein=20, TotalFat=10 } },
+        { 1, new NutritionSummaryDto{ DailyMealTime=1, TotalKcal=600, TotalCarbohydrate=60, TotalProtein=25, TotalFat=15 } },
+        { 2, new NutritionSummaryDto{ DailyMealTime=2, TotalKcal=700, TotalCarbohydrate=70, TotalProtein=30, TotalFat=20 } },
+        //… eğer daha fazla varsa ekleyebilirsin
+    };
+
+    // Genel özet kartları için
+    private Dictionary<string,(decimal Amount,string Unit,string BgColor)> overallTargets;
+    private Dictionary<string,(decimal Amount,string Unit,string BgColor)> overallTaken;
+
+    protected override async Task OnInitializedAsync()
+    {
+        dailyMacro      = await dailyMacroService.GetDailyMacroByUserId(1);
+        MealSummaries   = await dailyNutritionDetailsService.GetTotalMeal(1);
+
+        // GENEL ÖZET: hedefler
+        overallTargets = new()
+        {
+            ["Kalori"]       = (dailyMacro.Calories,       "Kcal",   "bg-warning"),
+            ["Karbonhidrat"] = (dailyMacro.Carbohydrates,   "g",      "bg-info"),
+            ["Protein"]      = (dailyMacro.Proteins,        "g",      "bg-success"),
+            ["Yağ"]          = (dailyMacro.Fats,            "g",      "bg-danger"),
+        };
+
+        // GENEL ÖZET: alınan
+        overallTaken = new()
+        {
+            ["Kalori"]       = (MealSummaries.Sum(x=>x.TotalKcal),            "Kcal", "bg-warning"),
+            ["Karbonhidrat"] = (MealSummaries.Sum(x=>x.TotalCarbohydrate),    "g",    "bg-info"),
+            ["Protein"]      = (MealSummaries.Sum(x=>x.TotalProtein),         "g",    "bg-success"),
+            ["Yağ"]          = (MealSummaries.Sum(x=>x.TotalFat),             "g",    "bg-danger"),
+        };
+
+        loaded = true;
+    }
+
+    string GetProgressLabel(decimal target, decimal actual)
+        => actual < target ? "Eksik" : actual > target ? "Fazla" : "İdeal";
+
+    string GetDiffColor(decimal target, decimal actual)
+        => actual < target ? "text-danger" : actual > target ? "text-warning" : "text-success";
+
+    private double GetProgressPercent(decimal target, decimal actual)
+    {
+        if (target == 0) return 0;
+        var percentage = (double)(actual / target * 100);
+        return percentage > 100 ? 100 : percentage;
+    }
+
+    MudBlazor.Color GetDiffColorEnum(decimal target, decimal actual)
+    => actual < target ? Color.Error
+       : actual > target ? Color.Warning
+       : Color.Success;
+}

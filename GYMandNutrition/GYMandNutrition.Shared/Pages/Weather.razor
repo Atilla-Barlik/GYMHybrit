@@ -110,7 +110,7 @@
     }
 } *@
 
-@inject IDailyMacroService dailyMacroService
+@* @inject IDailyMacroService dailyMacroService
 @inject ISnackbar snackbar
 @using Entities.DailyMacroEntities
 @using MudBlazor
@@ -119,31 +119,31 @@
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="mt-5">
     <MudPaper Elevation="4" Class="p-6">
-        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">Nutrition Calculator</MudText>
-        <MudText Typo="Typo.subtitle1" Align="Align.Center">The calculator estimates your daily calories, protein, fat, and carbohydrate needs based on Harris-Benedict equation.</MudText>
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">Günlük Kalori ve Makro Hesabı</MudText>
+        <MudText Typo="Typo.subtitle1" Align="Align.Center">Bu hesaplama, günlük kalori, protein, yağ ve karbonhidrat ihtiyacınızı Harris-Benedict denklemine göre tahmin eder.</MudText>
 
         <MudDivider Class="my-4" />
 
-        <MudRadioGroup  @bind-Value="Sex" Label="Sex" Orientation="Orientation.Horizontal" Class="mb-4">
+        <MudRadioGroup  @bind-Value="Sex" Label="Sex"  Orientation="Orientation.Horizontal" Class="mb-4">
             <MudRadio  Value="@("male")" Label="Erkek" />
             <MudRadio Value="@("female")" Label="Kadın" />
         </MudRadioGroup>
 
         <MudGrid Class="mb-4">
             <MudItem xs="12" sm="4">
-                <MudNumericField @bind-Value="Age" Label="Yaş" Min="10" Max="100" Variant="Variant.Outlined" />
+                <MudNumericField @bind-Value="Age" HideSpinButtons="false" Label="Yaş" Min="10" Max="100" Variant="Variant.Filled" />
             </MudItem>
             <MudItem xs="12" sm="4">
-                <MudNumericField @bind-Value="Weight" Label="Kilo (kg)" Min="30" Max="200" Variant="Variant.Outlined" />
+                <MudNumericField @bind-Value="Weight" Label="Kilo (kg)" Min="30" Max="200" Variant="Variant.Filled" />
             </MudItem>
             <MudItem xs="12" sm="4">
-                <MudNumericField @bind-Value="Height" Label="Boy (cm)" Min="100" Max="250" Variant="Variant.Outlined" />
+                <MudNumericField @bind-Value="Height" Label="Boy (cm)" Min="100" Max="250" Variant="Variant.Filled" />
             </MudItem>
         </MudGrid>
 
         <MudGrid Class="mb-4">
             <MudItem xs="12" sm="6">
-                <MudSelect @bind-Value="ActivityFactor" Label="Egzersiz Seviyesi" Variant="Variant.Outlined">
+                <MudSelect @bind-Value="ActivityFactor" Label="Egzersiz Seviyesi" Variant="Variant.Filled">
                     <MudSelectItem Value="1.2">Egzersiz Yapmıyorum</MudSelectItem>
                     <MudSelectItem Value="1.3">Hafif Egzersiz</MudSelectItem>
                     <MudSelectItem Value="1.4">Orta Egzersiz</MudSelectItem>
@@ -151,7 +151,7 @@
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" sm="6">
-                <MudSelect @bind-Value="CarbPercent" Label="Karbonhidrat %" Variant="Variant.Outlined">
+                <MudSelect @bind-Value="CarbPercent" Label="Karbonhidrat %" Variant="Variant.Filled">
                     <MudSelectItem Value="0.45">45%</MudSelectItem>
                     <MudSelectItem Value="0.55">55%</MudSelectItem>
                     <MudSelectItem Value="0.60">60%</MudSelectItem>
@@ -160,7 +160,7 @@
             </MudItem>
         </MudGrid>
 
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateNutrition" Class="my-4" FullWidth="true">Calculate</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateNutrition" Class="my-4" FullWidth="true">HESAPLA</MudButton>
 
         @if (Calculated)
         {
@@ -168,9 +168,9 @@
                 <MudText Typo="Typo.h6" Class="mb-2">Sonuç:</MudText>
                 <MudList T="string" Dense="true">
                     <MudListItem >Günlük Kalori İhtiyacı: <strong>@Calories kcal</strong></MudListItem>
-                    <MudListItem>Protein İhtiyacı: <strong>@Protein g</strong></MudListItem>
-                    <MudListItem>Yağ İhtiyacı: <strong>@Fat g</strong></MudListItem>
-                    <MudListItem>Karbonhidrat İhtiyacı: <strong>@Carbohydrate g</strong></MudListItem>
+                    <MudListItem>Protein İhtiyacı: <strong>@Protein gr</strong></MudListItem>
+                    <MudListItem>Yağ İhtiyacı: <strong>@Fat gr</strong></MudListItem>
+                    <MudListItem>Karbonhidrat İhtiyacı: <strong>@Carbohydrate gr</strong></MudListItem>
                 </MudList>
                 <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="SaveNutrition" Class="mt-4">Sonucu Kaydet</MudButton>
             </MudPaper>
@@ -238,4 +238,189 @@
             snackbar.Add("Kayıt sırasında bir hata oluştu!", Severity.Error);   
         }
     }
+} *@
+
+
+            @page "/nutrition-calculator"
+@inject IDailyMacroService dailyMacroService
+@inject ISnackbar Snackbar
+@using MudBlazor
+@using Entities.DailyMacroEntities
+
+<PageTitle>Günlük Kalori ve Makro</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
+
+  <!-- Toggle Butonları -->
+  <MudButtonGroup Exclusive="true" Color="Color.Primary" Class="mb-4">
+    <MudButton 
+      Variant="@(viewMode == ViewMode.Auto ? Variant.Filled : Variant.Outlined)" 
+      OnClick="() => viewMode = ViewMode.Auto">
+      Otomatik Hesaplama
+    </MudButton>
+    <MudButton 
+      Variant="@(viewMode == ViewMode.Custom ? Variant.Filled : Variant.Outlined)" 
+      OnClick="() => viewMode = ViewMode.Custom">
+      Özel Makro
+    </MudButton>
+  </MudButtonGroup>
+
+  <!-- Otomatik Hesaplama Paneli -->
+  @if (viewMode == ViewMode.Auto)
+  {
+    <MudPaper Elevation="4" Class="p-6 mb-4">
+      <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3">Otomatik Hesaplama</MudText>
+      <MudRadioGroup @bind-Value="Sex" Label="Cinsiyet" Orientation="Orientation.Horizontal" Class="mb-4">
+                <MudRadio Value="@("male")" Label="Erkek" />
+                <MudRadio Value="@("female")" Label="Kadın" />
+      </MudRadioGroup>
+
+      <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="4">
+          <MudNumericField @bind-Value="Age" Label="Yaş" Min="10" Max="100" Variant="Variant.Filled" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+          <MudNumericField @bind-Value="Weight" Label="Kilo (kg)" Min="30" Max="200" Variant="Variant.Filled" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+          <MudNumericField @bind-Value="Height" Label="Boy (cm)" Min="100" Max="250" Variant="Variant.Filled" />
+        </MudItem>
+      </MudGrid>
+
+      <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="6">
+          <MudSelect @bind-Value="ActivityFactor" Label="Egzersiz Seviyesi" Variant="Variant.Filled">
+            <MudSelectItem Value="1.2">Egzersiz Yapmıyorum</MudSelectItem>
+            <MudSelectItem Value="1.3">Hafif</MudSelectItem>
+            <MudSelectItem Value="1.4">Orta</MudSelectItem>
+            <MudSelectItem Value="1.5">Ağır</MudSelectItem>
+          </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+          <MudSelect @bind-Value="CarbPercent" Label="Karbonhidrat %" Variant="Variant.Filled">
+            <MudSelectItem Value="0.45">45%</MudSelectItem>
+            <MudSelectItem Value="0.55">55%</MudSelectItem>
+            <MudSelectItem Value="0.60">60%</MudSelectItem>
+            <MudSelectItem Value="0.65">65%</MudSelectItem>
+          </MudSelect>
+        </MudItem>
+      </MudGrid>
+
+      <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateNutrition" FullWidth="true">
+        HESAPLA
+      </MudButton>
+
+      @if (Calculated)
+      {
+        <MudPaper Class="pa-4 mt-4" Elevation="2">
+          <MudText Typo="Typo.subtitle1" Class="mb-2">Sonuçlar</MudText>
+          <MudList T="decimal" Dense="true">
+            <MudListItem>Kalori: <b>@Calories kcal</b></MudListItem>
+            <MudListItem>Protein: <b>@Protein g</b></MudListItem>
+            <MudListItem>Yağ: <b>@Fat g</b></MudListItem>
+            <MudListItem>Karbonhidrat: <b>@Carbohydrate g</b></MudListItem>
+          </MudList>
+          <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="SaveNutrition" Class="mt-3">
+            Kaydet
+          </MudButton>
+        </MudPaper>
+      }
+    </MudPaper>
+  }
+
+  <!-- Özel Makro Paneli -->
+  @if (viewMode == ViewMode.Custom)
+  {
+    <MudPaper Elevation="4" Class="p-6">
+      <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3">Özel Makro Girişi</MudText>
+      <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="6">
+          <MudNumericField @bind-Value="CustomCalories" Label="Kalori (kcal)" Min="0" Variant="Variant.Filled" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+          <MudNumericField @bind-Value="CustomProtein" Label="Protein (g)" Min="0" Variant="Variant.Filled" />
+        </MudItem>
+      </MudGrid>
+      <MudGrid Class="mb-4">
+        <MudItem xs="12" sm="6">
+          <MudNumericField @bind-Value="CustomFat" Label="Yağ (g)" Min="0" Variant="Variant.Filled" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+          <MudNumericField @bind-Value="CustomCarb" Label="Karbonhidrat (g)" Min="0" Variant="Variant.Filled" />
+        </MudItem>
+      </MudGrid>
+
+      <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCustomNutrition" FullWidth="true">
+        Özel Makroyu Kaydet
+      </MudButton>
+    </MudPaper>
+  }
+
+</MudContainer>
+
+@code {
+  enum ViewMode { Auto, Custom }
+  private ViewMode viewMode = ViewMode.Auto;
+
+  // --- Otomatik hesaplama ---
+  private string Sex { get; set; } = "male";
+  private int Age { get; set; } = 25;
+  private double Weight { get; set; } = 70;
+  private double Height { get; set; } = 170;
+  private double ActivityFactor { get; set; } = 1.2;
+  private double CarbPercent { get; set; } = 0.55;
+
+  private bool Calculated;
+  private decimal Calories;
+  private decimal Protein;
+  private decimal Fat;
+  private decimal Carbohydrate;
+
+  // --- Özel Makro ---
+  private decimal CustomCalories { get; set; }
+  private decimal CustomProtein  { get; set; }
+  private decimal CustomFat      { get; set; }
+  private decimal CustomCarb     { get; set; }
+
+  private void CalculateNutrition()
+  {
+    var BEE = Sex == "male"
+      ? 66.5 + 13.8 * Weight + 5.0 * Height - 6.8 * Age
+      : 655.1 +  9.6 * Weight + 1.9 * Height - 4.7 * Age;
+
+    Calories     = (decimal)Math.Round(BEE * ActivityFactor, 0);
+    Protein      = (decimal)Math.Round(Weight * 0.9, 1);
+    Fat          = (decimal)Math.Round(((decimal)Calories * 0.30m) / 9m, 1);
+    Carbohydrate = (decimal)Math.Round(((decimal)Calories * (decimal)CarbPercent) / 4m, 1);
+
+    Calculated = true;
+  }
+
+  private async Task SaveNutrition()
+  {
+    var req = new AddUpdateDailyMacroRequest {
+      Calories      = Calories,
+      Proteins      = Protein,
+      Fats          = Fat,
+      Carbohydrates = Carbohydrate,
+      AppUserId     = 1
+    };
+    var ok = await dailyMacroService.AddDailyMacro(req);
+    Snackbar.Add(ok ? "Makro başarıyla kaydedildi!" : "Kayıt sırasında hata oldu.",
+                 ok ? Severity.Success : Severity.Error);
+  }
+
+  private async Task SaveCustomNutrition()
+  {
+    var req = new AddUpdateDailyMacroRequest {
+      Calories      = CustomCalories,
+      Proteins      = CustomProtein,
+      Fats          = CustomFat,
+      Carbohydrates = CustomCarb,
+      AppUserId     = 1
+    };
+    var ok = await dailyMacroService.AddDailyMacro(req);
+    Snackbar.Add(ok ? "Özel makro başarıyla kaydedildi!" : "Kayıt sırasında hata oldu.",
+                 ok ? Severity.Success : Severity.Error);
+  }
 }

@@ -269,7 +269,7 @@ else
         DateOnly today = DateOnly.FromDateTime(DateTime.Now);
         dailyNutritionId = await dailyNutritionService.GetDailyNutritionCheck(1);
 
-        dailyNutrition = await dailyNutritionService.GetDailyNutritionById(dailyNutritionService.dailyNutrition.DailyNutritionID);
+       
         // Günlük kayıt yoksa oluştur
         if (dailyNutritionId == 0)
         {
@@ -305,7 +305,7 @@ else
         {
             dailyNutritionGroups.Clear();
         }
-
+         dailyNutrition = await dailyNutritionService.GetDailyNutritionById(dailyNutritionService.dailyNutrition.DailyNutritionID);
 
         ConvertGroupsToList();
         StateHasChanged();
