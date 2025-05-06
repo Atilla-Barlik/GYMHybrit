@@ -18,6 +18,7 @@ namespace Services.AppUserExerciseProgramServise
         private string _baseURL = "https://localhost:7149";
         private readonly HttpClient _httpClient;
         private List<CombinedExerciseDataResponseModel> _combinedData;
+        private List<GetAppUserExerciseProgramTotalBurnKcalResponseModel> _getData;
 
         //private AddUpdateAppUserExerciseProgramRequest _addRequest;
         public async Task<bool> AddAppUserExercise(AppUserExerciseProgramResponseModel request)
@@ -169,6 +170,38 @@ namespace Services.AppUserExerciseProgramServise
             }
 
             return returnResponse;
+        }
+
+        public async Task<List<GetAppUserExerciseProgramTotalBurnKcalResponseModel>> GetDailyBurnSummaryAsync(int appUserId)
+        {
+            _getData = new List<GetAppUserExerciseProgramTotalBurnKcalResponseModel>();
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/AppUserExerciseProgram/{appUserId}";
+                    var apiResponse = await client.GetAsync(url);
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        var response = await apiResponse.Content.ReadAsStringAsync();
+
+                        var options = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true // JSON'daki anahtar isimleri için büyük/küçük harf duyarlılığını kapat
+                        };
+
+                        _getData = System.Text.Json.JsonSerializer.Deserialize<List<GetAppUserExerciseProgramTotalBurnKcalResponseModel>>(response, options);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Hata mesajını loglama
+                Console.WriteLine($"Hata: {ex.Message}");
+            }
+
+            return _getData;
         }
     }
 }

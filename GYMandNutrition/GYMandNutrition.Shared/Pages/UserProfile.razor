@@ -448,11 +448,13 @@ else
         @page "/userProfile"
 
 
+
 @inject IDailyMacroService dailyMacroService
 @inject IDailyNutritionDetailsService dailyNutritionDetailsService
 @inject ISnackbar Snackbar
 @inject IAppUserService appUserService
 @inject IAppUserDetailService appUserDetailService
+@inject IAppUserExerciseProgramService appUserExerciseProgramService
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
     @if (!loaded)
     {
@@ -463,7 +465,7 @@ else
     }
     else
     {
-        <MudPaper Elevation="2" Class="p-4 mb-6">
+        <MudPaper Elevation="2" Class="p-4 mb-6 hover-zoom fade-in-up">
             <MudStack Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
                 <MudText Typo="Typo.h5">Profil Bilgileri</MudText>
                 <MudButtonGroup>
@@ -551,7 +553,7 @@ else
         <MudGrid GutterSize="3">
             <!-- Hedef Makro -->
             <MudItem xs="12" sm="4">
-                <MudPaper Elevation="4" Class="p-4 text-center">
+                <MudPaper Elevation="4" Class="p-4 text-center hover-zoom fade-in-up" Style="min-height:250px;">
                     <MudText Typo="Typo.h6" Class="mb-2">🎯 Hedef Makro</MudText>
                     <MudDivider Class="mb-2" />
                     <MudList T="decimal" Dense="true">
@@ -564,8 +566,8 @@ else
             </MudItem>
 
             <!-- Alınan Besin Değerleri -->
-            <MudItem xs="12" sm="4">
-                <MudPaper Elevation="4" Class="p-4 text-center">
+            <MudItem xs="12" sm="4" >
+                <MudPaper Elevation="4" Class="p-4 text-center hover-zoom fade-in-up" Style="min-height:250px;">
                     <MudText Typo="Typo.h6" Class="mb-2">✅ Alınan Besinler</MudText>
                     <MudDivider Class="mb-2" />
                     <MudList T="decimal" Dense="true">
@@ -579,10 +581,40 @@ else
 
             <!-- Egzersizle Yakılan Kalori -->
             <MudItem xs="12" sm="4">
-                <MudPaper Elevation="4" Class="p-4 text-center">
+                <MudPaper Elevation="4" Class="p-4 text-center hover-zoom fade-in-up" Style="min-height:250px;">
                     <MudText Typo="Typo.h6" Class="mb-2">🔥 Egzersizle Yakılan</MudText>
                     <MudDivider Class="mb-2" />
-                    <MudText Typo="Typo.h4">22 Kcal</MudText>
+
+                    <MudSelect T="int"
+                               Label="Program Numarası"
+                               Value="selectedDayNo"
+                               ValueChanged="OnDayChanged"
+                               ValueExpression="() => selectedDayNo"
+                               Variant="Variant.Filled"
+                               Class="mb-2">
+                        @foreach (var dto in dailyBurns)
+                        {
+                            <MudSelectItem Value="@dto.DayNo">Program @dto.DayNo</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudText Typo="Typo.h4">@selectedBurnKcal Kcal</MudText>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12">
+				<MudPaper Elevation="4" Class="p-4 text-center mt-4 fade-in-up hover-zoom ">
+                    <MudText Typo="Typo.h6" Class="mb-2">⚖️ Kalori Dengesi</MudText>
+                    <MudDivider Class="mb-2" />
+                    <MudText Typo="Typo.subtitle2">
+                        Net Alım: <b>@CalorieNet Kcal</b>
+                    </MudText><br />
+                    <MudText Typo="Typo.subtitle2">
+                        Hedef: <b>@dailyMacro.Calories Kcal</b>
+                    </MudText><br />
+                    <MudText Typo="Typo.h4" Class="mt-1">
+                        Fark: <b>@CalorieDiff Kcal</b> (@(CalorieDiff > 0 ? "Fazla" : "Açık"))
+                    </MudText>
                 </MudPaper>
             </MudItem>
         </MudGrid>
@@ -604,6 +636,14 @@ else
     private DailyMacroResponseModel dailyMacro;
     private Dictionary<string, (decimal Amount, string Unit)> overallTaken;
     private decimal burnedCalories;
+
+    private List<GetAppUserExerciseProgramTotalBurnKcalResponseModel> dailyBurns = new();
+    private int selectedDayNo;
+    private int selectedBurnKcal;
+
+    private decimal CalorieNet => overallTaken["Kalori"].Amount - selectedBurnKcal;
+    private decimal CalorieDiff => CalorieNet - dailyMacro.Calories;
+
     protected override async Task OnInitializedAsync()
     {
         user = await appUserService.GetAppUserByUserId(1);
@@ -651,7 +691,12 @@ else
 
         // Egzersizle yakılan kalori
         //burnedCalories = await exerciseBurnService.GetTotalBurnedByUser(1);
-
+        dailyBurns = await appUserExerciseProgramService.GetDailyBurnSummaryAsync(user.AppUserId);
+        if (dailyBurns.Any())
+        {
+            selectedDayNo = dailyBurns.First().DayNo;
+            selectedBurnKcal = dailyBurns.First().TotalBurnedKcal;
+        }
 
         loaded = true;
         loaded2 = true;
@@ -691,5 +736,56 @@ else
     {
         mode = m;
     }
+    void OnDayChanged(int dayNo)
+    {
+        selectedDayNo = dayNo;
+        selectedBurnKcal = dailyBurns.FirstOrDefault(x => x.DayNo == dayNo)?.TotalBurnedKcal ?? 0;
+        StateHasChanged();
+    }
 
+    // binding değiştiğinde tetiklemek için
+    private int SelectedDayNo
+    {
+        get => selectedDayNo;
+        set
+        {
+            selectedDayNo = value;
+        }
+    }
 }
+<style>
+    .fixed-card {
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    
+
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out both; /* both = forwards + backwards */
+    }
+
+    .hover-zoom {
+        /* transition transform’ı dinleyecek */
+        transition: transform 0.2s ease !important, box-shadow 0.2s ease;
+    }
+
+        .hover-zoom:hover {
+            transform: translateY(0) scale(1.05) !important;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+        }
+</style>
