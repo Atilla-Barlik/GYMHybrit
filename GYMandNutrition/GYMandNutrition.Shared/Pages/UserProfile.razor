@@ -234,7 +234,7 @@ else
 
     private string GetProgressLabel(decimal target, decimal actual)
     {
-        
+
         if (actual < target)
         {
             return "Eksik"; // Eğer hedefin altındaysa "Eksik" yazacak
@@ -247,7 +247,7 @@ else
     }
 
 
-} *@
+} 
 
         @page "/userProfile"
 @using Entities.DailyMacroEntities
@@ -298,7 +298,7 @@ else
     </div>
 
     <!-- --- HER ÖĞÜN İÇİN DİNAMİK KARTLAR --- -->
-    
+
     @foreach (var grp in groups)
     {
         var mealTime = grp.Key+1;
@@ -319,7 +319,7 @@ else
             </MudCardHeader>
             <MudCardContent>
                 <div class="row gx-3">
-                    @* Kalori *@
+                    @* Kalori 
                     <div class="col-md-3 mb-3">
                         <MudText  Typo="Typo.subtitle2" Class="fw-bold">Kalori</MudText>
                         <div class="d-flex align-items-center">
@@ -332,7 +332,7 @@ else
                                            Value="GetProgressPercent(target?.TotalKcal ?? 0, taken.TotalKcal)"
                                            Buffer="false" />
                     </div>
-                    @* Karbonhidrat *@
+                    @* Karbonhidrat 
                     <div class="col-md-3 mb-3">
                         <MudText Typo="Typo.subtitle2" Class="fw-bold">Karbonhidrat</MudText>
                         <div class="d-flex align-items-center">
@@ -345,7 +345,7 @@ else
                                            Value="GetProgressPercent(target?.TotalCarbohydrate ?? 0,taken.TotalCarbohydrate)"
                                            Buffer="false" />
                     </div>
-                    @* Protein *@
+                    @* Protein 
                     <div class="col-md-3 mb-3">
                         <MudText Typo="Typo.subtitle2" Class="fw-bold">Protein</MudText>
                         <div class="d-flex align-items-center">
@@ -358,7 +358,7 @@ else
                                            Value="GetProgressPercent(target?.TotalProtein ?? 0, taken.TotalProtein)"
                                            Buffer="false" />
                     </div>
-                    @* Yağ *@
+                    @* Yağ 
                     <div class="col-md-3 mb-3">
                         <MudText Typo="Typo.subtitle2" Class="fw-bold">Yağ</MudText>
                         <div class="d-flex align-items-center">
@@ -442,4 +442,254 @@ else
     => actual < target ? Color.Error
        : actual > target ? Color.Warning
        : Color.Success;
+}
+*@
+
+        @page "/userProfile"
+
+
+@inject IDailyMacroService dailyMacroService
+@inject IDailyNutritionDetailsService dailyNutritionDetailsService
+@inject ISnackbar Snackbar
+@inject IAppUserService appUserService
+@inject IAppUserDetailService appUserDetailService
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+    @if (!loaded)
+    {
+        <div class="text-center">
+            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+            <p>Yükleniyor…</p>
+        </div>
+    }
+    else
+    {
+        <MudPaper Elevation="2" Class="p-4 mb-6">
+            <MudStack Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                <MudText Typo="Typo.h5">Profil Bilgileri</MudText>
+                <MudButtonGroup>
+                    <MudButton Variant="@(mode==ProfileMode.View?Variant.Filled:Variant.Outlined)"
+                    Color="Color.Primary"
+                    OnClick="@(()=>ChangeMode(ProfileMode.View))">
+                        Görüntüle
+                    </MudButton>
+                    <MudButton Variant="@(mode==ProfileMode.Edit?Variant.Filled:Variant.Outlined)"
+                    Color="Color.Primary"
+                    OnClick="@(()=>ChangeMode(ProfileMode.Edit))">
+                        Düzenle
+                    </MudButton>
+                </MudButtonGroup>
+            </MudStack>
+
+            <MudGrid GutterSize="3" AlignItems="Center">
+                <!-- Profil Foto -->
+                <MudItem xs="12" sm="4" Class="d-flex justify-center">
+                    <MudAvatar Size="Size.Large" Src="https://png.pngtree.com/png-vector/20190223/ourmid/pngtree-profile-line-black-icon-png-image_691065.jpg" />
+                </MudItem>
+
+                <!-- Alanlar -->
+                <MudItem xs="12" sm="8">
+                    <MudGrid GutterSize="2">
+                        @if (mode == ProfileMode.View)
+                        {
+                            <MudItem xs="6">
+                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Ad Soyad</MudText>
+                                <MudText Typo="Typo.h6">@user.AppUserFirstName</MudText>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Yaş</MudText>
+                                <MudText Typo="Typo.h6">@appuserDetail.Age</MudText>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Boy</MudText>
+                                <MudText Typo="Typo.h6">@($"{appuserDetail.Length} cm")</MudText>
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Kilo</MudText>
+                                <MudText Typo="Typo.h6">@($"{appuserDetail.Weight} kg")</MudText>
+                            </MudItem>
+                        }
+                        else
+                        {
+                            <MudItem xs="6">
+                                <MudTextField @bind-Value="user.AppUserFirstName" Label="Ad Soyad" Variant="Variant.Filled" />
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudNumericField @bind-Value="editAppuserDetail.Age" Label="Yaş" Min="1" Max="120" Variant="Variant.Filled" />
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudNumericField @bind-Value="editAppuserDetail.Length" Label="Boy (cm)" Min="50" Max="250" Variant="Variant.Filled" />
+                            </MudItem>
+                            <MudItem xs="6">
+                                <MudNumericField @bind-Value="editAppuserDetail.Weight" Label="Kilo (kg)" Min="20" Max="300" Variant="Variant.Filled" />
+                            </MudItem>
+                            <MudItem xs="12" Class="d-flex justify-end mt-2">
+                                <MudButton Color="Color.Primary" OnClick="SaveProfile">Kaydet</MudButton>
+                                <MudButton Color="Color.Secondary" OnClick="CancelEdit" Class="ml-2">İptal</MudButton>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    }
+</MudContainer>
+
+@* Alt blokta özetler… (önceki örnekteki üç kartı aynen ekleyebilirsiniz) *@
+@if (!loaded2)
+{
+    <div class="text-center">
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+        <p>Yükleniyor…</p>
+    </div>
+}
+else
+{
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+
+        <!-- ALT BLOK: Üç Özet Kartı -->
+        <MudGrid GutterSize="3">
+            <!-- Hedef Makro -->
+            <MudItem xs="12" sm="4">
+                <MudPaper Elevation="4" Class="p-4 text-center">
+                    <MudText Typo="Typo.h6" Class="mb-2">🎯 Hedef Makro</MudText>
+                    <MudDivider Class="mb-2" />
+                    <MudList T="decimal" Dense="true">
+                        <MudListItem>Kalori: <b>@dailyMacro.Calories Kcal</b></MudListItem>
+                        <MudListItem>Protein: <b>@dailyMacro.Proteins g</b></MudListItem>
+                        <MudListItem>Yağ: <b>@dailyMacro.Fats g</b></MudListItem>
+                        <MudListItem>Karb.: <b>@dailyMacro.Carbohydrates g</b></MudListItem>
+                    </MudList>
+                </MudPaper>
+            </MudItem>
+
+            <!-- Alınan Besin Değerleri -->
+            <MudItem xs="12" sm="4">
+                <MudPaper Elevation="4" Class="p-4 text-center">
+                    <MudText Typo="Typo.h6" Class="mb-2">✅ Alınan Besinler</MudText>
+                    <MudDivider Class="mb-2" />
+                    <MudList T="decimal" Dense="true">
+                        <MudListItem>Kalori: <b>@overallTaken["Kalori"].Amount Kcal</b></MudListItem>
+                        <MudListItem>Protein: <b>@overallTaken["Protein"].Amount g</b></MudListItem>
+                        <MudListItem>Yağ: <b>@overallTaken["Yağ"].Amount g</b></MudListItem>
+                        <MudListItem>Karb.: <b>@overallTaken["Karbonhidrat"].Amount g</b></MudListItem>
+                    </MudList>
+                </MudPaper>
+            </MudItem>
+
+            <!-- Egzersizle Yakılan Kalori -->
+            <MudItem xs="12" sm="4">
+                <MudPaper Elevation="4" Class="p-4 text-center">
+                    <MudText Typo="Typo.h6" Class="mb-2">🔥 Egzersizle Yakılan</MudText>
+                    <MudDivider Class="mb-2" />
+                    <MudText Typo="Typo.h4">22 Kcal</MudText>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+    </MudContainer>
+}
+
+
+@code {
+    enum ProfileMode { View, Edit }
+
+    private ProfileMode mode = ProfileMode.View;
+    private bool loaded,loaded2;
+    private AppUserResponseModel user;
+    private AddUpdateAppUserDetailRequest editModel;
+    private AddUpdateAppUserDetailRequest appuserDetail;
+    private AddUpdateAppUserDetailRequest editAppuserDetail;
+
+    private DailyMacroResponseModel dailyMacro;
+    private Dictionary<string, (decimal Amount, string Unit)> overallTaken;
+    private decimal burnedCalories;
+    protected override async Task OnInitializedAsync()
+    {
+        user = await appUserService.GetAppUserByUserId(1);
+        appuserDetail = await appUserDetailService.GetAppUserDetailByUserId(1);
+        user.AppUserFirstName = user.AppUserFirstName + " " + user.AppUserLastName;
+        if(user.AppUserId == 0 )
+        {
+            user = new AppUserResponseModel
+                {
+                    AppUserFirstName = "Henüz Profil Oluşturulmamış",
+                 };
+        }
+        editAppuserDetail = new AddUpdateAppUserDetailRequest
+            {
+                Age = appuserDetail.Age,
+                sex = appuserDetail.sex,
+                Length = appuserDetail.Length,
+                Weight = appuserDetail.Weight,
+                AppUserId = user.AppUserId,
+                AppUserDetailId = appuserDetail.AppUserDetailId,
+                AfterImage = " ",
+                BeforeImage = " "
+            };
+
+        // Diğer servis çağrılarınız…
+        // dailyMacro = await dailyMacroService…
+        // overallTaken = …
+        // burnedCalories = …
+        dailyMacro = await dailyMacroService.GetDailyMacroByUserId(1);
+
+        // Alınan besinler toplamı
+        var takenList = await dailyNutritionDetailsService.GetTotalMeal(1);
+        var totKcal = takenList.Sum(x => x.TotalKcal);
+        var totProt = takenList.Sum(x => x.TotalProtein);
+        var totFat = takenList.Sum(x => x.TotalFat);
+        var totCarb = takenList.Sum(x => x.TotalCarbohydrate);
+
+        overallTaken = new()
+            {
+                ["Kalori"] = (totKcal, "Kcal"),
+                ["Protein"] = (totProt, "g"),
+                ["Yağ"] = (totFat, "g"),
+                ["Karbonhidrat"] = (totCarb, "g")
+            };
+
+        // Egzersizle yakılan kalori
+        //burnedCalories = await exerciseBurnService.GetTotalBurnedByUser(1);
+
+
+        loaded = true;
+        loaded2 = true;
+    }
+
+  private async Task SaveProfile()
+  {
+    // basit validasyon
+        if (string.IsNullOrWhiteSpace(user.AppUserFirstName))
+    {
+            Snackbar.Add("Ad Soyad boş olamaz.", Severity.Warning);
+      return;
+    }
+
+        var ok = await appUserDetailService.UpdateAppUserDetail(editAppuserDetail);
+    if (ok)
+    {
+      appuserDetail = editAppuserDetail;    // güncellenen modeli göster
+      mode = ProfileMode.View;
+      Snackbar.Add("Profil güncellendi.", Severity.Success);
+    }
+    else
+    {
+      Snackbar.Add("Güncelleme başarısız.", Severity.Error);
+    }
+  }
+
+  private void CancelEdit()
+  {
+    // değişiklikleri iptal edip formu eski haline döndür
+    user = new AppUserResponseModel {
+      AppUserFirstName = user.AppUserFirstName + " " + user.AppUserLastName,
+    };
+    mode = ProfileMode.View;
+  }
+    void ChangeMode(ProfileMode m)
+    {
+        mode = m;
+    }
+
 }
