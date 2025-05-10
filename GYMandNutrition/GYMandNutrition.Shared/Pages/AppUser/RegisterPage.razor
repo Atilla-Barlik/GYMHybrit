@@ -1,0 +1,125 @@
+﻿@page "/register"
+@using Entities.AppUserEntities
+@inject IAppUserService AppUserService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<MudPaper Elevation="4" Class="mx-auto mt-6 p-6" Style="max-width:400px">
+    <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-4">Yeni Üyelik</MudText>
+
+    <MudForm @ref="form" OnValidSubmit="HandleRegister">
+        <MudTextField @bind-Value="model.AppUserFirstName"
+        Label="Ad"
+        For="@(()=>model.AppUserFirstName)"
+        Required="true"
+        RequiredError="Ad giriniz." />
+
+        <MudTextField @bind-Value="model.AppUserLastName"
+        Label="Soyad"
+        For="@(()=>model.AppUserLastName)"
+        Required="true"
+        RequiredError="Soyad giriniz." />
+
+        <MudTextField @bind-Value="model.AppUserEmail"
+        Label="E-posta"
+        For="@(()=>model.AppUserEmail)"
+        Required="true"
+        RequiredError="Geçerli bir e-posta giriniz."
+        Validation="@(new Func<string, string>(val =>
+                          string.IsNullOrWhiteSpace(val) || !val.Contains("@")
+                            ? "Geçerli bir e-posta adresi olmalı."
+                            : null))" />
+
+        <MudTextField @bind-Value="model.AppUserPassword"
+        Label="Şifre"
+                      InputType="@(showPassword2 ? InputType.Text : InputType.Password)"
+        For="@(()=>model.AppUserPassword)"
+        Required="true"
+        RequiredError="Şifre giriniz."
+        Adornment="Adornment.End"
+        AdornmentIcon="@Icons.Material.Filled.VisibilityOff"
+        OnAdornmentClick="TogglePasswordVisibility2" />
+
+        <MudTextField @bind-Value="confirmPassword"
+        Label="Şifre (Tekrar)"
+        InputType="@(showPassword ? InputType.Text : InputType.Password)"
+        Required="true"
+        RequiredError="Şifreyi tekrar giriniz."
+        Validation="ConfirmPasswordValidator"
+        Adornment="Adornment.End"
+        AdornmentIcon="@Icons.Material.Filled.VisibilityOff"
+        OnAdornmentClick="TogglePasswordVisibility" />
+
+        <MudButton Type="ButtonType.Submit"
+        OnClick="HandleRegister"
+        Variant="Variant.Filled"
+        Color="Color.Primary"
+        Disabled="isSubmitting"
+        Class="mt-4"
+        FullWidth="true">
+            @if (isSubmitting)
+            {
+                <MudProgressCircular Size="Size.Medium" Color="Color.Inherit" Class="me-2" Indeterminate="true" />
+                <MudText>Kayıt Olunuyor…</MudText>
+            }
+            else
+            {
+                <MudText>Kayıt Ol</MudText>
+            }
+        </MudButton>
+    </MudForm>
+</MudPaper>
+
+@code {
+    private MudForm form;
+    private bool isSubmitting;
+    private bool showPassword,showPassword2 = false;
+    private string confirmPassword;
+    [Inject] IAppUserService appUserService { get; set; }
+    private AddUpdateAppUserRequest model = new AddUpdateAppUserRequest();
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+    private void TogglePasswordVisibility2()
+    {
+        showPassword2 = !showPassword2;
+    }
+    private string ConfirmPasswordValidator(string val)
+        => val != model.AppUserPassword
+             ? "Şifreler eşleşmiyor."
+             : null;
+    private async Task HandleRegister()
+    {
+        await form.Validate();
+        if (!form.IsValid)
+            return;
+
+        isSubmitting = true;
+        StateHasChanged();
+
+        try
+        {
+            var ok = await appUserService.CreateAppUser(model);
+            if (ok)
+            {
+                Snackbar.Add("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz…", Severity.Success);
+                await Task.Delay(1500);
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                Snackbar.Add("Kayıt sırasında bir hata oluştu.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Beklenmedik hata: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

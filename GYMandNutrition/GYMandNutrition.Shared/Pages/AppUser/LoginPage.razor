@@ -1,0 +1,115 @@
+﻿@page "/login"
+@inject NavigationManager Navigation
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IAuthService AuthService
+@using System.ComponentModel.DataAnnotations
+@using MudBlazor
+@using global::Services.LocalAuthStateProviderServices
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mt-8">
+    <MudPaper Elevation="4" Class="p-6">
+        <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-4">Giriş Yap</MudText>
+
+        @if (_checking)
+        {
+            <div class="d-flex justify-center">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+            </div>
+        }
+        else if (_alreadyLoggedIn)
+        {
+            <!-- Bu branch muhtemelen çok kısa eser, çünkü NavigateTo ile anında redirect ediyoruz -->
+            <p class="text-center">Zaten giriş yapılmış, yönlendiriliyorsunuz...</p>
+        }
+        else
+        {
+            <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <MudTextField @bind-Value="loginModel.Email"
+                Label="Email"
+                Required="true"
+                For="@(() => loginModel.Email)" />
+                <MudTextField @bind-Value="loginModel.Password"
+                Label="Şifre"
+                InputType="InputType.Password"
+                Required="true"
+                For="@(() => loginModel.Password)" />
+                <MudCheckBox  @bind-Value="rememberMe" Label="Beni Hatırla" Class="mt-2" />
+                @if (!string.IsNullOrWhiteSpace(_error))
+                {
+                    <MudText Color="Color.Error" Class="mt-2">@_error</MudText>
+                }
+                <MudButton Type="Submit"
+                Variant="Variant.Filled"
+                Color="Color.Primary"
+                Class="mt-4"
+                OnClick="HandleLogin"
+                FullWidth="true">
+                    Giriş Yap
+                </MudButton>
+            </EditForm>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    class LoginModel
+    {
+        [Required, EmailAddress] public string Email { get; set; }
+        [Required] public string Password { get; set; }
+    }
+    [Inject] AuthenticationStateProvider AuthStateProvider { get; set; }
+    private LoginRequest loginModel = new();
+    private bool rememberMe { get; set; } = false;
+    private bool _checking = true;
+    private bool _alreadyLoggedIn;
+    private string _error;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Prerender bitti, gerçek tarayıcı ortamında çalışacak.
+            if (await LocalStorage.ContainKeyAsync("authUserId"))
+            {
+                var id = await LocalStorage.GetItemAsync<int>("authUserId");
+                if (id > 0)
+                {
+                    _alreadyLoggedIn = true;
+                    StateHasChanged();
+                    // ağaçtan kurtulup anasayfaya at:
+                    Navigation.NavigateTo("/");
+                    return;
+                }
+            }
+            
+            _checking = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        _error = null;
+        var result = await AuthService.LoginAsync(loginModel);
+        if (result > 0)
+        {
+            // Başarılıysa localStorage'a kaydet
+            //await LocalStorage.SetItemAsync("appUserId", result);
+            
+
+            // “Beni hatırla” yoksa sayfa kapanınca deaktif et:
+            if (!rememberMe)
+                await LocalStorage.RemoveItemAsync("authUserId");
+            if (AuthStateProvider is LocalAuthStateProvider local)
+                await local.MarkUserAsAuthenticated(result, rememberMe);
+
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            _error = "Giriş başarısız.";
+        }
+    }
+}

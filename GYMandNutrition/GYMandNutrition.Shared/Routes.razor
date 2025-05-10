@@ -1,6 +1,47 @@
-﻿<Router AppAssembly="typeof(Layout.MainLayout).Assembly">
+﻿@using global::Services.LocalAuthStateProviderServices
+@* <CascadingAuthenticationState>
+<Router AppAssembly="typeof(Layout.MainLayout).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
+</CascadingAuthenticationState> *@
+@* <CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(Layout.MainLayout).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(Layout.MainLayout)">
+                <p>Sayfa bulunamadı.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState> *@
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(Layout.MainLayout).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(Layout.MainLayout)">
+                <p>Sayfa bulunamadı.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+
+@code {
+    [Inject] AuthenticationStateProvider AuthProv { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && AuthProv is LocalAuthStateProvider app)
+        {
+            // Force it to re-evaluate and pick up localStorage now that JS is live
+            await app.GetAuthenticationStateAsync();
+            StateHasChanged();
+        }
+    }
+}

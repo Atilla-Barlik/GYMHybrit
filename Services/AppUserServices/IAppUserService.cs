@@ -11,5 +11,6 @@ namespace Services.AppUserServices
     public interface IAppUserService
     {
         Task<AppUserResponseModel> GetAppUserByUserId(int userId);
+        Task<bool> CreateAppUser(AddUpdateAppUserRequest addUpdateAppUserRequest);
     }
 }
