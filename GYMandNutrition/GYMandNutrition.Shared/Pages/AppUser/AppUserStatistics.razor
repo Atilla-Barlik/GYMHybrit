@@ -96,6 +96,66 @@ else
 
 
 @inject IStatisticService StatisticService
+@inject IDailyNutritionService dailyNutritionService
+
+<h3 class="text-center my-4">🍽️ Günlük Beslenme Trendleri</h3>
+
+@if (allData is null)
+{
+    <p class="text-center text-muted">🔄 Beslenme verileri yükleniyor...</p>
+}
+else if (!allData.Any())
+{
+    <p class="text-center text-muted">📭 Henüz kapalı günlük beslenme verisi yok.</p>
+}
+else
+{
+    <MudGrid GutterSize="3">
+        <!-- Kalori Grafiği -->
+        <MudItem xs="12" md="6">
+            <MudCard>
+                <MudCardHeader>
+                    <MudText Typo="Typo.h6">Kalori Zaman Serisi</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudChart ChartType="MudBlazor.ChartType.Line"
+                              ChartSeries="@calorieSeries"
+                              XAxisLabels="@calorieLabels"
+                              ChartOptions="_options_Kcal"
+                              Width="100%" Height="300px" CanHideSeries/>
+                    <div class="d-flex justify-space-between mt-2">
+                        <MudButton Variant="Variant.Text" Disabled="@(caloriePage == 0)" OnClick="PrevCalorie">← Önceki</MudButton>
+                        <MudText Typo="Typo.caption">Sayfa @caloriePage+1</MudText>
+                        <MudButton Variant="Variant.Text" Disabled="@((caloriePage+1)*pageSize >= totalCount)" OnClick="NextCalorie">Sonraki →</MudButton>
+                    </div>
+                    <MudSlider @bind-Value="_options_Kcal.YAxisTicks" Min="0" Max="5000" Step="1" Color="Color.Info">Besin değer gösterimi: @_options_Kcal.YAxisTicks.ToString()</MudSlider>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- Makro Grafiği -->
+        <MudItem xs="12" md="6">
+            <MudCard>
+                <MudCardHeader>
+                    <MudText Typo="Typo.h6">Protein / Karbonhidrat / Yağ Zaman Serisi</MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudChart ChartType="MudBlazor.ChartType.Line"
+                              ChartSeries="@macroSeries"
+                              XAxisLabels="@macroLabels"
+                              ChartOptions="_options2"
+                              Width="100%" Height="300px" CanHideSeries/>
+                    <div class="d-flex justify-space-between mt-2">
+                        <MudButton Variant="Variant.Text" Disabled="@(macroPage == 0)" OnClick="PrevMacro">← Önceki</MudButton>
+                        <MudText Typo="Typo.caption">Sayfa @macroPage+1</MudText>
+                        <MudButton Variant="Variant.Text" Disabled="@((macroPage+1)*pageSize >= totalCount)" OnClick="NextMacro">Sonraki →</MudButton>
+                    </div>
+                    <MudSlider @bind-Value="_options2.YAxisTicks" Min="0" Max="500" Step="1" Color="Color.Info">Besin değer gösterimi: @_options2.YAxisTicks.ToString()</MudSlider>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+}
 
 <h3 class="text-center my-4">📊 Egzersiz İstatistikleri</h3>
 
@@ -116,10 +176,10 @@ else
             <MudCardContent>
                 <div class="chart-fade">
                     <MudChart ChartType="MudBlazor.ChartType.Line"
-                              ChartSeries="@GetChartSeries(pagedData)"
-                              XAxisLabels="@pagedData.Select(e => e.DateFormatted).ToArray()"
-                              ChartOptions="_options"
-                              Width="100%" Height="350px" CanHideSeries>
+                    ChartSeries="@GetChartSeries(pagedData)"
+                    XAxisLabels="@pagedData.Select(e => e.DateFormatted).ToArray()"
+                    ChartOptions="_options"
+                    Width="100%" Height="350px" CanHideSeries>
                     </MudChart>
                 </div>
 
@@ -147,11 +207,38 @@ else
 @code {
     private List<ExerciseStatisticsModel> exerciseStatistics;
     private readonly MudBlazor.ChartOptions _options = new() { YAxisTicks = 1 };
+    private readonly MudBlazor.ChartOptions _options2 = new() { YAxisTicks = 1 };
+    private readonly MudBlazor.ChartOptions _options_Kcal = new() { YAxisTicks = 1 };
     private int pageSize = 5;
     private Dictionary<int, int> pageIndices = new(); // exerciseId -> pageIndex
 
+    private List<DailyNutritionResponseModel> nutritionData;
+    private List<ChartSeries> nutritionSeries;
+    private string[] nutritionDates;
+    private List<DailyNutritionResponseModel> allData;
+    private int pageSize2 = 5;
+    private int totalCount => allData?.Count ?? 0;
+
+    private int caloriePage = 0;
+    private int macroPage = 0;
+
+    private List<ChartSeries> calorieSeries = new();
+    private string[] calorieLabels = Array.Empty<string>();
+
+    private List<ChartSeries> macroSeries = new();
+    private string[] macroLabels = Array.Empty<string>();
     protected override async Task OnInitializedAsync()
     {
+        // 1) Beslenme verilerini çek ve hazırlık yap
+        allData = await dailyNutritionService.GetClosedDailyNutritionListByUserId(1);
+        // tarihlere göre artan sırala (API zaten artan sıralı döndürüyor, ekstra güvenlik için):
+        allData = allData
+            .OrderBy(n => n.Date)
+            .ThenBy(n => n.DailyNutritionID)
+            .ToList();
+
+        UpdateCalorieChart();
+        UpdateMacroChart();
         exerciseStatistics = await StatisticService.GetAllExercisesStatistics();
 
         if (exerciseStatistics != null)
@@ -213,6 +300,68 @@ else
     {
         var endIndex = GetStartIndex(exerciseId) + pageSize;
         return endIndex > totalCount ? totalCount : endIndex;
+    }
+    private void UpdateCalorieChart()
+    {
+        var pageData = allData
+            .Skip(caloriePage * pageSize2)
+            .Take(pageSize2)
+            .ToList();
+
+        calorieLabels = pageData.Select(d => d.Date.ToString("MM-dd")).ToArray();
+        calorieSeries = new List<ChartSeries> {
+            new ChartSeries {
+                Name = "Kalori",
+                Data = pageData.Select(d => (double)d.DailyNutritionTotalKcal).ToArray()
+            }
+        };
+    }
+    private void UpdateMacroChart()
+    {
+        var pageData = allData
+            .Skip(macroPage * pageSize2)
+            .Take(pageSize2)
+            .ToList();
+
+        macroLabels = pageData.Select(d => d.Date.ToString("MM-dd")).ToArray();
+        macroSeries = new List<ChartSeries> {
+            new ChartSeries {
+                Name = "Protein",
+                Data = pageData.Select(d => (double)d.DailyNutritionTotalProtein).ToArray()
+            },
+            new ChartSeries {
+                Name = "Karb.",
+                Data = pageData.Select(d => (double)d.DailyNutritionTotalCarbohydrate).ToArray()
+            },
+            new ChartSeries {
+                Name = "Yağ",
+                Data = pageData.Select(d => (double)d.DailyNutritionTotalFat).ToArray()
+            }
+        };
+    }
+
+    private void PrevCalorie()
+    {
+        if (caloriePage > 0) caloriePage--;
+        UpdateCalorieChart();
+    }
+
+    private void NextCalorie()
+    {
+        if ((caloriePage + 1) * pageSize < totalCount) caloriePage++;
+        UpdateCalorieChart();
+    }
+
+    private void PrevMacro()
+    {
+        if (macroPage > 0) macroPage--;
+        UpdateMacroChart();
+    }
+
+    private void NextMacro()
+    {
+        if ((macroPage + 1) * pageSize < totalCount) macroPage++;
+        UpdateMacroChart();
     }
 }
 

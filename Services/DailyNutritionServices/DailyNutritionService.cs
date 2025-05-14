@@ -201,6 +201,35 @@ namespace Services.DailyNutritionServices
             return returnResponse;
         }
 
+        public async Task<List<DailyNutritionResponseModel>> GetClosedDailyNutritionListByUserId(int userID)
+        {
+            returnResponse = new List<DailyNutritionResponseModel>();
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/DailyNutrition/closed/{userID}";
+                    var apiResponse = await client.GetAsync(url);
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+
+                        var response = await apiResponse.Content.ReadAsStringAsync();
+
+                        returnResponse = JsonConvert.DeserializeObject<List<DailyNutritionResponseModel>>(response);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return returnResponse;
+        }
+
         public DailyNutritionResponseModel dailyNutrition
         {
             set { dailyNutritionId = value; }

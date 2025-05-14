@@ -45,7 +45,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<LocalAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(x =>x.GetRequiredService<LocalAuthStateProvider>());
-
+builder.Services.AddMudBlazorResizeListener();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
@@ -53,6 +53,7 @@ builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]
                                  ?? "https://localhost:7149/");
 });
+
 builder.Services.AddMudServices(config =>
 {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
@@ -64,6 +65,17 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.HideTransitionDuration = 500;
     config.SnackbarConfiguration.ShowTransitionDuration = 500;
     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+    config.ResizeOptions = new ResizeOptions
+    {
+        EnableLogging = false,
+        ReportRate = 200,
+        NotifyOnBreakpointOnly = false
+    };
+    config.ResizeObserverOptions = new ResizeObserverOptions
+    {
+        EnableLogging = false
+    };
+    
 });
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>

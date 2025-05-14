@@ -21,5 +21,7 @@ namespace Services.DailyNutritionServices
         public DailyNutritionResponseModel dailyNutrition { get; set; }
 
         Task<bool> AggregateAndCloseAsync(int dailyNutritionId);
+
+        Task<List<DailyNutritionResponseModel>> GetClosedDailyNutritionListByUserId(int userID);
     }
 }
