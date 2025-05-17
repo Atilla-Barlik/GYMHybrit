@@ -137,7 +137,10 @@ else
                         </table>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Kayıt Yap</button>
+                if(user.CurrentUserId > 0)
+                {
+                    <button type="submit" class="btn btn-primary">Kayıt Yap</button>
+                }
             }
             else
             {
@@ -149,7 +152,7 @@ else
 }
 
 
-
+@inject LocalAuthStateProvider user
 @code {
     [Inject] INutrientService NutrientService { get; set; }
     [Inject] IDailyNutritionService DailyNutritionService { get; set; }
@@ -158,7 +161,8 @@ else
     public NutrientResponseModel? nutrient;
     public NutrientResponseModel? nutrient2;
     public AddUpdateDailyNutritionDetailsRequest? AddDailyNutritionDetails;
-    public DailyNutritionResponseModel dailyNutritionId; 
+    public DailyNutritionResponseModel dailyNutritionId;
+    
     private int _userInputWeight = 100; // Varsayılan olarak 100 gram
     public int userInputWeight
     {

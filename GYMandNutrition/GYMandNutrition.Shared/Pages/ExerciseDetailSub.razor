@@ -5,6 +5,7 @@
 @using global::Services.ExerciseDetailServise
 @inject IJSRuntime js
 @inject NavigationManager nm
+@inject LocalAuthStateProvider user
 @if(exercise != null)
 {
     <!-- Gray background container -->
@@ -271,7 +272,11 @@
                         </div>
                         
                     </form>
-                    <button id="toastbtn" class="btn btn-primary w-100" @onclick="SubmitExerciseProgram">Kaydet</button>
+                    @if (user.CurrentUserId > 0)
+                    {
+                        <button id="toastbtn" class="btn btn-primary w-100" @onclick="SubmitExerciseProgram">Kaydet</button>
+                    }
+                    
                 </div>
             </div>
 

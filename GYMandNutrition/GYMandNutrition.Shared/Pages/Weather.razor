@@ -246,7 +246,7 @@
 @inject ISnackbar Snackbar
 @using MudBlazor
 @using Entities.DailyMacroEntities
-
+@inject LocalAuthStateProvider user
 <PageTitle>Günlük Kalori ve Makro</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
@@ -320,9 +320,12 @@
             <MudListItem>Yağ: <b>@Fat g</b></MudListItem>
             <MudListItem>Karbonhidrat: <b>@Carbohydrate g</b></MudListItem>
           </MudList>
-          <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="SaveNutrition" Class="mt-3">
-            Kaydet
-          </MudButton>
+                    @if (user.CurrentUserId > 0)
+                    {
+                        <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="SaveNutrition" Class="mt-3">
+                            Kaydet
+                        </MudButton>
+                    }
         </MudPaper>
       }
     </MudPaper>

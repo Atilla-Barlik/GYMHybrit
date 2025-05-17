@@ -552,6 +552,7 @@ else
 @using global::Services.AppUserExerciseProgramServise
 @inject NavigationManager navigationManager
 @inject IAppUserExerciseProgramService appUserExerciseProgramService
+@attribute [Authorize]
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-5">
     <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">🏋️ Egzersiz Programları</MudText>

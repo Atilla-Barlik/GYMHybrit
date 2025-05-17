@@ -449,12 +449,14 @@ else
 
 
 
+@attribute [Authorize]
 @inject IDailyMacroService dailyMacroService
 @inject IDailyNutritionDetailsService dailyNutritionDetailsService
 @inject ISnackbar Snackbar
 @inject IAppUserService appUserService
 @inject IAppUserDetailService appUserDetailService
 @inject IAppUserExerciseProgramService appUserExerciseProgramService
+
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
     @if (!loaded)
     {

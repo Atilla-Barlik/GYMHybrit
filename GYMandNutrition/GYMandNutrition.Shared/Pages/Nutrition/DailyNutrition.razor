@@ -189,7 +189,7 @@ else
 
 
 
-
+@attribute [Authorize]
 @using Entities.DailyNutritionEntities
 @inject IDailyNutritionDetailsService DailyNutritionDetailsService
 @inject ISnackbar Snackbar
@@ -392,7 +392,7 @@ else
                     MealTime = g.Key,
                     Items = g.Value
                 }).ToList();
-
+                
         // Her zaman boş bir slotu en alta ekle
         if (mealGroupList.Count < MaxGroups)
         {

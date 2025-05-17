@@ -13,20 +13,45 @@ namespace Services.AuthServices
     public class AuthService : IAuthService
     {
         private string _baseURL = "https://localhost:7149";
-        private readonly HttpClient _http;
+        
+        //public async Task<int> LoginAsync(LoginRequest request)
+        //{
+        //    var response = await _http.PostAsJsonAsync("api/Auth/login", request);
+        //    if (!response.IsSuccessStatusCode)
+        //        return 0;
 
-        public AuthService(HttpClient http)
-        {
-            _http = http;
-        }
+        //    var payload = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        //    return payload?.UserId ?? 0;
+        //}
+
         public async Task<int> LoginAsync(LoginRequest request)
         {
-            var response = await _http.PostAsJsonAsync("api/Auth/login", request);
-            if (!response.IsSuccessStatusCode)
-                return 0;
+            var returnResponse = false;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/Auth/login";
 
-            var payload = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            return payload?.UserId ?? 0;
+                    var serializeContent = JsonConvert.SerializeObject(request);
+
+                    var apiResponse = await client.PostAsync(url, new StringContent(serializeContent, Encoding.UTF8, "application/json"));
+                    var response = await apiResponse.Content.ReadFromJsonAsync<LoginResponse>();
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+
+                        return response.UserId;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return 0;
         }
     }
 }

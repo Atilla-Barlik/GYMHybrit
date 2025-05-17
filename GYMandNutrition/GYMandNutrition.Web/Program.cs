@@ -39,6 +39,7 @@ builder.Services.AddSingleton<IStatisticService, StatisticService>();
 builder.Services.AddSingleton<IDailyMacroService, DailyMacroService>();
 builder.Services.AddSingleton<IAppUserService, AppUserService>();
 builder.Services.AddSingleton<IAppUserDetailService, AppUserDetailService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddSingleton<MealTimeService>();
 builder.Services.AddScoped<ProtectedLocalStorage>();
 builder.Services.AddBlazoredLocalStorage();
@@ -47,12 +48,7 @@ builder.Services.AddScoped<LocalAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(x =>x.GetRequiredService<LocalAuthStateProvider>());
 builder.Services.AddMudBlazorResizeListener();
 builder.Services.AddRazorPages();
-builder.Services.AddHttpClient();
-builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]
-                                 ?? "https://localhost:7149/");
-});
+
 
 builder.Services.AddMudServices(config =>
 {
