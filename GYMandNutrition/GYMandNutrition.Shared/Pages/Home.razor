@@ -4,59 +4,114 @@
 @using global::Services.NutrientServices
 @using Entities.NutrientEntities
 @inject INutrientService NutrientService
+@inject NavigationManager NavManager
 
 
-<PageTitle>Home</PageTitle>
 
-@if (_nutrientList == null)
-{
-	<p>Loading...</p>
-}
-else
-{
+@using MudBlazor
 
-	<div class="table-responsive">
-		<table class="table">
-			<thead>
-				<tr>
-					<th>Besin Adı</th>
-					<th>Kalori</th>
-					<th>Protein</th>
-					<th>Karbonhidrat</th>
-					<th>Yağ</th>
-				</tr>
-			</thead>
-			<tbody>
-				@foreach (var nutrient in _nutrientList)
-				{
-					<tr>
-						<td>@nutrient.Name</td>
-						<td>@nutrient.kcal</td>
-						<td>@nutrient.protein</td>
-						<td>@nutrient.carbonhydrate</td>
-						<td>@nutrient.fat</td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	</div>
-}
-
-Welcome to your new app running on <em>@factor</em> using <em>@platform</em>.
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid GutterSpacing="3">
+        @foreach (var entry in Tabs.Select((tab, idx) => new { tab, idx }))
+        {
+            <MudItem xs="12">
+                <MudNavLink Href="@entry.tab.Url" Style="text-decoration:none;">
+                    <MudCard Elevation="1" Outlined="true" Class="mb-4">
+                        <MudGrid GutterSpacing="2" AlignItems="Center">
+                            @if (entry.idx % 2 == 0)
+                            {
+                                <MudItem xs="12" md="4">
+                                    <MudCardMedia Image="@entry.tab.ImageSrc" Alt="@entry.tab.Title" Height="200" />
+                                </MudItem>
+                                <MudItem xs="12" md="8">
+                                    <MudCardContent Style="padding-left:16px">
+                                        <MudText Typo="Typo.h6">@entry.tab.Title</MudText>
+                                        <MudText>@entry.tab.Description</MudText>
+                                    </MudCardContent>
+                                </MudItem>
+                            }
+                            else
+                            {
+                                <MudItem xs="12" md="8">
+                                    <MudCardContent Style="padding-right:16px">
+                                        <MudText Typo="Typo.h6">@entry.tab.Title</MudText>
+                                        <MudText Align="Align.Left">@entry.tab.Description</MudText>
+                                    </MudCardContent>
+                                </MudItem>
+                                <MudItem xs="12" md="4">
+                                    <MudCardMedia Image="@entry.tab.ImageSrc" Alt="@entry.tab.Title" Height="200" />
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </MudCard>
+                </MudNavLink>
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
 
 @code {
-	private string factor => FormFactor.GetFormFactor();
-	private string platform => FormFactor.GetPlatform();
+    // Menü kartlarını tanımladığın model
+    private class TabItem
+    {
+        public string Title { get; set; }
+        public string Url { get; set; }
+        public string ImageSrc { get; set; }
+        public string Description { get; set; }
+    }
 
-	private List<NutrientResponseModel>? _nutrientList;
-
-	protected override async Task OnInitializedAsync()
-	{
-
-		await base.OnInitializedAsync();
-
-		//_nutrientList = await NutrientService.GetAllNutrientList();
-		_nutrientList = await NutrientService.GetNutrientDetailByName("elma");
-
-	}
+    // Buraya sekme bilgilerini ekle
+    private List<TabItem> Tabs = new()
+    {
+        new TabItem
+        {
+            Title       = "Vücut Kitle Endeksi",
+            Url         = "/counter",
+            ImageSrc    = "https://www.drfaki.com/assets/images/boy-kilo-endeksi.jpg",
+            Description = "Vücut Kitle Endeksi (BMI), kilonuzun boyunuza oranla sağlıklı aralıkta olup olmadığını gösterir."
+        },
+        new TabItem
+        {
+            Title       = "Kalori Hesap",
+            Url         = "/nutrition-calculator",
+            ImageSrc    = "https://www.thebodylabtr.com/wp-content/uploads/2015/05/macros.jpg",
+            Description = "Günlük kalori ihtiyacınızı Harris-Benedict denklemiyle hesaplayın."
+        },
+        new TabItem
+        {
+            Title       = "Besin Ara",
+            Url         = "/NutritionSearch",
+            ImageSrc    = "https://www.bilimup.com/uploads/galeri/gorsel/makromolekuller-karbonhidrat-lipit-ve-yaglar-jpeg-TL3F.webp",
+            Description = "Veritabanımızdaki besinleri isim, kalori veya makro değerlerine göre filtreleyin."
+        },
+        new TabItem
+        {
+            Title       = "Besin Listesi",
+            Url         = "/DailyNutritionList",
+            ImageSrc    = "https://www.365gun.com/sites/g/files/vrxlpx32371/files/styles/desktop_1000xauto/public/2021-03/besin-rehberi.jpg?itok=iXUzoCMd",
+            Description = "Günlük eklediğiniz besinlerin toplamını ve detaylarını burada görüntüleyin."
+        },
+        new TabItem
+        {
+            Title       = "Profil",
+            Url         = "/userProfile",
+            ImageSrc    = "https://st4.depositphotos.com/30046358/38676/v/950/depositphotos_386769762-stock-illustration-sportsman-flat-concept-vector-illustration.jpg",
+            Description = "Kişisel bilgilerinizi ve hedef makro/kalori değerlerinizi yönetin."
+        },
+        new TabItem
+        {
+            Title       = "Egzersiz Listesi",
+            Url         = "/UserExerciseList",
+            ImageSrc    = "https://st2.depositphotos.com/2535571/6621/v/450/depositphotos_66214253-stock-illustration-set-of-vintage-fitness-designed.jpg",
+            Description = "Egzersiz programınızda yer alan hareketleri ve yaktığınız kaloriyi görüntüleyin."
+        },
+        new TabItem
+        {
+            Title       = "İstatistik",
+            Url         = "/exercise-statistics",
+            ImageSrc    = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDNZJI2Xd7f22jKZSVwhQ424UpL2EzXoNBsg&s",
+            Description = "Egzersiz ve beslenme verilerinize dair grafiksel analizleri inceleyin."
+        },
+       
+    };
 }
