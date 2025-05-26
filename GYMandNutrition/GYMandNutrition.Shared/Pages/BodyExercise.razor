@@ -3,7 +3,7 @@
 @using global::Services.ExerciseServices
 @inject NavigationManager NavigationManager
 
-@if(@Exercises == null)
+@* @if(@Exercises == null)
 {
     <p>Yükleniyor</p>
 }
@@ -19,7 +19,7 @@ else
                         <a @onclick="() => NavigateToDetail(exercise.ExerciseId)" style="text-decoration:none;">
                             <img src="@exercise.ExerciseImage" class="card-img-top exercise-img" alt="@exercise.ExerciseName">
                             <div class="card-body">
-                                <h5 class="card-title">@exercise.ExerciseName</h5>
+                                <h5 class="card-title" >@exercise.ExerciseName</h5>
                             </div>
                         </a>
                     </div>
@@ -48,9 +48,49 @@ else
 
 <style>
     .exercise-img {
-        height: 200px; /* Set a fixed height for all images */
-        object-fit: cover; /* Ensures images fit within the height and width without distortion */
+        height: 250px; /* Set a fixed height for all images */
+        object-fit: contain; /* Ensures images fit within the height and width without distortion */
         width: 100%; /* Ensures the image takes up the full width of the card */
     }
-</style>
+</style> *@
 
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">Vücut Bölümleri</MudText>
+
+    @if (Exercises == null)
+    {
+        <MudProgressCircular Indeterminate="true" Color="Color.Primary" Class="d-block mx-auto my-6" />
+    }
+    else
+    {
+        <MudGrid GutterSpacing="3">
+            @foreach (var exercise in Exercises)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudNavLink Href="@($"/exercise-list/{exercise.ExerciseId}")" Style="text-decoration:none">
+                        <MudCard Elevation="1" Class="mb-4">
+                            <MudCardMedia Image="@exercise.ExerciseImage" Alt="@exercise.ExerciseName" Height="250" />
+                            <MudCardContent>
+                                <MudText Typo="Typo.h6" Align="Align.Center">@exercise.ExerciseName</MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudNavLink>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    private List<ExerciseResponseModel> Exercises;
+    [Inject] IExerciseService exerciseService { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        Exercises = await exerciseService.GetAllExercises();
+    }
+
+    void NavigateToDetail(int id)
+    {
+        NavigationManager.NavigateTo($"/exercise-list/{id}");
+    }
+}

@@ -10,20 +10,20 @@
 
 @using MudBlazor
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-    <MudGrid GutterSpacing="3">
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-2">
+    <MudGrid Spacing="3">
         @foreach (var entry in Tabs.Select((tab, idx) => new { tab, idx }))
         {
             <MudItem xs="12">
                 <MudNavLink Href="@entry.tab.Url" Style="text-decoration:none;">
-                    <MudCard Elevation="1" Outlined="true" Class="mb-4">
-                        <MudGrid GutterSpacing="2" AlignItems="Center">
+                    <MudCard Elevation="1" Outlined="true" Class="mb-md-2">
+                        <MudGrid Spacing="4" Justify="Justify.Center">
                             @if (entry.idx % 2 == 0)
                             {
-                                <MudItem xs="12" md="4">
-                                    <MudCardMedia Image="@entry.tab.ImageSrc" Alt="@entry.tab.Title" Height="200" />
+                                <MudItem xs="8" md="4">
+                                    <MudImage Src="@entry.tab.ImageSrc" Alt="@entry.tab.Title" Height="250" Width="250" Elevation="25" Class="rounded-lg ma-4" Fluid="true" />
                                 </MudItem>
-                                <MudItem xs="12" md="8">
+                                <MudItem xs="8" md="4">
                                     <MudCardContent Style="padding-left:16px">
                                         <MudText Typo="Typo.h6">@entry.tab.Title</MudText>
                                         <MudText>@entry.tab.Description</MudText>
@@ -32,14 +32,14 @@
                             }
                             else
                             {
-                                <MudItem xs="12" md="8">
+                                <MudItem xs="8" md="4">
                                     <MudCardContent Style="padding-right:16px">
                                         <MudText Typo="Typo.h6">@entry.tab.Title</MudText>
                                         <MudText Align="Align.Left">@entry.tab.Description</MudText>
                                     </MudCardContent>
                                 </MudItem>
-                                <MudItem xs="12" md="4">
-                                    <MudCardMedia Image="@entry.tab.ImageSrc" Alt="@entry.tab.Title" Height="200" />
+                                <MudItem xs="8" md="4">
+                                    <MudImage Src="@entry.tab.ImageSrc" Alt="@entry.tab.Title" Height="250" Width="250" Elevation="25" Class="rounded-lg ma-4" Fluid="true" />
                                 </MudItem>
                             }
                         </MudGrid>
@@ -67,49 +67,57 @@
         {
             Title       = "Vücut Kitle Endeksi",
             Url         = "/counter",
-            ImageSrc    = "https://www.drfaki.com/assets/images/boy-kilo-endeksi.jpg",
+            ImageSrc    = "https://raw.githubusercontent.com/Atilla-Barlik/images/refs/heads/main/MainScreen/ibm.png",
             Description = "Vücut Kitle Endeksi (BMI), kilonuzun boyunuza oranla sağlıklı aralıkta olup olmadığını gösterir."
         },
         new TabItem
         {
             Title       = "Kalori Hesap",
             Url         = "/nutrition-calculator",
-            ImageSrc    = "https://www.thebodylabtr.com/wp-content/uploads/2015/05/macros.jpg",
+            ImageSrc    = "https://raw.githubusercontent.com/Atilla-Barlik/images/refs/heads/main/MainScreen/calculateCalories.png",
             Description = "Günlük kalori ihtiyacınızı Harris-Benedict denklemiyle hesaplayın."
         },
         new TabItem
         {
             Title       = "Besin Ara",
             Url         = "/NutritionSearch",
-            ImageSrc    = "https://www.bilimup.com/uploads/galeri/gorsel/makromolekuller-karbonhidrat-lipit-ve-yaglar-jpeg-TL3F.webp",
+            ImageSrc    = "https://raw.githubusercontent.com/Atilla-Barlik/images/refs/heads/main/MainScreen/nutrientSearch.png",
             Description = "Veritabanımızdaki besinleri isim, kalori veya makro değerlerine göre filtreleyin."
         },
         new TabItem
         {
             Title       = "Besin Listesi",
             Url         = "/DailyNutritionList",
-            ImageSrc    = "https://www.365gun.com/sites/g/files/vrxlpx32371/files/styles/desktop_1000xauto/public/2021-03/besin-rehberi.jpg?itok=iXUzoCMd",
+            ImageSrc    = "https://raw.githubusercontent.com/Atilla-Barlik/images/refs/heads/main/MainScreen/nutrientList.png",
             Description = "Günlük eklediğiniz besinlerin toplamını ve detaylarını burada görüntüleyin."
         },
         new TabItem
         {
             Title       = "Profil",
             Url         = "/userProfile",
-            ImageSrc    = "https://st4.depositphotos.com/30046358/38676/v/950/depositphotos_386769762-stock-illustration-sportsman-flat-concept-vector-illustration.jpg",
+            ImageSrc    = "https://raw.githubusercontent.com/Atilla-Barlik/images/refs/heads/main/MainScreen/profile.png",
             Description = "Kişisel bilgilerinizi ve hedef makro/kalori değerlerinizi yönetin."
+        },
+        new TabItem
+        {
+            Title       = "Egzersizler",
+            Url         = "/body-exercise",
+            ImageSrc    = "https://raw.githubusercontent.com/Atilla-Barlik/images/refs/heads/main/MainScreen/exercise.png",
+            Description = "Kendi egzersiz programınızı oluşturabilirsiniz."
         },
         new TabItem
         {
             Title       = "Egzersiz Listesi",
             Url         = "/UserExerciseList",
-            ImageSrc    = "https://st2.depositphotos.com/2535571/6621/v/450/depositphotos_66214253-stock-illustration-set-of-vintage-fitness-designed.jpg",
+            ImageSrc    = "https://raw.githubusercontent.com/Atilla-Barlik/images/refs/heads/main/MainScreen/exerciseList.png",
             Description = "Egzersiz programınızda yer alan hareketleri ve yaktığınız kaloriyi görüntüleyin."
         },
+        
         new TabItem
         {
             Title       = "İstatistik",
             Url         = "/exercise-statistics",
-            ImageSrc    = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDNZJI2Xd7f22jKZSVwhQ424UpL2EzXoNBsg&s",
+            ImageSrc    = "https://raw.githubusercontent.com/Atilla-Barlik/images/refs/heads/main/MainScreen/statistics.png",
             Description = "Egzersiz ve beslenme verilerinize dair grafiksel analizleri inceleyin."
         },
        
