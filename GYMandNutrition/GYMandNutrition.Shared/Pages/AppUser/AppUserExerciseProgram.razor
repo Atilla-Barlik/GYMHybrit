@@ -561,7 +561,7 @@ else
     {
         @foreach (var group in GroupedExercises)
         {
-            var totalCalories = group.Sum(ex => ex.ExerciseTotalBurnedKcal);
+            var totalCalories = group.Where(ex=>ex.ExerciseDone).Sum(ex => ex.ExerciseTotalBurnedKcal);
             <MudPaper Class="mb-5" Elevation="3" >
                 <MudStack Direction="Row" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="p-3 text-white rounded-top" Style="background-color: #5E35B1;">
                     <MudText Typo="Typo.h6">
@@ -577,7 +577,11 @@ else
                     @foreach (var exercise in group)
                     {
                         <MudItem xs="12" sm="6" md="4">
-                            <MudCard Class="h-100 hover:shadow-lg">
+                            <MudCard Class="h-100 hover:shadow-lg" Style=@($"background-color:{(exercise.ExerciseDone ? "#d4edda" : "#f8d7da")}")>
+                                <MudIconButton Icon="@(exercise.ExerciseDone ? Icons.Material.Filled.Remove : Icons.Material.Filled.Add)"
+                                               Color="Color.Primary"
+                                               Size="Size.Medium"
+                                               OnClick="@(() => ToggleDone(exercise))" />
                                 <MudCardContent>
                                     <MudText Typo="Typo.h6" Align="Align.Center" GutterBottom="true">🏋️ @exercise.ExerciseDetailDto.Name</MudText>
                                     <MudList T="string" Dense="true">
@@ -596,6 +600,7 @@ else
                     }
                 </MudGrid>
             </MudPaper>
+            
         }
     }
     else
@@ -646,6 +651,7 @@ else
             </MudGrid>
         </MudPaper>
     </div>
+    
 }
 
 
@@ -680,6 +686,7 @@ else
             ExerciseRepeat = combinedData.ExerciseRepeat,
             ExerciseSet = combinedData.ExerciseSet,
             ExerciseWeight = combinedData.ExerciseWeight,
+            ExerciseDone = combinedData.ExerciseDone,
             ExerciseTotalBurnedKcal = combinedData.ExerciseTotalBurnedKcal,
             ExerciseDetailId = combinedData.ExerciseDetailDto.ExerciseDetailId,
             AppUserId = combinedData.AppUserId,
@@ -701,6 +708,7 @@ else
             ExerciseRepeat = exercise.ExerciseRepeat,
             ExerciseSet = exercise.ExerciseSet,
             ExerciseWeight = exercise.ExerciseWeight,
+            ExerciseDone = exercise.ExerciseDone,
             ExerciseTotalBurnedKcal = exercise.ExerciseTotalBurnedKcal,
             ExerciseDetailId = exercise.ExerciseDetailDto.ExerciseDetailId,
             AppUserId = exercise.AppUserId,
@@ -726,5 +734,30 @@ else
         combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails(1);
         localCombinedExerciseProgramData = combinedExerciseDataResponseModels;
         StateHasChanged();
+    }
+
+    private async Task ToggleDone(CombinedExerciseDataResponseModel ex)
+    {
+        // 1) UI’da anında değişsin
+        ex.ExerciseDone = !ex.ExerciseDone;
+
+        // 2) DB’ye güncelle
+        var req = new AddUpdateAppUserExerciseProgramRequest
+            {
+                AppUserExerciseProgramId = ex.AppUserExerciseProgramId,
+                ExerciseSet = ex.ExerciseSet,
+                ExerciseRepeat = ex.ExerciseRepeat,
+                ExerciseWeight = ex.ExerciseWeight,
+                ExerciseDone = ex.ExerciseDone,
+                ExerciseTotalBurnedKcal = ex.ExerciseTotalBurnedKcal,
+                ExerciseDetailId = ex.ExerciseDetailDto.ExerciseDetailId,
+                AppUserId = ex.AppUserId,
+                DayNo = ex.DayNo,
+                Date = ex.Date
+            };
+        await appUserExerciseProgramService.UpdateAppUserExerciseProgram(req);
+
+        // 3) isteğe bağlı: veriyi yeniden yükle
+        // await ReloadExerciseData();
     }
 }

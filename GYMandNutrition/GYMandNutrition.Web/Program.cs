@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using GYMandNutrition.Shared.Services;
 using GYMandNutrition.Web.Components;
 using GYMandNutrition.Web.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +49,7 @@ builder.Services.AddScoped<LocalAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(x =>x.GetRequiredService<LocalAuthStateProvider>());
 builder.Services.AddMudBlazorResizeListener();
 builder.Services.AddRazorPages();
+builder.Services.AddAuthorization();
 
 
 builder.Services.AddMudServices(config =>
@@ -79,7 +81,7 @@ builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
     options.DetailedErrors = true;
 });
 
-	
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

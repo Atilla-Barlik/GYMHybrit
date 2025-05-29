@@ -129,7 +129,7 @@ namespace Services.AppUserExerciseProgramServise
 
                     var apiResponse = await client.PutAsync(url, new StringContent(serializeContent, Encoding.UTF8, "application/json"));
 
-                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.NoContent)
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
                     {
 
                         return true;
