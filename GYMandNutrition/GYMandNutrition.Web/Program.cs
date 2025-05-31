@@ -12,6 +12,7 @@ using Services.AppUserDetailServices;
 using Services.AppUserExerciseProgramServise;
 using Services.AppUserServices;
 using Services.AuthServices;
+using Services.AvgKcalDailyServices;
 using Services.DailyMacroServices;
 using Services.DailyNutritionDetailsService;
 using Services.DailyNutritionServices;
@@ -50,7 +51,7 @@ builder.Services.AddScoped<AuthenticationStateProvider>(x =>x.GetRequiredService
 builder.Services.AddMudBlazorResizeListener();
 builder.Services.AddRazorPages();
 builder.Services.AddAuthorization();
-
+builder.Services.AddSingleton<IAvgKcalDailyService, AvgKcalDailyService>();
 
 builder.Services.AddMudServices(config =>
 {

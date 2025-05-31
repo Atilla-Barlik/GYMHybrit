@@ -1,4 +1,5 @@
 ﻿@page "/exercise-statistics"
+@using Entities.AvgKcalDailyEntities
 @using Entities.UserExerciseProgramEntities
 @using System.Globalization
 @using global::Services.StatisticServices
@@ -97,9 +98,42 @@ else
 @attribute [Authorize]
 @inject IStatisticService StatisticService
 @inject IDailyNutritionService dailyNutritionService
+@inject IAvgKcalDailyService avgKcalDailyService
 
+
+<h3 class="text-center my-4">🍽️ Günlük Kalori Özetleri</h3>
+
+@if (avgKcalDailyResponseModels == null)
+{
+    <p class="text-center text-muted">🔄 Veriler yükleniyor...</p>
+}
+else if (!avgKcalDailyResponseModels.Any())
+{
+    <p class="text-center text-muted">📭 Henüz veri yok.</p>
+}
+else
+{
+    <MudCard Class="mx-auto" Style="max-width:800px;">
+        <MudCardHeader>
+            <MudText Typo="Typo.h6">Kullanıcı Günlük Kalori Dengesi</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudChart ChartType="MudBlazor.ChartType.Line"
+            ChartSeries="@avgSeries"
+            XAxisLabels="@avgLabels"
+            ChartOptions="_avgOptions"
+            Width="100%"
+            Height="400px"
+            CanHideSeries="true" />
+            <div class="d-flex justify-space-between mt-2">
+                <MudButton Variant="Variant.Text" Disabled="@(avgKcalDailyPage == 0)" OnClick="PrevAvgKcalDaily">← Önceki</MudButton>
+                <MudText Typo="Typo.caption">Sayfa @avgKcalDailyPage+1</MudText>
+                <MudButton Variant="Variant.Text" Disabled="@((avgKcalDailyPage+1)*avgKcalDailyPage >= avgKcalDailyTotalCount)" OnClick="NextAvgKcalDaily">Sonraki →</MudButton>
+            </div>
+        </MudCardContent>
+    </MudCard>
+}
 <h3 class="text-center my-4">🍽️ Günlük Beslenme Trendleri</h3>
-
 @if (allData is null)
 {
     <p class="text-center text-muted">🔄 Beslenme verileri yükleniyor...</p>
@@ -119,10 +153,10 @@ else
                 </MudCardHeader>
                 <MudCardContent>
                     <MudChart ChartType="MudBlazor.ChartType.Line"
-                              ChartSeries="@calorieSeries"
-                              XAxisLabels="@calorieLabels"
-                              ChartOptions="_options_Kcal"
-                              Width="100%" Height="300px" CanHideSeries/>
+                    ChartSeries="@calorieSeries"
+                    XAxisLabels="@calorieLabels"
+                    ChartOptions="_options_Kcal"
+                    Width="100%" Height="300px" CanHideSeries/>
                     <div class="d-flex justify-space-between mt-2">
                         <MudButton Variant="Variant.Text" Disabled="@(caloriePage == 0)" OnClick="PrevCalorie">← Önceki</MudButton>
                         <MudText Typo="Typo.caption">Sayfa @caloriePage+1</MudText>
@@ -141,13 +175,13 @@ else
                 </MudCardHeader>
                 <MudCardContent>
                     <MudChart ChartType="MudBlazor.ChartType.Line"
-                              ChartSeries="@macroSeries"
-                              XAxisLabels="@macroLabels"
-                              ChartOptions="_options2"
-                              Width="100%" Height="300px" CanHideSeries/>
+                    ChartSeries="@macroSeries"
+                    XAxisLabels="@macroLabels"
+                    ChartOptions="_options2"
+                    Width="100%" Height="300px" CanHideSeries/>
                     <div class="d-flex justify-space-between mt-2">
                         <MudButton Variant="Variant.Text" Disabled="@(macroPage == 0)" OnClick="PrevMacro">← Önceki</MudButton>
-                        <MudText Typo="Typo.caption">Sayfa @macroPage+1</MudText>
+                        <MudText Typo="Typo.caption">Sayfa @(macroPage+1)</MudText>
                         <MudButton Variant="Variant.Text" Disabled="@((macroPage+1)*pageSize >= totalCount)" OnClick="NextMacro">Sonraki →</MudButton>
                     </div>
                     <MudSlider @bind-Value="_options2.YAxisTicks" Min="0" Max="500" Step="1" Color="Color.Info">Besin değer gösterimi: @_options2.YAxisTicks.ToString()</MudSlider>
@@ -206,6 +240,7 @@ else
 
 @code {
     private List<ExerciseStatisticsModel> exerciseStatistics;
+    private List<AvgKcalDailyResponseModel> avgKcalDailyResponseModels;
     private readonly MudBlazor.ChartOptions _options = new() { YAxisTicks = 1 };
     private readonly MudBlazor.ChartOptions _options2 = new() { YAxisTicks = 1 };
     private readonly MudBlazor.ChartOptions _options_Kcal = new() { YAxisTicks = 1 };
@@ -217,18 +252,28 @@ else
     private string[] nutritionDates;
     private List<DailyNutritionResponseModel> allData;
     private int pageSize2 = 5;
+    private int pageSizeAvgKcal = 10;
+    private int avgKcalDailyTotalCount => avgKcalDailyResponseModels?.Count ?? 0;
     private int totalCount => allData?.Count ?? 0;
 
     private int caloriePage = 0;
     private int macroPage = 0;
+    private int avgKcalDailyPage = 0;
 
     private List<ChartSeries> calorieSeries = new();
     private string[] calorieLabels = Array.Empty<string>();
 
     private List<ChartSeries> macroSeries = new();
     private string[] macroLabels = Array.Empty<string>();
+
+
+    private List<ChartSeries> avgSeries = new();
+    private string[] avgLabels = Array.Empty<string>();
     protected override async Task OnInitializedAsync()
     {
+        //Günlük Kalori Verileri
+        avgKcalDailyResponseModels = await avgKcalDailyService.GetAppUserExerciseProgramDetails(1);
+        
         // 1) Beslenme verilerini çek ve hazırlık yap
         allData = await dailyNutritionService.GetClosedDailyNutritionListByUserId(1);
         // tarihlere göre artan sırala (API zaten artan sıralı döndürüyor, ekstra güvenlik için):
@@ -237,6 +282,7 @@ else
             .ThenBy(n => n.DailyNutritionID)
             .ToList();
 
+        UpdateAvgKcalDailyChart();
         UpdateCalorieChart();
         UpdateMacroChart();
         exerciseStatistics = await StatisticService.GetAllExercisesStatistics();
@@ -270,6 +316,10 @@ else
 
         StateHasChanged();
     }
+    private readonly MudBlazor.ChartOptions _avgOptions = new()
+        {
+            YAxisTicks = 100,   // isteğe göre ayarlayabilirsiniz
+        };
 
     private List<ChartSeries> GetChartSeries(List<ExerciseStatisticsModel> data)
     {
@@ -340,6 +390,35 @@ else
         };
     }
 
+    private void UpdateAvgKcalDailyChart()
+    {
+        var pageData = avgKcalDailyResponseModels.Skip(avgKcalDailyPage * pageSizeAvgKcal).Take(pageSizeAvgKcal).ToList();
+        avgLabels = pageData.Select(a => a.Date.ToString("MM-dd")).ToArray();
+        avgSeries = new List<ChartSeries>
+        {
+             new ChartSeries
+            {
+                Name = "Makro (-)",
+                Data = pageData.Select(d => (double)-d.DailyMacro).ToArray()
+            },
+            new ChartSeries
+            {
+                Name = "Yakılan Kalori (-)",
+                Data = pageData.Select(d => (double)-d.BurnKcal).ToArray()
+            },
+            new ChartSeries
+            {
+                Name = "Alınan Kalori (+)",
+                Data = pageData.Select(d => (double)d.DailyTakenKcal).ToArray()
+            },
+            new ChartSeries
+            {
+                Name = "Sonuç Kalori",
+                Data = pageData.Select(d => (double)d.ResultKcal).ToArray()
+            }
+        };
+    }
+
     private void PrevCalorie()
     {
         if (caloriePage > 0) caloriePage--;
@@ -362,6 +441,18 @@ else
     {
         if ((macroPage + 1) * pageSize < totalCount) macroPage++;
         UpdateMacroChart();
+    }
+
+    private void PrevAvgKcalDaily()
+    {
+        if (avgKcalDailyPage > 0) avgKcalDailyPage--;
+        UpdateAvgKcalDailyChart();
+    }
+
+    private void NextAvgKcalDaily()
+    {
+        if ((avgKcalDailyPage + 1) * pageSizeAvgKcal < avgKcalDailyTotalCount) avgKcalDailyPage++;
+        UpdateAvgKcalDailyChart();
     }
 }
 
