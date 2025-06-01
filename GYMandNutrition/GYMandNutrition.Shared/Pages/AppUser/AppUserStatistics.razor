@@ -95,101 +95,110 @@ else
 
 
 
-@attribute [Authorize]
+
 @inject IStatisticService StatisticService
 @inject IDailyNutritionService dailyNutritionService
 @inject IAvgKcalDailyService avgKcalDailyService
 
+<AuthorizeView>
+    <Authorized>
+        <h3 class="text-center my-4">🍽️ Günlük Kalori Özetleri</h3>
 
-<h3 class="text-center my-4">🍽️ Günlük Kalori Özetleri</h3>
-
-@if (avgKcalDailyResponseModels == null)
-{
-    <p class="text-center text-muted">🔄 Veriler yükleniyor...</p>
-}
-else if (!avgKcalDailyResponseModels.Any())
-{
-    <p class="text-center text-muted">📭 Henüz veri yok.</p>
-}
-else
-{
-    <MudCard Class="mx-auto" Style="max-width:800px;">
-        <MudCardHeader>
-            <MudText Typo="Typo.h6">Kullanıcı Günlük Kalori Dengesi</MudText>
-        </MudCardHeader>
-        <MudCardContent>
-            <MudChart ChartType="MudBlazor.ChartType.Line"
-            ChartSeries="@avgSeries"
-            XAxisLabels="@avgLabels"
-            ChartOptions="_avgOptions"
-            Width="100%"
-            Height="400px"
-            CanHideSeries="true" />
-            <div class="d-flex justify-space-between mt-2">
-                <MudButton Variant="Variant.Text" Disabled="@(avgKcalDailyPage == 0)" OnClick="PrevAvgKcalDaily">← Önceki</MudButton>
-                <MudText Typo="Typo.caption">Sayfa @avgKcalDailyPage+1</MudText>
-                <MudButton Variant="Variant.Text" Disabled="@((avgKcalDailyPage+1)*avgKcalDailyPage >= avgKcalDailyTotalCount)" OnClick="NextAvgKcalDaily">Sonraki →</MudButton>
-            </div>
-        </MudCardContent>
-    </MudCard>
-}
-<h3 class="text-center my-4">🍽️ Günlük Beslenme Trendleri</h3>
-@if (allData is null)
-{
-    <p class="text-center text-muted">🔄 Beslenme verileri yükleniyor...</p>
-}
-else if (!allData.Any())
-{
-    <p class="text-center text-muted">📭 Henüz kapalı günlük beslenme verisi yok.</p>
-}
-else
-{
-    <MudGrid GutterSize="3">
-        <!-- Kalori Grafiği -->
-        <MudItem xs="12" md="6">
-            <MudCard>
+        @if (avgKcalDailyResponseModels == null)
+        {
+            <p class="text-center text-muted">🔄 Veriler yükleniyor...</p>
+        }
+        else if (!avgKcalDailyResponseModels.Any())
+        {
+            <p class="text-center text-muted">📭 Henüz veri yok.</p>
+        }
+        else
+        {
+            <MudCard Class="mx-auto" Style="max-width:800px;">
                 <MudCardHeader>
-                    <MudText Typo="Typo.h6">Kalori Zaman Serisi</MudText>
+                    <MudText Typo="Typo.h6">Kullanıcı Günlük Kalori Dengesi</MudText>
                 </MudCardHeader>
                 <MudCardContent>
                     <MudChart ChartType="MudBlazor.ChartType.Line"
-                    ChartSeries="@calorieSeries"
-                    XAxisLabels="@calorieLabels"
-                    ChartOptions="_options_Kcal"
-                    Width="100%" Height="300px" CanHideSeries/>
+                              ChartSeries="@avgSeries"
+                              XAxisLabels="@avgLabels"
+                              ChartOptions="_avgOptions"
+                              Width="100%"
+                              Height="400px"
+                              CanHideSeries="true" />
                     <div class="d-flex justify-space-between mt-2">
-                        <MudButton Variant="Variant.Text" Disabled="@(caloriePage == 0)" OnClick="PrevCalorie">← Önceki</MudButton>
-                        <MudText Typo="Typo.caption">Sayfa @caloriePage+1</MudText>
-                        <MudButton Variant="Variant.Text" Disabled="@((caloriePage+1)*pageSize >= totalCount)" OnClick="NextCalorie">Sonraki →</MudButton>
+                        <MudButton Variant="Variant.Text" Disabled="@(avgKcalDailyPage == 0)" OnClick="PrevAvgKcalDaily">← Önceki</MudButton>
+                        <MudText Typo="Typo.caption">Sayfa @avgKcalDailyPage+1</MudText>
+                        <MudButton Variant="Variant.Text" Disabled="@((avgKcalDailyPage+1)*avgKcalDailyPage >= avgKcalDailyTotalCount)" OnClick="NextAvgKcalDaily">Sonraki →</MudButton>
                     </div>
-                    <MudSlider @bind-Value="_options_Kcal.YAxisTicks" Min="0" Max="5000" Step="1" Color="Color.Info">Besin değer gösterimi: @_options_Kcal.YAxisTicks.ToString()</MudSlider>
                 </MudCardContent>
             </MudCard>
-        </MudItem>
+        }
+        <h3 class="text-center my-4">🍽️ Günlük Beslenme Trendleri</h3>
+        @if (allData is null)
+        {
+            <p class="text-center text-muted">🔄 Beslenme verileri yükleniyor...</p>
+        }
+        else if (!allData.Any())
+        {
+            <p class="text-center text-muted">📭 Henüz kapalı günlük beslenme verisi yok.</p>
+        }
+        else
+        {
+            <MudGrid GutterSize="3">
+                <!-- Kalori Grafiği -->
+                <MudItem xs="12" md="6">
+                    <MudCard>
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h6">Kalori Zaman Serisi</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudChart ChartType="MudBlazor.ChartType.Line"
+                                      ChartSeries="@calorieSeries"
+                                      XAxisLabels="@calorieLabels"
+                                      ChartOptions="_options_Kcal"
+                                      Width="100%" Height="300px" CanHideSeries />
+                            <div class="d-flex justify-space-between mt-2">
+                                <MudButton Variant="Variant.Text" Disabled="@(caloriePage == 0)" OnClick="PrevCalorie">← Önceki</MudButton>
+                                <MudText Typo="Typo.caption">Sayfa @caloriePage+1</MudText>
+                                <MudButton Variant="Variant.Text" Disabled="@((caloriePage+1)*pageSize >= totalCount)" OnClick="NextCalorie">Sonraki →</MudButton>
+                            </div>
+                            <MudSlider @bind-Value="_options_Kcal.YAxisTicks" Min="0" Max="5000" Step="1" Color="Color.Info">Besin değer gösterimi: @_options_Kcal.YAxisTicks.ToString()</MudSlider>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
 
-        <!-- Makro Grafiği -->
-        <MudItem xs="12" md="6">
-            <MudCard>
-                <MudCardHeader>
-                    <MudText Typo="Typo.h6">Protein / Karbonhidrat / Yağ Zaman Serisi</MudText>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudChart ChartType="MudBlazor.ChartType.Line"
-                    ChartSeries="@macroSeries"
-                    XAxisLabels="@macroLabels"
-                    ChartOptions="_options2"
-                    Width="100%" Height="300px" CanHideSeries/>
-                    <div class="d-flex justify-space-between mt-2">
-                        <MudButton Variant="Variant.Text" Disabled="@(macroPage == 0)" OnClick="PrevMacro">← Önceki</MudButton>
-                        <MudText Typo="Typo.caption">Sayfa @(macroPage+1)</MudText>
-                        <MudButton Variant="Variant.Text" Disabled="@((macroPage+1)*pageSize >= totalCount)" OnClick="NextMacro">Sonraki →</MudButton>
-                    </div>
-                    <MudSlider @bind-Value="_options2.YAxisTicks" Min="0" Max="500" Step="1" Color="Color.Info">Besin değer gösterimi: @_options2.YAxisTicks.ToString()</MudSlider>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-    </MudGrid>
-}
+                <!-- Makro Grafiği -->
+                <MudItem xs="12" md="6">
+                    <MudCard>
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h6">Protein / Karbonhidrat / Yağ Zaman Serisi</MudText>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudChart ChartType="MudBlazor.ChartType.Line"
+                                      ChartSeries="@macroSeries"
+                                      XAxisLabels="@macroLabels"
+                                      ChartOptions="_options2"
+                                      Width="100%" Height="300px" CanHideSeries />
+                            <div class="d-flex justify-space-between mt-2">
+                                <MudButton Variant="Variant.Text" Disabled="@(macroPage == 0)" OnClick="PrevMacro">← Önceki</MudButton>
+                                <MudText Typo="Typo.caption">Sayfa @(macroPage + 1)</MudText>
+                                <MudButton Variant="Variant.Text" Disabled="@((macroPage+1)*pageSize >= totalCount)" OnClick="NextMacro">Sonraki →</MudButton>
+                            </div>
+                            <MudSlider @bind-Value="_options2.YAxisTicks" Min="0" Max="500" Step="1" Color="Color.Info">Besin değer gösterimi: @_options2.YAxisTicks.ToString()</MudSlider>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <div>
+            <p class="text-danger h3"><MudNavLink Href="/login">Sayfayı görüntülemek için Giriş yapmalısınız.</MudNavLink> </p>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
 
 <h3 class="text-center my-4">📊 Egzersiz İstatistikleri</h3>
 

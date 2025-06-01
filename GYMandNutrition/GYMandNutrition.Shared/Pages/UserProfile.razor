@@ -449,7 +449,7 @@ else
 
 
 
-@attribute [Authorize]
+
 @inject IDailyMacroService dailyMacroService
 @inject IDailyNutritionDetailsService dailyNutritionDetailsService
 @inject ISnackbar Snackbar
@@ -458,181 +458,193 @@ else
 @inject IAppUserExerciseProgramService appUserExerciseProgramService
 @inject IAvgKcalDailyService avgKcalDailyService
 @inject IDialogService DialogService
+@inject NavigationManager navigationManager
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
-    @if (!loaded)
-    {
-        <div class="text-center">
-            <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
-            <p>Yükleniyor…</p>
-        </div>
-    }
-    else
-    {
-        <MudPaper Elevation="2" Class="p-4 mb-6 hover-zoom fade-in-up">
-            <MudStack Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-                <MudText Typo="Typo.h5">Profil Bilgileri</MudText>
-                <MudButtonGroup>
-                    <MudButton Variant="@(mode==ProfileMode.View?Variant.Filled:Variant.Outlined)"
-                    Color="Color.Primary"
-                    OnClick="@(()=>ChangeMode(ProfileMode.View))">
-                        Görüntüle
-                    </MudButton>
-                    <MudButton Variant="@(mode==ProfileMode.Edit?Variant.Filled:Variant.Outlined)"
-                    Color="Color.Primary"
-                    OnClick="@(()=>ChangeMode(ProfileMode.Edit))">
-                        Düzenle
-                    </MudButton>
-                </MudButtonGroup>
-            </MudStack>
+<AuthorizeView>
+    <Authorized>
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+            @if (!loaded)
+            {
+                <div class="text-center">
+                    <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                    <p>Yükleniyor…</p>
+                </div>
+            }
+            else
+            {
+                <MudPaper Elevation="2" Class="p-4 mb-6 hover-zoom fade-in-up">
+                    <MudStack Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudText Typo="Typo.h5">Profil Bilgileri</MudText>
+                        <MudButtonGroup>
+                            <MudButton Variant="@(mode==ProfileMode.View?Variant.Filled:Variant.Outlined)"
+                            Color="Color.Primary"
+                            OnClick="@(()=>ChangeMode(ProfileMode.View))">
+                                Görüntüle
+                            </MudButton>
+                            <MudButton Variant="@(mode==ProfileMode.Edit?Variant.Filled:Variant.Outlined)"
+                            Color="Color.Primary"
+                            OnClick="@(()=>ChangeMode(ProfileMode.Edit))">
+                                Düzenle
+                            </MudButton>
+                        </MudButtonGroup>
+                    </MudStack>
 
-            <MudGrid GutterSize="3" AlignItems="Center">
-                <!-- Profil Foto -->
-                <MudItem xs="12" sm="4" Class="d-flex justify-center">
-                    <MudAvatar Size="Size.Large" Src="https://png.pngtree.com/png-vector/20190223/ourmid/pngtree-profile-line-black-icon-png-image_691065.jpg" />
-                </MudItem>
+                    <MudGrid GutterSize="3" AlignItems="Center">
+                        <!-- Profil Foto -->
+                        <MudItem xs="12" sm="4" Class="d-flex justify-center">
+                            <MudAvatar Size="Size.Large" Src="https://png.pngtree.com/png-vector/20190223/ourmid/pngtree-profile-line-black-icon-png-image_691065.jpg" />
+                        </MudItem>
 
-                <!-- Alanlar -->
-                <MudItem xs="12" sm="8">
-                    <MudGrid GutterSize="2">
-                        @if (mode == ProfileMode.View)
-                        {
-                            <MudItem xs="6">
-                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Ad Soyad</MudText>
-                                <MudText Typo="Typo.h6">@user.AppUserFirstName</MudText>
-                            </MudItem>
-                            <MudItem xs="6">
-                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Yaş</MudText>
-                                <MudText Typo="Typo.h6">@appuserDetail.Age</MudText>
-                            </MudItem>
-                            <MudItem xs="6">
-                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Boy</MudText>
-                                <MudText Typo="Typo.h6">@($"{appuserDetail.Length} cm")</MudText>
-                            </MudItem>
-                            <MudItem xs="6">
-                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Kilo</MudText>
-                                <MudText Typo="Typo.h6">@($"{appuserDetail.Weight} kg")</MudText>
-                            </MudItem>
-                        }
-                        else
-                        {
-                            <MudItem xs="6">
-                                <MudTextField @bind-Value="user.AppUserFirstName" Label="Ad Soyad" Variant="Variant.Filled" />
-                            </MudItem>
-                            <MudItem xs="6">
-                                <MudNumericField @bind-Value="editAppuserDetail.Age" Label="Yaş" Min="1" Max="120" Variant="Variant.Filled" />
-                            </MudItem>
-                            <MudItem xs="6">
-                                <MudNumericField @bind-Value="editAppuserDetail.Length" Label="Boy (cm)" Min="50" Max="250" Variant="Variant.Filled" />
-                            </MudItem>
-                            <MudItem xs="6">
-                                <MudNumericField @bind-Value="editAppuserDetail.Weight" Label="Kilo (kg)" Min="20" Max="300" Variant="Variant.Filled" />
-                            </MudItem>
-                            <MudItem xs="12" Class="d-flex justify-end mt-2">
-                                <MudButton Color="Color.Primary" OnClick="SaveProfile">Kaydet</MudButton>
-                                <MudButton Color="Color.Secondary" OnClick="CancelEdit" Class="ml-2">İptal</MudButton>
-                            </MudItem>
-                        }
+                        <!-- Alanlar -->
+                        <MudItem xs="12" sm="8">
+                            <MudGrid GutterSize="2">
+                                @if (mode == ProfileMode.View)
+                                {
+                                    <MudItem xs="6">
+                                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Ad Soyad</MudText>
+                                        <MudText Typo="Typo.h6">@user.AppUserFirstName</MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Yaş</MudText>
+                                        <MudText Typo="Typo.h6">@appuserDetail.Age</MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Boy</MudText>
+                                        <MudText Typo="Typo.h6">@($"{appuserDetail.Length} cm")</MudText>
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Kilo</MudText>
+                                        <MudText Typo="Typo.h6">@($"{appuserDetail.Weight} kg")</MudText>
+                                    </MudItem>
+                                }
+                                else
+                                {
+                                    <MudItem xs="6">
+                                        <MudTextField @bind-Value="user.AppUserFirstName" Label="Ad Soyad" Variant="Variant.Filled" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudNumericField @bind-Value="editAppuserDetail.Age" Label="Yaş" Min="1" Max="120" Variant="Variant.Filled" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudNumericField @bind-Value="editAppuserDetail.Length" Label="Boy (cm)" Min="50" Max="250" Variant="Variant.Filled" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudNumericField @bind-Value="editAppuserDetail.Weight" Label="Kilo (kg)" Min="20" Max="300" Variant="Variant.Filled" />
+                                    </MudItem>
+                                    <MudItem xs="12" Class="d-flex justify-end mt-2">
+                                        <MudButton Color="Color.Primary" OnClick="SaveProfile">Kaydet</MudButton>
+                                        <MudButton Color="Color.Secondary" OnClick="CancelEdit" Class="ml-2">İptal</MudButton>
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </MudItem>
                     </MudGrid>
-                </MudItem>
-            </MudGrid>
-        </MudPaper>
-    }
-</MudContainer>
-
-@* Alt blokta özetler… (önceki örnekteki üç kartı aynen ekleyebilirsiniz) *@
-@if (!loaded2)
-{
-    <div class="text-center">
-        <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
-        <p>Yükleniyor…</p>
-    </div>
-}
-else
-{
-    <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
-
-
-        <!-- ALT BLOK: Üç Özet Kartı -->
-        <MudGrid GutterSize="3">
-            <!-- Hedef Makro -->
-            <MudItem xs="12" sm="4">
-                <MudPaper Elevation="4" Class="p-4 text-center hover-zoom fade-in-up" Style="min-height:250px;">
-                    <MudText Typo="Typo.h6" Class="mb-2">🎯 Hedef Makro</MudText>
-                    <MudDivider Class="mb-2" />
-                    <MudList T="decimal" Dense="true">
-                        <MudListItem>Kalori: <b>@dailyMacro.Calories Kcal</b></MudListItem>
-                        <MudListItem>Protein: <b>@dailyMacro.Proteins g</b></MudListItem>
-                        <MudListItem>Yağ: <b>@dailyMacro.Fats g</b></MudListItem>
-                        <MudListItem>Karb.: <b>@dailyMacro.Carbohydrates g</b></MudListItem>
-                    </MudList>
                 </MudPaper>
-            </MudItem>
+            }
+        </MudContainer>
 
-            <!-- Alınan Besin Değerleri -->
-            <MudItem xs="12" sm="4" >
-                <MudPaper Elevation="4" Class="p-4 text-center hover-zoom fade-in-up" Style="min-height:250px;">
-                    <MudText Typo="Typo.h6" Class="mb-2">✅ Alınan Besinler</MudText>
-                    <MudDivider Class="mb-2" />
-                    <MudList T="decimal" Dense="true">
-                        <MudListItem>Kalori: <b>@overallTaken["Kalori"].Amount Kcal</b></MudListItem>
-                        <MudListItem>Protein: <b>@overallTaken["Protein"].Amount g</b></MudListItem>
-                        <MudListItem>Yağ: <b>@overallTaken["Yağ"].Amount g</b></MudListItem>
-                        <MudListItem>Karb.: <b>@overallTaken["Karbonhidrat"].Amount g</b></MudListItem>
-                    </MudList>
-                </MudPaper>
-            </MudItem>
+        @* Alt blokta özetler… (önceki örnekteki üç kartı aynen ekleyebilirsiniz) *@
+        @if (!loaded2)
+        {
+            <div class="text-center">
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" />
+                <p>Yükleniyor…</p>
+            </div>
+        }
+        else
+        {
+            <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
 
-            <!-- Egzersizle Yakılan Kalori -->
-            <MudItem xs="12" sm="4">
-                <MudPaper Elevation="4" Class="p-4 text-center hover-zoom fade-in-up" Style="min-height:250px;">
-                    <MudText Typo="Typo.h6" Class="mb-2">🔥 Egzersizle Yakılan</MudText>
-                    <MudDivider Class="mb-2" />
 
-                    <MudSelect T="int"
-                    Label="Program Numarası"
-                    Value="selectedDayNo"
-                    ValueChanged="OnDayChanged"
-                    ValueExpression="() => selectedDayNo"
-                    Variant="Variant.Filled"
-                    Class="mb-2">
-                        @foreach (var dto in dailyBurns)
-                        {
-                            <MudSelectItem Value="@dto.DayNo">Program @dto.DayNo</MudSelectItem>
-                        }
-                    </MudSelect>
+                <!-- ALT BLOK: Üç Özet Kartı -->
+                <MudGrid GutterSize="3">
+                    <!-- Hedef Makro -->
+                    <MudItem xs="12" sm="4">
+                        <MudPaper Elevation="4" Class="p-4 text-center hover-zoom fade-in-up" Style="min-height:250px;">
+                            <MudText Typo="Typo.h6" Class="mb-2">🎯 Hedef Makro</MudText>
+                            <MudDivider Class="mb-2" />
+                            <MudList T="decimal" Dense="true">
+                                <MudListItem>Kalori: <b>@dailyMacro.Calories Kcal</b></MudListItem>
+                                <MudListItem>Protein: <b>@dailyMacro.Proteins g</b></MudListItem>
+                                <MudListItem>Yağ: <b>@dailyMacro.Fats g</b></MudListItem>
+                                <MudListItem>Karb.: <b>@dailyMacro.Carbohydrates g</b></MudListItem>
+                            </MudList>
+                        </MudPaper>
+                    </MudItem>
 
-                    <MudText Typo="Typo.h4">@selectedBurnKcal Kcal</MudText>
-                </MudPaper>
-            </MudItem>
+                    <!-- Alınan Besin Değerleri -->
+                    <MudItem xs="12" sm="4">
+                        <MudPaper Elevation="4" Class="p-4 text-center hover-zoom fade-in-up" Style="min-height:250px;">
+                            <MudText Typo="Typo.h6" Class="mb-2">✅ Alınan Besinler</MudText>
+                            <MudDivider Class="mb-2" />
+                            <MudList T="decimal" Dense="true">
+                                <MudListItem>Kalori: <b>@overallTaken["Kalori"].Amount Kcal</b></MudListItem>
+                                <MudListItem>Protein: <b>@overallTaken["Protein"].Amount g</b></MudListItem>
+                                <MudListItem>Yağ: <b>@overallTaken["Yağ"].Amount g</b></MudListItem>
+                                <MudListItem>Karb.: <b>@overallTaken["Karbonhidrat"].Amount g</b></MudListItem>
+                            </MudList>
+                        </MudPaper>
+                    </MudItem>
 
-            <MudItem xs="12">
-                <MudPaper Elevation="4" Class="p-4 text-center mt-4 fade-in-up hover-zoom ">
-                    <MudText Typo="Typo.h6" Class="mb-2">⚖️ Kalori Dengesi</MudText>
-                    <MudDivider Class="mb-2" />
-                    <MudText Typo="Typo.subtitle2">
-                        Net Alım: <b>@CalorieNet Kcal</b>
-                    </MudText><br />
-                    <MudText Typo="Typo.subtitle2">
-                        Hedef: <b>@dailyMacro.Calories Kcal</b>
-                    </MudText><br />
-                    <MudText Typo="Typo.h4" Class="mt-1">
-                        Fark: <b>@CalorieDiff Kcal</b> (@(CalorieDiff > 0 ? "Fazla" : "Açık"))
-                    </MudText>
-                    <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="SaveAvgKcalDaily">
-                        <MudIcon Icon="@Icons.Material.Filled.Save" class="me-1" /> Kaydet ve Kapat
-                    </MudButton>
-                </MudPaper>
-            </MudItem>
-        </MudGrid>
+                    <!-- Egzersizle Yakılan Kalori -->
+                    <MudItem xs="12" sm="4">
+                        <MudPaper Elevation="4" Class="p-4 text-center hover-zoom fade-in-up" Style="min-height:250px;">
+                            <MudText Typo="Typo.h6" Class="mb-2">🔥 Egzersizle Yakılan</MudText>
+                            <MudDivider Class="mb-2" />
 
-    </MudContainer>
-}
+                            <MudSelect T="int"
+                            Label="Program Numarası"
+                            Value="selectedDayNo"
+                            ValueChanged="OnDayChanged"
+                            ValueExpression="() => selectedDayNo"
+                            Variant="Variant.Filled"
+                            Class="mb-2">
+                                @foreach (var dto in dailyBurns)
+                                {
+                                    <MudSelectItem Value="@dto.DayNo">Program @dto.DayNo</MudSelectItem>
+                                }
+                            </MudSelect>
+
+                            <MudText Typo="Typo.h4">@selectedBurnKcal Kcal</MudText>
+                        </MudPaper>
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudPaper Elevation="4" Class="p-4 text-center mt-4 fade-in-up hover-zoom ">
+                            <MudText Typo="Typo.h6" Class="mb-2">⚖️ Kalori Dengesi</MudText>
+                            <MudDivider Class="mb-2" />
+                            <MudText Typo="Typo.subtitle2">
+                                Net Alım: <b>@CalorieNet Kcal</b>
+                            </MudText><br />
+                            <MudText Typo="Typo.subtitle2">
+                                Hedef: <b>@dailyMacro.Calories Kcal</b>
+                            </MudText><br />
+                            <MudText Typo="Typo.h4" Class="mt-1">
+                                Fark: <b>@CalorieDiff Kcal</b> (@(CalorieDiff > 0 ? "Fazla" : "Açık"))
+                            </MudText>
+                            <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="SaveAvgKcalDaily">
+                                <MudIcon Icon="@Icons.Material.Filled.Save" class="me-1" /> Kaydet ve Kapat
+                            </MudButton>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+
+            </MudContainer>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <div>
+            <p class="text-danger h3"><MudNavLink Href="/login">Sayfayı görüntülemek için Giriş yapmalısınız.</MudNavLink> </p>
+            
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+
 
 
 @code {
     enum ProfileMode { View, Edit }
-
     private ProfileMode mode = ProfileMode.View;
     private bool loaded,loaded2;
     private AppUserResponseModel user;

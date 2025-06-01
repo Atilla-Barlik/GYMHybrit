@@ -35,7 +35,6 @@
                 InputType="InputType.Password"
                 Required="true"
                 For="@(() => loginModel.Password)" />
-                <MudCheckBox  @bind-Value="rememberMe" Label="Beni Hatırla" Class="mt-2" />
                 @if (!string.IsNullOrWhiteSpace(_error))
                 {
                     <MudText Color="Color.Error" Class="mt-2">@_error</MudText>
@@ -61,7 +60,7 @@
     }
     [Inject] AuthenticationStateProvider AuthStateProvider { get; set; }
     private LoginRequest loginModel = new();
-    private bool rememberMe { get; set; } = false;
+    private bool rememberMe { get; set; } = true;
     private bool _checking = true;
     private bool _alreadyLoggedIn;
     private string _error;

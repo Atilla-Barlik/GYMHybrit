@@ -189,7 +189,7 @@ else
 
 
 
-@attribute [Authorize]
+
 @using Entities.DailyNutritionEntities
 @inject IDailyNutritionDetailsService DailyNutritionDetailsService
 @inject ISnackbar Snackbar
@@ -198,63 +198,75 @@ else
 @using MudBlazor.Services
 @inject IDialogService DialogService
 
-<h3 class="d-flex justify-content-between align-items-center mt-4">
-    Günlük Besin Listeleri
-    <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="SaveDailyNutrientDialog">
-        <MudIcon Icon="@Icons.Material.Filled.Save" class="me-1" /> Kaydet ve Kapat
-    </MudButton>
-</h3>
+<AuthorizeView>
+    <Authorized>
+        <h3 class="d-flex justify-content-between align-items-center mt-4">
+            Günlük Besin Listeleri
+            <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="SaveDailyNutrientDialog">
+                <MudIcon Icon="@Icons.Material.Filled.Save" class="me-1" /> Kaydet ve Kapat
+            </MudButton>
+        </h3>
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
-    @foreach (var group in mealGroupList)
-    {
-        <MudPaper Class="p-3 mb-4 fade-in">
-            <MudStack Direction="Row" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                <MudText Typo="Typo.h6">Liste @(group.MealTime+1)</MudText>
-                <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="() => AddNewItemToMeal(group.MealTime)" />
-            </MudStack>
-
-            @if (group.Items != null && group.Items.Any())
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+            @foreach (var group in mealGroupList)
             {
-                <MudList T="object" Dense="true">
-                    @foreach (var item in group.Items)
+                <MudPaper Class="p-3 mb-4 fade-in">
+                    <MudStack Direction="Row" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.h6">Liste @(group.MealTime + 1)</MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="() => AddNewItemToMeal(group.MealTime)" />
+                    </MudStack>
+
+                    @if (group.Items != null && group.Items.Any())
                     {
-                        <MudCard Class="nutrient-card my-2">
-                            <MudCardContent>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center">
-                                        <MudImage Src="@item.NutrientImage"
-                                        Class="rounded-circle me-3"
-                                        Alt="@item.NutrientName"
-                                        Width="50" Height="50"
-                                        Elevation="25" />
-                                        <div>
-                                            <MudText Typo="Typo.subtitle1" Class="fw-bold">@item.NutrientName</MudText>
-                                            <MudText Typo="Typo.body2" Class="text-muted">Kalori: @item.NutrientKcal kcal</MudText>
-                                            <MudText Typo="Typo.caption">
-                                                Karbonhidrat: @item.NutrientCarbohydrate g |
-                                                Protein: @item.NutrientProtein g |
-                                                Yağ: @item.NutrientFat g
-                                            </MudText>
-                                        </div>
-                                    </div>
+                        <MudList T="object" Dense="true">
+                            @foreach (var item in group.Items)
+                            {
+                                <MudCard Class="nutrient-card my-2">
+                                    <MudCardContent>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <MudImage Src="@item.NutrientImage"
+                                                          Class="rounded-circle me-3"
+                                                          Alt="@item.NutrientName"
+                                                          Width="50" Height="50"
+                                                          Elevation="25" />
+                                                <div>
+                                                    <MudText Typo="Typo.subtitle1" Class="fw-bold">@item.NutrientName</MudText>
+                                                    <MudText Typo="Typo.body2" Class="text-muted">Kalori: @item.NutrientKcal kcal</MudText>
+                                                    <MudText Typo="Typo.caption">
+                                                        Karbonhidrat: @item.NutrientCarbohydrate g |
+                                                        Protein: @item.NutrientProtein g |
+                                                        Yağ: @item.NutrientFat g
+                                                    </MudText>
+                                                </div>
+                                            </div>
 
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                    Color="Color.Error"
-                                    OnClick="() => DeleteNutrient(item)" />
-                                </div>
-                            </MudCardContent>
-                        </MudCard>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                           Color="Color.Error"
+                                                           OnClick="() => DeleteNutrient(item)" />
+                                        </div>
+                                    </MudCardContent>
+                                </MudCard>
+                            }
+                        </MudList>
                     }
-                </MudList>
+                    else
+                    {
+                        <MudText Class="text-muted mt-2">Bu öğünde henüz besin eklenmemiş.</MudText>
+                    }
+                </MudPaper>
             }
-            else
-            {
-                <MudText Class="text-muted mt-2">Bu öğünde henüz besin eklenmemiş.</MudText>
-            }
-        </MudPaper>
-    }
-</MudContainer>
+        </MudContainer>
+    </Authorized>
+    <NotAuthorized>
+        <div>
+            <p class="text-danger h3"><MudNavLink Href="/login">Sayfayı görüntülemek için Giriş yapmalısınız.</MudNavLink> </p>
+
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+
 
 @code {
     private Dictionary<int, List<DailyNutritionDetailsResponseModel>> dailyNutritionGroups = new();
