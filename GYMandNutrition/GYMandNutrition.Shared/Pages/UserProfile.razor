@@ -456,6 +456,8 @@ else
 @inject IAppUserService appUserService
 @inject IAppUserDetailService appUserDetailService
 @inject IAppUserExerciseProgramService appUserExerciseProgramService
+@inject IAvgKcalDailyService avgKcalDailyService
+@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
     @if (!loaded)
@@ -588,12 +590,12 @@ else
                     <MudDivider Class="mb-2" />
 
                     <MudSelect T="int"
-                               Label="Program Numarası"
-                               Value="selectedDayNo"
-                               ValueChanged="OnDayChanged"
-                               ValueExpression="() => selectedDayNo"
-                               Variant="Variant.Filled"
-                               Class="mb-2">
+                    Label="Program Numarası"
+                    Value="selectedDayNo"
+                    ValueChanged="OnDayChanged"
+                    ValueExpression="() => selectedDayNo"
+                    Variant="Variant.Filled"
+                    Class="mb-2">
                         @foreach (var dto in dailyBurns)
                         {
                             <MudSelectItem Value="@dto.DayNo">Program @dto.DayNo</MudSelectItem>
@@ -605,7 +607,7 @@ else
             </MudItem>
 
             <MudItem xs="12">
-				<MudPaper Elevation="4" Class="p-4 text-center mt-4 fade-in-up hover-zoom ">
+                <MudPaper Elevation="4" Class="p-4 text-center mt-4 fade-in-up hover-zoom ">
                     <MudText Typo="Typo.h6" Class="mb-2">⚖️ Kalori Dengesi</MudText>
                     <MudDivider Class="mb-2" />
                     <MudText Typo="Typo.subtitle2">
@@ -617,6 +619,9 @@ else
                     <MudText Typo="Typo.h4" Class="mt-1">
                         Fark: <b>@CalorieDiff Kcal</b> (@(CalorieDiff > 0 ? "Fazla" : "Açık"))
                     </MudText>
+                    <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="SaveAvgKcalDaily">
+                        <MudIcon Icon="@Icons.Material.Filled.Save" class="me-1" /> Kaydet ve Kapat
+                    </MudButton>
                 </MudPaper>
             </MudItem>
         </MudGrid>
@@ -634,6 +639,8 @@ else
     private AddUpdateAppUserDetailRequest editModel;
     private AddUpdateAppUserDetailRequest appuserDetail;
     private AddUpdateAppUserDetailRequest editAppuserDetail;
+
+    private AddUpdateAvgKcalDailyRequest addUpdateAvgKcalDailyRequest;
 
     private DailyMacroResponseModel dailyMacro;
     private Dictionary<string, (decimal Amount, string Unit)> overallTaken;
@@ -705,36 +712,36 @@ else
         loaded2 = true;
     }
 
-  private async Task SaveProfile()
-  {
-    // basit validasyon
-        if (string.IsNullOrWhiteSpace(user.AppUserFirstName))
+    private async Task SaveProfile()
     {
+        // basit validasyon
+        if (string.IsNullOrWhiteSpace(user.AppUserFirstName))
+        {
             Snackbar.Add("Ad Soyad boş olamaz.", Severity.Warning);
-      return;
-    }
+            return;
+        }
 
         var ok = await appUserDetailService.UpdateAppUserDetail(editAppuserDetail);
-    if (ok)
-    {
-      appuserDetail = editAppuserDetail;    // güncellenen modeli göster
-      mode = ProfileMode.View;
-      Snackbar.Add("Profil güncellendi.", Severity.Success);
+        if (ok)
+        {
+            appuserDetail = editAppuserDetail;    // güncellenen modeli göster
+            mode = ProfileMode.View;
+            Snackbar.Add("Profil güncellendi.", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Güncelleme başarısız.", Severity.Error);
+        }
     }
-    else
-    {
-      Snackbar.Add("Güncelleme başarısız.", Severity.Error);
-    }
-  }
 
-  private void CancelEdit()
-  {
-    // değişiklikleri iptal edip formu eski haline döndür
-    user = new AppUserResponseModel {
+    private void CancelEdit()
+    {
+        // değişiklikleri iptal edip formu eski haline döndür
+        user = new AppUserResponseModel {
       AppUserFirstName = user.AppUserFirstName + " " + user.AppUserLastName,
     };
-    mode = ProfileMode.View;
-  }
+        mode = ProfileMode.View;
+    }
     void ChangeMode(ProfileMode m)
     {
         mode = m;
@@ -754,6 +761,41 @@ else
         {
             selectedDayNo = value;
         }
+    }
+    private List<AvgKcalDailyResponseModel> avgKcalDailyResponseModels;
+    private async Task SaveAvgKcalDaily()
+    {
+        avgKcalDailyResponseModels = await avgKcalDailyService.GetAppUserExerciseProgramDetails(1);
+        var status = avgKcalDailyResponseModels.OrderBy(x => x.Date).LastOrDefault();
+        DateTime dateTime = DateTime.Now;
+        DateOnly dateOnly = DateOnly.FromDateTime(dateTime);
+        if (status.Date != dateOnly)
+        {
+            var yes = await DialogService.ShowMessageBox(
+            "Günlük Listeni Kaydet",
+            "Günlük besin listesini kaydetmek ve kapatmak istediğine emin misin?",
+            yesText: "Evet", noText: "Hayır");
+            if(yes == true)
+            {
+                var req = addUpdateAvgKcalDailyRequest = new AddUpdateAvgKcalDailyRequest
+                    {
+                        AppUserId = 1,
+                        BurnKcal = selectedBurnKcal,
+                        DailyMacro = dailyMacro.Calories,
+                        DailyTakenKcal = overallTaken["Kalori"].Amount,
+                        ResultKcal = CalorieDiff
+                    };
+                var res = await avgKcalDailyService.AddAvgKcalDaily(req);
+                if (res) Snackbar.Add("Başarıyla kaydedildi.", Severity.Success);
+                else Snackbar.Add("Kayıt hatası.", Severity.Error);
+            }
+            
+        }
+        else
+        {
+            Snackbar.Add("Günlük Kaydınız Gerçekleştirilmiş.", Severity.Error);
+        }
+        
     }
 }
 <style>

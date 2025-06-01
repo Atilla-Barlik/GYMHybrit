@@ -1,5 +1,6 @@
 ﻿using Entities.AvgKcalDailyEntities;
 using Entities.UserExerciseProgramEntities;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,31 @@ namespace Services.AvgKcalDailyServices
         private List<AvgKcalDailyResponseModel> _avgKcalDailyResponseModels;
         public async Task<bool> AddAvgKcalDaily(AddUpdateAvgKcalDailyRequest request)
         {
-            throw new NotImplementedException();
+            var returnResponse = false;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    string url = $"{_baseURL}/api/AvgKcalDaily";
+
+                    var serializeContent = JsonConvert.SerializeObject(request);
+
+                    var apiResponse = await client.PostAsync(url, new StringContent(serializeContent, Encoding.UTF8, "application/json"));
+
+                    if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+
+                        return true;
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                string msg = ex.Message;
+            }
+
+            return returnResponse;
         }
 
         public async Task<List<AvgKcalDailyResponseModel>> GetAppUserExerciseProgramDetails(int AppUserId)
