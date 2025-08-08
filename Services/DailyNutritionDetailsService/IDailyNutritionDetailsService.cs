@@ -11,7 +11,7 @@ namespace Services.DailyNutritionDetailsService
 {
     public interface IDailyNutritionDetailsService
     {
-        Task<List<DailyNutritionDetailsResponseModel>> GetAllDailyNutritiontList();
+        Task<List<DailyNutritionDetailsResponseModel>> GetAllDailyNutritiontList(int userId);
         Task<DailyNutritionDetailsResponseModel> GetDailyNutritionById(int Id);
         Task<bool> AddDailyNutrition(AddUpdateDailyNutritionDetailsRequest nutrientRequest);
         Task<bool> UpdateDailyNutrition(DailyNutritionDetailsResponseModel nutrientRequest, int id);

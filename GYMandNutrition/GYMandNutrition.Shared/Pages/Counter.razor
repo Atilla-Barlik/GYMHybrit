@@ -68,7 +68,7 @@
                         </ul>
                     </div>
                 </div>
-                
+
             </div>
         </div>
     }
@@ -187,7 +187,7 @@
             return "alert-danger";
     }
 
-   
+
 }
 
 <style>
@@ -257,16 +257,14 @@
     }
 </style> *@
 
-       
+
 @using MudBlazor
-
-
-
-
 @page "/vucut-kitle-indeksi"
 @using MudBlazor
 @using System.ComponentModel.DataAnnotations
-
+@inject LocalAuthStateProvider user
+@inject IAppUserService appUserService
+@inject IAppUserDetailService appUserDetailService
 <MudContainer MaxWidth="MaxWidth.Medium" Class="my-6">
     <!-- Başlık -->
     <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">
@@ -277,44 +275,44 @@
     <MudPaper Elevation="1" Class="pa-4 mx-auto" Style="max-width:500px">
         <MudForm @ref="_form" OnValidSubmit="CalculateMetrics">
             <MudTextField T="int?"
-                          Label="Yaş"
-                          @bind-Value="_model.Age"
-                          Required="true"
-                          RequiredError="Yaş zorunludur"
-                          For="() => _model.Age" />
+            Label="Yaş"
+            @bind-Value="_model.Age"
+            Required="true"
+            RequiredError="Yaş zorunludur"
+            For="() => _model.Age" />
 
             <MudRadioGroup T="string"
-                           Label="Cinsiyet"
-                           @bind-Value="_model.Gender"
-                           Required="true"
-                           RequiredError="Cinsiyet seçmelisiniz"
-                           Class="mt-4">
+            Label="Cinsiyet"
+            @bind-Value="_model.Gender"
+            Required="true"
+            RequiredError="Cinsiyet seçmelisiniz"
+            Class="mt-4">
                 <MudRadio T="string" Value="@("Erkek")" Label="Erkek" />
                 <MudRadio T="string" Value="@("Kadın")" Label="Kadın" />
             </MudRadioGroup>
 
             <MudTextField T="double?"
-                          Label="Boy (cm)"
-                          @bind-Value="_model.Height"
-                          Required="true"
-                          RequiredError="Boy zorunludur"
-                          For="() => _model.Height"
-                          Class="mt-4" />
+            Label="Boy (cm)"
+            @bind-Value="_model.Height"
+            Required="true"
+            RequiredError="Boy zorunludur"
+            For="() => _model.Height"
+            Class="mt-4" />
 
             <MudTextField T="double?"
-                          Label="Kilo (kg)"
-                          @bind-Value="_model.Weight"
-                          Required="true"
-                          RequiredError="Kilo zorunludur"
-                          For="() => _model.Weight"
-                          Class="mt-4" />
+            Label="Kilo (kg)"
+            @bind-Value="_model.Weight"
+            Required="true"
+            RequiredError="Kilo zorunludur"
+            For="() => _model.Weight"
+            Class="mt-4" />
 
             <MudButton Type="Submit"
-                       Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       Class="mt-6"
-                       onclick="CalculateMetrics"
-                       FullWidth="true">
+            Variant="Variant.Filled"
+            Color="Color.Primary"
+            Class="mt-6"
+            onclick="CalculateMetrics"
+            FullWidth="true">
                 Hesapla
             </MudButton>
         </MudForm>
@@ -346,9 +344,9 @@
             </div>
 
             <MudList T="string" Class="mt-4">
-                <MudListItem>Sağlıklı BMI aralığı: 18.5 - 25</MudListItem>
-                <MudListItem>Sağlıklı kilo aralığı: @_result.MinWeight kg - @_result.MaxWeight kg</MudListItem>
-                <MudListItem>25 BMI için verilmesi gereken kilo: @_result.WeightToLose kg</MudListItem>
+                <MudListItem><strong>Sağlıklı BMI aralığı:</strong> 18.5 - 25</MudListItem>
+                <MudListItem><strong>Sağlıklı kilo aralığı:</strong> @_result.MinWeight kg - @_result.MaxWeight kg</MudListItem>
+                <MudListItem><strong>25 BMI için verilmesi gereken kilo:</strong> @_result.WeightToLose kg</MudListItem>
             </MudList>
         </MudPaper>
     }
@@ -358,6 +356,29 @@
     private MudForm _form;
     private BmiCalcModel _model = new BmiCalcModel();
     private BmiResult _result;
+    private AppUserResponseModel getUserDetails;
+    private AddUpdateAppUserDetailRequest appuserDetail;
+    private BmiCalcModel details;
+    string gender;
+    protected override async Task OnInitializedAsync()
+    {
+        if(user.CurrentUserId > 0)
+        {
+            appuserDetail = await appUserDetailService.GetAppUserDetailByUserId((int)user.CurrentUserId);
+            if (appuserDetail.sex)
+                gender = "Erkek";
+            else
+                gender = "Kadın";
+
+            _model = new BmiCalcModel
+            {
+                    Age = appuserDetail.Age,
+                    Gender = gender,
+                    Height = appuserDetail.Length,
+                    Weight = (double)appuserDetail.Weight,
+            };
+        }
+    }
 
     private class BmiCalcModel
     {

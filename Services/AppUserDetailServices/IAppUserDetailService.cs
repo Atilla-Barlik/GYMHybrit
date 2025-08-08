@@ -12,5 +12,6 @@ namespace Services.AppUserDetailServices
     {
         Task<AddUpdateAppUserDetailRequest> GetAppUserDetailByUserId(int userId);
         Task<bool> UpdateAppUserDetail(AddUpdateAppUserDetailRequest appUserDetailRequest);
+        
     }
 }

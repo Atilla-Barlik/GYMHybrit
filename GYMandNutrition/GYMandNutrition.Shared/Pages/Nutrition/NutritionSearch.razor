@@ -1,11 +1,11 @@
 ﻿@page "/NutritionSearch"
 @inject NavigationManager Navigation
 @inject INutrientService NutrientService
-
-<h3>NutritionSearch</h3>
+@inject LocalAuthStateProvider user
+<h3>Besin Ara</h3>
 
 <div class="search-container">
-    <input  @oninput="OnSearchChanged" placeholder="Search..." />
+    <input  @oninput="OnSearchChanged" placeholder="Ara..." />
 </div>
 
 @if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -124,7 +124,8 @@ else if (string.IsNullOrWhiteSpace(searchTerm))
         await base.OnInitializedAsync();
 
         _totalUsageNurition = await dailyNutritionDetailsService.GetTotalUsageNutrition();
-        _userMostUsageNutrientList = await dailyNutritionDetailsService.GetUserMostUsageNutrients(1);
+        if(user.CurrentUserId>0)
+            _userMostUsageNutrientList = await dailyNutritionDetailsService.GetUserMostUsageNutrients((int)user.CurrentUserId);
         //_nutrientList = await NutrientService.GetAllNutrientList();
         _nutrientList = await NutrientService.GetNutrientDetailByName(searchTerm);
 

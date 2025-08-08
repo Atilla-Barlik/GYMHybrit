@@ -64,7 +64,7 @@
     private bool _checking = true;
     private bool _alreadyLoggedIn;
     private string _error;
-
+    private AppUserDetailResponseModel createUserDetail;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -94,6 +94,7 @@
         var result = await AuthService.LoginAsync(loginModel);
         if (result > 0)
         {
+
             // Başarılıysa localStorage'a kaydet
             //await LocalStorage.SetItemAsync("appUserId", result);
             

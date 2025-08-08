@@ -552,7 +552,7 @@ else
 @using global::Services.AppUserExerciseProgramServise
 @inject NavigationManager navigationManager
 @inject IAppUserExerciseProgramService appUserExerciseProgramService
-
+@inject LocalAuthStateProvider user
 
 
 <AuthorizeView>
@@ -675,7 +675,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails(1);
+        combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails((int)user.CurrentUserId);
         localCombinedExerciseProgramData = combinedExerciseDataResponseModels;
     }
 
@@ -743,7 +743,7 @@ else
 
     async Task ReloadExerciseData()
     {
-        combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails(1);
+        combinedExerciseDataResponseModels = await appUserExerciseProgramService.GetAppUserExerciseProgramDetails((int)user.CurrentUserId);
         localCombinedExerciseProgramData = combinedExerciseDataResponseModels;
         StateHasChanged();
     }

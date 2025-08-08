@@ -132,7 +132,7 @@
             </div>
             <div class="col-md-6 d-flex justify-content-center">
                 <video class="img-fluid rounded" controls>
-                    <source src="@exercise.Gif1" type="video/mp4">
+                    <source src="@exercise.Gif2" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -301,6 +301,7 @@
     private bool showToast;
     DateTime dateTime;
     DateOnly date;
+    @inject LocalAuthStateProvider user
     
     bool t = true;
 
@@ -319,7 +320,7 @@
                 ExerciseTotalBurnedKcal = 0, // Bu alan hesaplanabilir ya da başka bir değere sahip olabilir
                 ExerciseDetailId = exercise.ExerciseDetailId, // Bunu dinamik olarak set edebilirsiniz, örneğin yönlendirme ile gelen ID
                 ExerciseWeight = ExerciseWeight,
-                AppUserId = 1, // Kullanıcı ID'si
+                AppUserId = (int)user.CurrentUserId, // Kullanıcı ID'si
                 DayNo = DayNo,
                 Date = date
         };

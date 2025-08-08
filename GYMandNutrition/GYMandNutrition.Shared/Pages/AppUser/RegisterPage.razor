@@ -32,7 +32,7 @@
 
         <MudTextField @bind-Value="model.AppUserPassword"
         Label="Şifre"
-                      InputType="@(showPassword2 ? InputType.Text : InputType.Password)"
+        InputType="@(showPassword2 ? InputType.Text : InputType.Password)"
         For="@(()=>model.AppUserPassword)"
         Required="true"
         RequiredError="Şifre giriniz."
@@ -64,7 +64,7 @@
             }
             else
             {
-                <MudText>Kayıt Ol</MudText>
+                <MudText>Kaydol</MudText>
             }
         </MudButton>
     </MudForm>
@@ -77,7 +77,7 @@
     private string confirmPassword;
     [Inject] IAppUserService appUserService { get; set; }
     private AddUpdateAppUserRequest model = new AddUpdateAppUserRequest();
-
+    private AppUserDetailResponseModel  createUserDetail;
     private void TogglePasswordVisibility()
     {
         showPassword = !showPassword;
@@ -104,6 +104,8 @@
             var ok = await appUserService.CreateAppUser(model);
             if (ok)
             {
+                
+
                 Snackbar.Add("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz…", Severity.Success);
                 await Task.Delay(1500);
                 Navigation.NavigateTo("/login");

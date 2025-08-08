@@ -140,7 +140,7 @@ namespace Services.DailyNutritionServices
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/DailyNutritionCheck/1";
+                    string url = $"{_baseURL}/api/DailyNutritionCheck/{id}";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)

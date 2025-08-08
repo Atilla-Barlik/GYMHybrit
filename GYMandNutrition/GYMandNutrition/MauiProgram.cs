@@ -9,6 +9,7 @@ using Services.AppUserDetailServices;
 using Services.AppUserExerciseProgramServise;
 using Services.AppUserServices;
 using Services.AuthServices;
+using Services.AvgKcalDailyServices;
 using Services.DailyMacroServices;
 using Services.DailyNutritionDetailsService;
 using Services.DailyNutritionServices;
@@ -52,7 +53,7 @@ namespace GYMandNutrition
             builder.Services.AddScoped<LocalAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(x => x.GetRequiredService<LocalAuthStateProvider>());
             builder.Services.AddMudBlazorResizeListener();
-            
+            builder.Services.AddSingleton<IAvgKcalDailyService, AvgKcalDailyService>();
             builder.Services.AddMudServices(config =>
             {
                 config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;

@@ -13,7 +13,7 @@ namespace Services.StatisticServices
     {
         private string _baseURL = "https://localhost:7149";
         private List<ExerciseStatisticsModel> _exerciseList;
-        public async Task<List<ExerciseStatisticsModel>> GetAllExercisesStatistics()
+        public async Task<List<ExerciseStatisticsModel>> GetAllExercisesStatistics(int userId)
         {
             _exerciseList = new List<ExerciseStatisticsModel>();
 
@@ -21,7 +21,7 @@ namespace Services.StatisticServices
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/AppUserExerciseStatistics/user/1/statistics";
+                    string url = $"{_baseURL}/api/AppUserExerciseStatistics/user/{userId}/statistics";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)

@@ -197,7 +197,7 @@ else
 @inject MealTimeService MealTimeService
 @using MudBlazor.Services
 @inject IDialogService DialogService
-
+@inject LocalAuthStateProvider user
 <AuthorizeView>
     <Authorized>
         <h3 class="d-flex justify-content-between align-items-center mt-4">
@@ -279,7 +279,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         DateOnly today = DateOnly.FromDateTime(DateTime.Now);
-        dailyNutritionId = await dailyNutritionService.GetDailyNutritionCheck(1);
+        dailyNutritionId = await dailyNutritionService.GetDailyNutritionCheck((int)user.CurrentUserId);
 
        
         // Günlük kayıt yoksa oluştur
@@ -287,7 +287,7 @@ else
         {
             var newNutrition = new AddUpdateDailyNutritionRequest
                 {
-                    AppUserId = 1,
+                    AppUserId = (int)user.CurrentUserId,
                     DailyNutritionStatus = true,
                     DailyNutritionTotalCarbohydrate = 0,
                     DailyNutritionTotalFat = 0,
@@ -305,7 +305,7 @@ else
         }
 
         // Kayıt varsa detayları getir
-        var details = await DailyNutritionDetailsService.GetAllDailyNutritiontList();
+        var details = await DailyNutritionDetailsService.GetAllDailyNutritiontList((int)user.CurrentUserId);
 
         if (details != null && details.Any())
         {
@@ -369,7 +369,7 @@ else
     {
         if (!firstRender)
         {
-            var list = await DailyNutritionDetailsService.GetAllDailyNutritiontList();
+            var list = await DailyNutritionDetailsService.GetAllDailyNutritiontList((int)user.CurrentUserId);
             dailyNutritionGroups = list
                 .GroupBy(x => x.DailyMealTime)
                 .ToDictionary(g => g.Key, g => g.ToList());

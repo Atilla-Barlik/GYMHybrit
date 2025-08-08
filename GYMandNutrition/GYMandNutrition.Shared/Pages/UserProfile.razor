@@ -459,6 +459,7 @@ else
 @inject IAvgKcalDailyService avgKcalDailyService
 @inject IDialogService DialogService
 @inject NavigationManager navigationManager
+@inject LocalAuthStateProvider localUser
 
 <AuthorizeView>
     <Authorized>
@@ -635,7 +636,7 @@ else
     <NotAuthorized>
         <div>
             <p class="text-danger h3"><MudNavLink Href="/login">Sayfayı görüntülemek için Giriş yapmalısınız.</MudNavLink> </p>
-            
+
         </div>
     </NotAuthorized>
 </AuthorizeView>
@@ -647,6 +648,7 @@ else
     enum ProfileMode { View, Edit }
     private ProfileMode mode = ProfileMode.View;
     private bool loaded,loaded2;
+
     private AppUserResponseModel user;
     private AddUpdateAppUserDetailRequest editModel;
     private AddUpdateAppUserDetailRequest appuserDetail;
@@ -659,6 +661,7 @@ else
     private decimal burnedCalories;
 
     private List<GetAppUserExerciseProgramTotalBurnKcalResponseModel> dailyBurns = new();
+    private GetAppUserExerciseProgramTotalBurnKcalResponseModel zeroModel;
     private int selectedDayNo;
     private int selectedBurnKcal;
 
@@ -667,8 +670,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        user = await appUserService.GetAppUserByUserId(1);
-        appuserDetail = await appUserDetailService.GetAppUserDetailByUserId(1);
+        user = await appUserService.GetAppUserByUserId((int)localUser.CurrentUserId);
+        appuserDetail = await appUserDetailService.GetAppUserDetailByUserId((int)localUser.CurrentUserId);
         user.AppUserFirstName = user.AppUserFirstName + " " + user.AppUserLastName;
         if(user.AppUserId == 0 )
         {
@@ -684,7 +687,7 @@ else
                 sex = appuserDetail.sex,
                 Length = appuserDetail.Length,
                 Weight = appuserDetail.Weight,
-                AppUserId = user.AppUserId,
+                AppUserId = (int)localUser.CurrentUserId,
                 AppUserDetailId = appuserDetail.AppUserDetailId,
                 AfterImage = " ",
                 BeforeImage = " "
@@ -694,10 +697,10 @@ else
         // dailyMacro = await dailyMacroService…
         // overallTaken = …
         // burnedCalories = …
-        dailyMacro = await dailyMacroService.GetDailyMacroByUserId(1);
+        dailyMacro = await dailyMacroService.GetDailyMacroByUserId((int)localUser.CurrentUserId);
 
         // Alınan besinler toplamı
-        var takenList = await dailyNutritionDetailsService.GetTotalMeal(1);
+        var takenList = await dailyNutritionDetailsService.GetTotalMeal((int)localUser.CurrentUserId);
         var totKcal = takenList.Sum(x => x.TotalKcal);
         var totProt = takenList.Sum(x => x.TotalProtein);
         var totFat = takenList.Sum(x => x.TotalFat);
@@ -711,9 +714,17 @@ else
                 ["Karbonhidrat"] = (totCarb, "g")
             };
 
+
+        zeroModel = new GetAppUserExerciseProgramTotalBurnKcalResponseModel
+            {
+                DayNo = -1,
+                TotalBurnedKcal = 0
+            };
+
         // Egzersizle yakılan kalori
         //burnedCalories = await exerciseBurnService.GetTotalBurnedByUser(1);
         dailyBurns = await appUserExerciseProgramService.GetDailyBurnSummaryAsync(user.AppUserId);
+        dailyBurns.Add(zeroModel);
         if (dailyBurns.Any())
         {
             selectedDayNo = dailyBurns.First().DayNo;
@@ -777,7 +788,7 @@ else
     private List<AvgKcalDailyResponseModel> avgKcalDailyResponseModels;
     private async Task SaveAvgKcalDaily()
     {
-        avgKcalDailyResponseModels = await avgKcalDailyService.GetAppUserExerciseProgramDetails(1);
+        avgKcalDailyResponseModels = await avgKcalDailyService.GetAppUserExerciseProgramDetails((int)localUser.CurrentUserId);
         var status = avgKcalDailyResponseModels.OrderBy(x => x.Date).LastOrDefault();
         DateTime dateTime = DateTime.Now;
         DateOnly dateOnly = DateOnly.FromDateTime(dateTime);
@@ -791,7 +802,7 @@ else
             {
                 var req = addUpdateAvgKcalDailyRequest = new AddUpdateAvgKcalDailyRequest
                     {
-                        AppUserId = 1,
+                        AppUserId = (int)localUser.CurrentUserId,
                         BurnKcal = selectedBurnKcal,
                         DailyMacro = dailyMacro.Calories,
                         DailyTakenKcal = overallTaken["Kalori"].Amount,

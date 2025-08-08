@@ -99,7 +99,7 @@ else
 @inject IStatisticService StatisticService
 @inject IDailyNutritionService dailyNutritionService
 @inject IAvgKcalDailyService avgKcalDailyService
-
+@inject LocalAuthStateProvider user
 <AuthorizeView>
     <Authorized>
         <h3 class="text-center my-4">🍽️ Günlük Kalori Özetleri</h3>
@@ -120,12 +120,12 @@ else
                 </MudCardHeader>
                 <MudCardContent>
                     <MudChart ChartType="MudBlazor.ChartType.Line"
-                              ChartSeries="@avgSeries"
-                              XAxisLabels="@avgLabels"
-                              ChartOptions="_avgOptions"
-                              Width="100%"
-                              Height="400px"
-                              CanHideSeries="true" />
+                    ChartSeries="@avgSeries"
+                    XAxisLabels="@avgLabels"
+                    ChartOptions="_avgOptions"
+                    Width="100%"
+                    Height="400px"
+                    CanHideSeries="true" />
                     <div class="d-flex justify-space-between mt-2">
                         <MudButton Variant="Variant.Text" Disabled="@(avgKcalDailyPage == 0)" OnClick="PrevAvgKcalDaily">← Önceki</MudButton>
                         <MudText Typo="Typo.caption">Sayfa @avgKcalDailyPage+1</MudText>
@@ -154,10 +154,10 @@ else
                         </MudCardHeader>
                         <MudCardContent>
                             <MudChart ChartType="MudBlazor.ChartType.Line"
-                                      ChartSeries="@calorieSeries"
-                                      XAxisLabels="@calorieLabels"
-                                      ChartOptions="_options_Kcal"
-                                      Width="100%" Height="300px" CanHideSeries />
+                            ChartSeries="@calorieSeries"
+                            XAxisLabels="@calorieLabels"
+                            ChartOptions="_options_Kcal"
+                            Width="100%" Height="300px" CanHideSeries />
                             <div class="d-flex justify-space-between mt-2">
                                 <MudButton Variant="Variant.Text" Disabled="@(caloriePage == 0)" OnClick="PrevCalorie">← Önceki</MudButton>
                                 <MudText Typo="Typo.caption">Sayfa @caloriePage+1</MudText>
@@ -176,10 +176,10 @@ else
                         </MudCardHeader>
                         <MudCardContent>
                             <MudChart ChartType="MudBlazor.ChartType.Line"
-                                      ChartSeries="@macroSeries"
-                                      XAxisLabels="@macroLabels"
-                                      ChartOptions="_options2"
-                                      Width="100%" Height="300px" CanHideSeries />
+                            ChartSeries="@macroSeries"
+                            XAxisLabels="@macroLabels"
+                            ChartOptions="_options2"
+                            Width="100%" Height="300px" CanHideSeries />
                             <div class="d-flex justify-space-between mt-2">
                                 <MudButton Variant="Variant.Text" Disabled="@(macroPage == 0)" OnClick="PrevMacro">← Önceki</MudButton>
                                 <MudText Typo="Typo.caption">Sayfa @(macroPage + 1)</MudText>
@@ -281,10 +281,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         //Günlük Kalori Verileri
-        avgKcalDailyResponseModels = await avgKcalDailyService.GetAppUserExerciseProgramDetails(1);
-        
+        avgKcalDailyResponseModels = await avgKcalDailyService.GetAppUserExerciseProgramDetails((int)user.CurrentUserId);
+
         // 1) Beslenme verilerini çek ve hazırlık yap
-        allData = await dailyNutritionService.GetClosedDailyNutritionListByUserId(1);
+        allData = await dailyNutritionService.GetClosedDailyNutritionListByUserId((int)user.CurrentUserId);
         // tarihlere göre artan sırala (API zaten artan sıralı döndürüyor, ekstra güvenlik için):
         allData = allData
             .OrderBy(n => n.Date)
@@ -294,7 +294,7 @@ else
         UpdateAvgKcalDailyChart();
         UpdateCalorieChart();
         UpdateMacroChart();
-        exerciseStatistics = await StatisticService.GetAllExercisesStatistics();
+        exerciseStatistics = await StatisticService.GetAllExercisesStatistics((int)user.CurrentUserId);
 
         if (exerciseStatistics != null)
         {
@@ -305,7 +305,7 @@ else
             {
                 if (item.Date == lastDate)
                 {
-                    item.Date = item.Date.AddDays(random.Next(1, 5));
+                    item.Date = item.Date.AddDays(random.Next(15, 30));
                 }
                 lastDate = item.Date;
                 item.DateFormatted = item.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -315,6 +315,7 @@ else
             {
                 item.DateFormatted = DateTime.ParseExact(item.Date.ToString("yyyy-MM-dd"), "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
             }
+            exerciseStatistics = exerciseStatistics.OrderBy(n => n.Date).ToList();
 
             // İlk sayfa indekslerini başlat
             foreach (var group in exerciseStatistics.GroupBy(e => e.ExerciseId))

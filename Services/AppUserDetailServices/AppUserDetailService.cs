@@ -13,6 +13,37 @@ namespace Services.AppUserDetailServices
     {
         private string _baseURL = "https://localhost:7149";
         public AddUpdateAppUserDetailRequest? AppUserDetailResponseModel { get; set; }
+
+        //public async Task<bool> CreateAppUserDetail(AppUserDetailResponseModel Response)
+        //{
+        //    var returnResponse = false;
+        //    try
+        //    {
+        //        using (var client = new HttpClient())
+        //        {
+        //            string url = $"{_baseURL}/api/AppUserDetail";
+
+
+        //            var serializeContent = JsonConvert.SerializeObject(Response);
+
+        //            var apiResponse = await client.PostAsync(url, new StringContent(serializeContent, Encoding.UTF8, "application/json"));
+
+        //            if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
+        //            {
+
+        //                return true;
+
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        string msg = ex.Message;
+        //    }
+
+        //    return returnResponse;
+        //}
+
         public async Task<AddUpdateAppUserDetailRequest> GetAppUserDetailByUserId(int userId)
         {
             AppUserDetailResponseModel = new AddUpdateAppUserDetailRequest();
@@ -21,7 +52,7 @@ namespace Services.AppUserDetailServices
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/AppUserDetail/1";
+                    string url = $"{_baseURL}/api/AppUserDetail/appUserDetails/{userId}";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)

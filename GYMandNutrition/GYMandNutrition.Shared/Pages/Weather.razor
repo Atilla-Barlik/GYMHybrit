@@ -247,47 +247,48 @@
 @using MudBlazor
 @using Entities.DailyMacroEntities
 @inject LocalAuthStateProvider user
+@inject IAppUserDetailService appUserDetailService
 <PageTitle>Günlük Kalori ve Makro</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
 
-  <!-- Toggle Butonları -->
-  <MudButtonGroup Exclusive="true" Color="Color.Primary" Class="mb-4">
-    <MudButton 
-      Variant="@(viewMode == ViewMode.Auto ? Variant.Filled : Variant.Outlined)" 
-      OnClick="() => viewMode = ViewMode.Auto">
-      Otomatik Hesaplama
-    </MudButton>
-    <MudButton 
-      Variant="@(viewMode == ViewMode.Custom ? Variant.Filled : Variant.Outlined)" 
-      OnClick="() => viewMode = ViewMode.Custom">
-      Özel Makro
-    </MudButton>
-  </MudButtonGroup>
+    <!-- Toggle Butonları -->
+    <MudButtonGroup Exclusive="true" Color="Color.Primary" Class="mb-4">
+        <MudButton 
+        Variant="@(viewMode == ViewMode.Auto ? Variant.Filled : Variant.Outlined)" 
+        OnClick="() => viewMode = ViewMode.Auto">
+            Otomatik Hesaplama
+        </MudButton>
+        <MudButton 
+        Variant="@(viewMode == ViewMode.Custom ? Variant.Filled : Variant.Outlined)" 
+        OnClick="() => viewMode = ViewMode.Custom">
+            Özel Makro
+        </MudButton>
+    </MudButtonGroup>
 
-  <!-- Otomatik Hesaplama Paneli -->
-  @if (viewMode == ViewMode.Auto)
-  {
-    <MudPaper Elevation="4" Class="p-6 mb-4">
-      <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3">Otomatik Hesaplama</MudText>
-      <MudRadioGroup @bind-Value="Sex" Label="Cinsiyet" Orientation="Orientation.Horizontal" Class="mb-4">
+    <!-- Otomatik Hesaplama Paneli -->
+    @if (viewMode == ViewMode.Auto)
+    {
+        <MudPaper Elevation="4" Class="p-6 mb-4">
+            <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3">Otomatik Hesaplama</MudText>
+            <MudRadioGroup @bind-Value="Sex" Label="Cinsiyet" Orientation="Orientation.Horizontal" Class="mb-4">
                 <MudRadio Value="@("male")" Label="Erkek" />
                 <MudRadio Value="@("female")" Label="Kadın" />
-      </MudRadioGroup>
+            </MudRadioGroup>
 
-      <MudGrid Class="mb-4">
-        <MudItem xs="12" sm="4">
-          <MudNumericField @bind-Value="Age" Label="Yaş" Min="10" Max="100" Variant="Variant.Filled" />
-        </MudItem>
-        <MudItem xs="12" sm="4">
-          <MudNumericField @bind-Value="Weight" Label="Kilo (kg)" Min="30" Max="200" Variant="Variant.Filled" />
-        </MudItem>
-        <MudItem xs="12" sm="4">
-          <MudNumericField @bind-Value="Height" Label="Boy (cm)" Min="100" Max="250" Variant="Variant.Filled" />
-        </MudItem>
-      </MudGrid>
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="4">
+                    <MudNumericField @bind-Value="Age" Label="Yaş" Min="10" Max="100" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudNumericField @bind-Value="Weight" Label="Kilo (kg)" Min="30" Max="200" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudNumericField @bind-Value="Height" Label="Boy (cm)" Min="100" Max="250" Variant="Variant.Filled" />
+                </MudItem>
+            </MudGrid>
 
-      <MudGrid Class="mb-4">
+            @* <MudGrid Class="mb-4">
         <MudItem xs="12" sm="6">
           <MudSelect @bind-Value="ActivityFactor" Label="Egzersiz Seviyesi" Variant="Variant.Filled">
             <MudSelectItem Value="1.2">Egzersiz Yapmıyorum</MudSelectItem>
@@ -304,97 +305,115 @@
             <MudSelectItem Value="0.65">65%</MudSelectItem>
           </MudSelect>
         </MudItem>
-      </MudGrid>
+      </MudGrid> *@
 
-      <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateNutrition" FullWidth="true">
-        HESAPLA
-      </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CalculateNutrition" FullWidth="true">
+                HESAPLA
+            </MudButton>
 
-      @if (Calculated)
-      {
-        <MudPaper Class="pa-4 mt-4" Elevation="2">
-          <MudText Typo="Typo.subtitle1" Class="mb-2">Sonuçlar</MudText>
-          <MudList T="decimal" Dense="true">
-            <MudListItem>Kalori: <b>@Calories kcal</b></MudListItem>
-            <MudListItem>Protein: <b>@Protein g</b></MudListItem>
-            <MudListItem>Yağ: <b>@Fat g</b></MudListItem>
-            <MudListItem>Karbonhidrat: <b>@Carbohydrate g</b></MudListItem>
-          </MudList>
+            @if (Calculated)
+            {
+                <MudPaper Class="pa-4 mt-4" Elevation="2">
+                    <MudText Typo="Typo.subtitle1" Class="mb-2">Sonuçlar</MudText>
+                    <MudList T="decimal" Dense="true">
+                        <MudListItem>Kalori: <b>@Calories kcal</b></MudListItem>
+                        <MudListItem>Protein: <b>@Protein g</b></MudListItem>
+                        <MudListItem>Yağ: <b>@Fat g</b></MudListItem>
+                        <MudListItem>Karbonhidrat: <b>@Carbohydrate g</b></MudListItem>
+                    </MudList>
                     @if (user.CurrentUserId > 0)
                     {
                         <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="SaveNutrition" Class="mt-3">
                             Kaydet
                         </MudButton>
                     }
+                </MudPaper>
+            }
         </MudPaper>
-      }
-    </MudPaper>
-  }
+    }
 
-  <!-- Özel Makro Paneli -->
-  @if (viewMode == ViewMode.Custom)
-  {
-    <MudPaper Elevation="4" Class="p-6">
-      <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3">Özel Makro Girişi</MudText>
-      <MudGrid Class="mb-4">
-        <MudItem xs="12" sm="6">
-          <MudNumericField @bind-Value="CustomCalories" Label="Kalori (kcal)" Min="0" Variant="Variant.Filled" />
-        </MudItem>
-        <MudItem xs="12" sm="6">
-          <MudNumericField @bind-Value="CustomProtein" Label="Protein (g)" Min="0" Variant="Variant.Filled" />
-        </MudItem>
-      </MudGrid>
-      <MudGrid Class="mb-4">
-        <MudItem xs="12" sm="6">
-          <MudNumericField @bind-Value="CustomFat" Label="Yağ (g)" Min="0" Variant="Variant.Filled" />
-        </MudItem>
-        <MudItem xs="12" sm="6">
-          <MudNumericField @bind-Value="CustomCarb" Label="Karbonhidrat (g)" Min="0" Variant="Variant.Filled" />
-        </MudItem>
-      </MudGrid>
+    <!-- Özel Makro Paneli -->
+    @if (viewMode == ViewMode.Custom)
+    {
+        <MudPaper Elevation="4" Class="p-6">
+            <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-3">Özel Makro Girişi</MudText>
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="CustomCalories" Label="Kalori (kcal)" Min="0" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="CustomProtein" Label="Protein (g)" Min="0" Variant="Variant.Filled" />
+                </MudItem>
+            </MudGrid>
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="CustomFat" Label="Yağ (g)" Min="0" Variant="Variant.Filled" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField @bind-Value="CustomCarb" Label="Karbonhidrat (g)" Min="0" Variant="Variant.Filled" />
+                </MudItem>
+            </MudGrid>
 
-      <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCustomNutrition" FullWidth="true">
-        Özel Makroyu Kaydet
-      </MudButton>
-    </MudPaper>
-  }
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCustomNutrition" FullWidth="true">
+                Özel Makroyu Kaydet
+            </MudButton>
+        </MudPaper>
+    }
 
 </MudContainer>
 
 @code {
-  enum ViewMode { Auto, Custom }
-  private ViewMode viewMode = ViewMode.Auto;
+    enum ViewMode { Auto, Custom }
+    private ViewMode viewMode = ViewMode.Auto;
 
-  // --- Otomatik hesaplama ---
-  private string Sex { get; set; } = "male";
-  private int Age { get; set; } = 25;
-  private double Weight { get; set; } = 70;
-  private double Height { get; set; } = 170;
-  private double ActivityFactor { get; set; } = 1.2;
-  private double CarbPercent { get; set; } = 0.55;
+    // --- Otomatik hesaplama ---
+    private string Sex { get; set; } = "male";
+    private int Age { get; set; } = 25;
+    private double Weight { get; set; } = 70;
+    private double Height { get; set; } = 170;
+    private double ActivityFactor { get; set; } = 1.2;
+    private double CarbPercent { get; set; } = 0.55;
 
-  private bool Calculated;
-  private decimal Calories;
-  private decimal Protein;
-  private decimal Fat;
-  private decimal Carbohydrate;
+    private bool Calculated;
+    private decimal Calories;
+    private decimal Protein;
+    private decimal Fat;
+    private decimal Carbohydrate;
 
-  // --- Özel Makro ---
-  private decimal CustomCalories { get; set; }
-  private decimal CustomProtein  { get; set; }
-  private decimal CustomFat      { get; set; }
-  private decimal CustomCarb     { get; set; }
+    // --- Özel Makro ---
+    private decimal CustomCalories { get; set; }
+    private decimal CustomProtein  { get; set; }
+    private decimal CustomFat      { get; set; }
+    private decimal CustomCarb     { get; set; }
+    string gender;
+    private AddUpdateAppUserDetailRequest appuserDetail;
+    protected override async Task OnInitializedAsync()
+    {
+        if (user.CurrentUserId > 0)
+        {
+            appuserDetail = await appUserDetailService.GetAppUserDetailByUserId((int)user.CurrentUserId);
+            if (appuserDetail.sex)
+                gender = "male";
+            else
+                gender = "female";
+
+            Age = appuserDetail.Age;
+            Sex = gender;
+            Height = appuserDetail.Length;
+            Weight = (double)appuserDetail.Weight;
+
+        }
+    }
 
   private void CalculateNutrition()
   {
-    var BEE = Sex == "male"
-      ? 66.5 + 13.8 * Weight + 5.0 * Height - 6.8 * Age
-      : 655.1 +  9.6 * Weight + 1.9 * Height - 4.7 * Age;
+        var BEE = 10 * Weight + 6.25 * Height - 5 * Age
+                         + (Sex == "male" ? 5 : -161);
 
-    Calories     = (decimal)Math.Round(BEE * ActivityFactor, 0);
+    Calories     = (decimal)Math.Round(BEE , 0);
     Protein      = (decimal)Math.Round(Weight * 0.9, 1);
     Fat          = (decimal)Math.Round(((decimal)Calories * 0.30m) / 9m, 1);
-    Carbohydrate = (decimal)Math.Round(((decimal)Calories * (decimal)CarbPercent) / 4m, 1);
+    Carbohydrate = (decimal)Math.Round(((decimal)Calories ) / 4m, 1);
 
     Calculated = true;
   }
@@ -406,7 +425,7 @@
       Proteins      = Protein,
       Fats          = Fat,
       Carbohydrates = Carbohydrate,
-      AppUserId     = 1
+                AppUserId = (int)user.CurrentUserId
     };
     var ok = await dailyMacroService.AddDailyMacro(req);
     Snackbar.Add(ok ? "Makro başarıyla kaydedildi!" : "Kayıt sırasında hata oldu.",
@@ -420,7 +439,7 @@
       Proteins      = CustomProtein,
       Fats          = CustomFat,
       Carbohydrates = CustomCarb,
-      AppUserId     = 1
+                AppUserId = (int)user.CurrentUserId
     };
     var ok = await dailyMacroService.AddDailyMacro(req);
     Snackbar.Add(ok ? "Özel makro başarıyla kaydedildi!" : "Kayıt sırasında hata oldu.",

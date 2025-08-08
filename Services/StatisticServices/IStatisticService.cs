@@ -10,6 +10,6 @@ namespace Services.StatisticServices
 {
     public interface IStatisticService
     {
-        Task<List<ExerciseStatisticsModel>> GetAllExercisesStatistics();
+        Task<List<ExerciseStatisticsModel>> GetAllExercisesStatistics(int userId);
     }
 }

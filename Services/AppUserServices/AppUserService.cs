@@ -51,7 +51,7 @@ namespace Services.AppUserServices
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/AppUser/1";
+                    string url = $"{_baseURL}/api/AppUser/{userId}";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)

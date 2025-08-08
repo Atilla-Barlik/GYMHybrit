@@ -84,14 +84,14 @@ namespace Services.DailyNutritionDetailsService
             return returnResponse;
         }
 
-        public async Task<List<DailyNutritionDetailsResponseModel>> GetAllDailyNutritiontList()
+        public async Task<List<DailyNutritionDetailsResponseModel>> GetAllDailyNutritiontList(int userId)
         {
             returnResponse = new List<DailyNutritionDetailsResponseModel>();
             try
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/DailyNutritionDetails/latest-nutrition-details/1";
+                    string url = $"{_baseURL}/api/DailyNutritionDetails/latest-nutrition-details/{userId}";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
@@ -183,7 +183,7 @@ namespace Services.DailyNutritionDetailsService
             {
                 using (var client = new HttpClient())
                 {
-                    string url = $"{_baseURL}/api/TotalUsageNutrition/userTop10/1";
+                    string url = $"{_baseURL}/api/TotalUsageNutrition/userTop10/{UserId}";
                     var apiResponse = await client.GetAsync(url);
 
                     if (apiResponse.StatusCode == System.Net.HttpStatusCode.OK)
